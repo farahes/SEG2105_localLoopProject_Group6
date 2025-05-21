@@ -1,4 +1,4 @@
-# [SEG2105-Z (2025/5)] LocalLoop Project (Group6)
+# [SEG2105-Z (2025/5)] LocalLoop Project (Group 6)
 
 ### Brief Overview:
 
