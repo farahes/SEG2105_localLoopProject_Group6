@@ -6,7 +6,7 @@ public abstract class User {
     protected String lastName;
     protected String username;
     protected String email;
-    protected Role role;
+    protected String role;
 
     public User() {}
 
