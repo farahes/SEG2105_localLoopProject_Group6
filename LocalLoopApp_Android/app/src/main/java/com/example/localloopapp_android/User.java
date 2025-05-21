@@ -28,4 +28,16 @@ public abstract class User {
     public Role getRole() {
         return this.role;
     }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 }
