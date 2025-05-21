@@ -64,4 +64,16 @@ public abstract class User {
     public String getWelcomeMessage() {
         return "Welcome " + this.getFirstName() + "! You are logged in as " + this.getRole() + ".";
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userID='" + userID + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", role='" + role + '\'' +
+                '}';
+    }
 }
