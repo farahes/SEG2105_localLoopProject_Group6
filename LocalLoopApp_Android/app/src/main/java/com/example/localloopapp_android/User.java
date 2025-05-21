@@ -1,13 +1,17 @@
 public abstract class User {
     protected String userID;
+    protected String firstName;
+    protected String lastName;
     protected String username;
     protected String email;
     protected Role role;
 
     public User() {}
 
-    public User(String userID, String username, String email, Role role) {
+    public User(String userID, String firstName, String lastName, String username, String email, Role role) {
         this.userID = userID;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.username = username;
         this.email = email;
         this.role = role;
@@ -17,6 +21,13 @@ public abstract class User {
         return this.userID;
     }
 
+    public String getFirstName() {
+        return this.firstName;
+    }
+
+    public String getLastName() {
+        return this.lastName;
+    }
     public String getUsername() {
         return this.username;
     }
@@ -29,6 +40,13 @@ public abstract class User {
         return this.role;
     }
 
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
     public void setUsername(String username) {
         this.username = username;
     }
