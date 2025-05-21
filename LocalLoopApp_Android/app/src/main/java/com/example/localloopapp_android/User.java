@@ -1,8 +1,8 @@
 public abstract class User {
-    private String userID;
-    private String username;
-    private String email;
-    private Role role;
+    protected String userID;
+    protected String username;
+    protected String email;
+    protected Role role;
 
     public User() {}
 
