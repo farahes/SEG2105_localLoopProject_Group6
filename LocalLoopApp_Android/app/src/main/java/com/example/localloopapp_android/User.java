@@ -70,6 +70,6 @@ public abstract class User {
     }
 
     public String getWelcomeMessage() {
-        return "Welcome " + this.getFirstName() + "! You are logged in as " + User.roleToStringRepresentationMap(this.getRole()) + ".";
+        return "Welcome " + this.getFirstName() + "! You are logged in as " + User.roleToStringRepresentationMap.get(this.getRole()) + ".";
     }
 }
