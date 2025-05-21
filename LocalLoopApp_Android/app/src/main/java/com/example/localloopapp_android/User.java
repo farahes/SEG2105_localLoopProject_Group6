@@ -1,14 +1,6 @@
 import java.util.HashMap;
 
 public abstract class User {
-
-    protected static HashMap<Role, String> roleToStringRepresentationMap = new HashMap<>();
-
-    static {
-        roleToStringRepresentationMap.put(Role.ADMIN, "Admin");
-        roleToStringRepresentationMap.put(Role.ORGANIZER, "Organizer");
-        roleToStringRepresentationMap.put(Role.PARTICIPANT, "Participant");
-    }
     protected String userID;
     protected String firstName;
     protected String lastName;
@@ -18,7 +10,7 @@ public abstract class User {
 
     public User() {}
 
-    public User(String userID, String firstName, String lastName, String username, String email, Role role) {
+    public User(String userID, String firstName, String lastName, String username, String email, String role) {
         this.userID = userID;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -46,7 +38,7 @@ public abstract class User {
         return this.email;
     }
 
-    public Role getRole() {
+    public String getRole() {
         return this.role;
     }
 
@@ -65,11 +57,11 @@ public abstract class User {
         this.email = email;
     }
 
-    public void setRole(Role role) {
+    public void setRole(String role) {
         this.role = role;
     }
 
     public String getWelcomeMessage() {
-        return "Welcome " + this.getFirstName() + "! You are logged in as " + User.roleToStringRepresentationMap.get(this.getRole()) + ".";
+        return "Welcome " + this.getFirstName() + "! You are logged in as " + this.getRole() + ".";
     }
 }
