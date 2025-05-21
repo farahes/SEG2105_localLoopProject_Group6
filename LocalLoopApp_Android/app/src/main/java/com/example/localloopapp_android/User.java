@@ -12,4 +12,20 @@ public abstract class User {
         this.email = email;
         this.role = role;
     }
+
+    public String getUserID() {
+        return this.userID;
+    }
+
+    public String getUsername() {
+        return this.username;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public Role getRole() {
+        return this.role;
+    }
 }
