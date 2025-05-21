@@ -10,7 +10,7 @@
 
 ## Collaborators:
   - Farah El Siss     - felsi072@uottawa.ca (#300168267)
-  - Derek Thiessen    - dthie071@uottawa.ca (#300231666)
+  - Derik Thiessen    - dthie071@uottawa.ca (#300231666)
   - Giovanni Abbruzzo - gabbr085@uottawa.ca (#300233180)
   - Mary Yermolenko   - myerm102@uottawa.ca (#300404297)
   - Dany Nuriev       - dnuri029@uottawa.ca (#300429224)
