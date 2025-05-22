@@ -13,4 +13,8 @@ public class InputValidator {
     public static boolean isValidEmail(String email) {
         return email != null && EMAIL_PATTERN.matcher(email).matches();
     }
+
+    public static boolean isValidUsername() {
+        return username != null && username.length() >= 1; // Can adjust this line as needed for minimum username length
+    }
 }
