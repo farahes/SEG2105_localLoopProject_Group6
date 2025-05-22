@@ -17,4 +17,8 @@ public class InputValidator {
     public static boolean isValidUsername() {
         return username != null && username.length() >= 1; // Can adjust this line as needed for minimum username length
     }
+
+    public static boolean isValidPassword() {
+        return password != null && password.length() >= 8; // Can adjust this line as needed for minimum password length
+    }
 }
