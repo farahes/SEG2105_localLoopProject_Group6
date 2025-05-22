@@ -14,11 +14,11 @@ public class InputValidator {
         return email != null && EMAIL_PATTERN.matcher(email).matches();
     }
 
-    public static boolean isValidUsername() {
+    public static boolean isValidUsername(String username) {
         return username != null && username.length() >= 1; // Can adjust this line as needed for minimum username length
     }
 
-    public static boolean isValidPassword() {
+    public static boolean isValidPassword(String password) {
         return password != null && password.length() >= 8; // Can adjust this line as needed for minimum password length
     }
 }
