@@ -1,3 +1,5 @@
+package com.example.localloopapp_android;
+
 public class Participant extends User {
     public Participant() {
         super();

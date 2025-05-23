@@ -1,3 +1,5 @@
+package com.example.localloopapp_android;
+
 import java.util.regex.Pattern;
 
 public class InputValidator {

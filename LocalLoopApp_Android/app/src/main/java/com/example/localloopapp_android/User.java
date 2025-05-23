@@ -1,3 +1,5 @@
+package com.example.localloopapp_android;
+
 public abstract class User {
     protected String userID;
     protected String firstName;

@@ -1,3 +1,5 @@
+package com.example.localloopapp_android;
+
 public class Organizer extends User {
     public Organizer() {
         super();

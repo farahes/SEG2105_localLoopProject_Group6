@@ -2,6 +2,10 @@ package com.example.localloopapp_android;
 
 import android.os.Bundle;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -22,3 +26,27 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 }
+
+/**
+ * Query user data for validation, something like this:
+ *
+ * public void validateUser(String userId) {
+ *     DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+ *     userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+ *         @Override
+ *         public void onDataChange(DataSnapshot snapshot) {
+ *             if (snapshot.exists()) {
+ *                 User user = snapshot.getValue(User.class);
+ *                 // Validate user credentials here
+ *             } else {
+ *                 // User not found
+ *             }
+ *         }
+ *
+ *         @Override
+ *         public void onCancelled(DatabaseError error) {
+ *             // Handle error
+ *         }
+ *     });
+ * }
+ */

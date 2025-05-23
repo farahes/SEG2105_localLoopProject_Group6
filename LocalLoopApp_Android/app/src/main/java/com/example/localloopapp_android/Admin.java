@@ -1,3 +1,5 @@
+package com.example.localloopapp_android;
+
 public class Admin extends User {
 
     public Admin() {
