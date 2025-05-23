@@ -33,30 +33,26 @@ public abstract class User {
     public String getUsername() {
         return this.username;
     }
-
     public String getEmail() {
         return this.email;
     }
-
     public String getRole() {
         return this.role;
     }
 
+    public void setUserID(String id){ this.userID = id; }
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
     public void setUsername(String username) {
         this.username = username;
     }
-
     public void setEmail(String email) {
         this.email = email;
     }
-
     public void setRole(String role) {
         this.role = role;
     }

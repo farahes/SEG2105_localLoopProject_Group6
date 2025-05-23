@@ -62,6 +62,21 @@
             android:inputType="textPassword"
             android:layout_marginTop="12dp" />
 
+        <CheckBox
+            android:id="@+id/check_organizer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I'm an organiser! And I love cats."
+            android:layout_marginTop="16dp"/>
+
+        <EditText
+            android:id="@+id/edit_company"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Company (optional)"
+            android:visibility="gone"
+            android:layout_marginTop="12dp"/>
+
         <Button
             android:id="@+id/button_create_account"
             android:layout_width="match_parent"
