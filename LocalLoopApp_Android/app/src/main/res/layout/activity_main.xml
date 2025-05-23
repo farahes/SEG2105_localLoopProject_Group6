@@ -12,7 +12,7 @@
         android:id="@+id/text_welcome_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Welcome to LoopApp — where you can create any event you want... except underwater raves. We like to keep things dry here."
+        android:text="Welcome to LoopApp — where you can create any event you want... except underwater math competitions. We like to keep things dry here. And we don't like math."
         android:textColor="#333333"
         android:textSize="18sp"
         android:textStyle="italic"
