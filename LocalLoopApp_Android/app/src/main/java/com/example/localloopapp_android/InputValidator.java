@@ -20,7 +20,7 @@ public class InputValidator {
     }
 
     public static boolean isValidUsername(String username) {
-        return username != null && username.length() >= 1; // Can adjust this line as needed for minimum username length
+        return username != null && !username.isEmpty(); // Can adjust this line as needed for minimum username length
     }
 
     public static boolean isValidPassword(String password) {
