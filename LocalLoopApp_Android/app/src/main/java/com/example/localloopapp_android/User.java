@@ -1,5 +1,7 @@
 package com.example.localloopapp_android;
 
+import com.google.firebase.database.Exclude;
+
 public abstract class User {
     protected String userID;
     protected String firstName;
@@ -63,6 +65,7 @@ public abstract class User {
         this.role = role;
     }
 
+    @Exclude
     public String getWelcomeMessage() {
         return "Welcome " + this.getFirstName() + "! You are logged in as " + this.getRole() + ".";
     }
