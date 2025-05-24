@@ -10,27 +10,19 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
-// Firebase Auth imports
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.auth.FirebaseAuthUserCollisionException; // For specific error handling
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-
-// Assuming User, Participant, Organizer, Admin classes are correctly defined
-// and InputValidator is also available.
 
 public class CreateAccountActivity extends AppCompatActivity {
 
@@ -42,8 +34,6 @@ public class CreateAccountActivity extends AppCompatActivity {
     private EditText editFirstName, editLastName, editUserName, editEmail, editPhone, editPassword, editConfirmPassword, editCompany;
     private CheckBox checkOrganizer;
     private Button buttonCreateAccount;
-    // It's good practice to have a ProgressBar for long operations
-    // private ProgressBar progressBarCreateAccount;
 
 
     @Override
@@ -71,9 +61,7 @@ public class CreateAccountActivity extends AppCompatActivity {
         checkOrganizer = findViewById(R.id.check_organizer);
         editCompany = findViewById(R.id.edit_company); // Initially hidden, shown if organizer
         buttonCreateAccount = findViewById(R.id.button_create_account);
-        // progressBarCreateAccount = findViewById(R.id.progressBarCreateAccount); // Assuming you add this to your XML
 
-        // Set initial visibility for company EditText
         editCompany.setVisibility(View.GONE);
 
         checkOrganizer.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -95,27 +83,24 @@ public class CreateAccountActivity extends AppCompatActivity {
     private void attemptAccountCreation() {
         final String firstName = getTrimmedString(editFirstName);
         final String lastName = getTrimmedString(editLastName);
-        final String username = getTrimmedString(editUserName); // This will be stored for potential username login
+        final String username = getTrimmedString(editUserName);
         final String email = getTrimmedString(editEmail);
         final String phone = getTrimmedString(editPhone);
-        final String password = getTrimmedString(editPassword); // Do not trim password, spaces can be intentional
+        final String password = getTrimmedString(editPassword);
         String confirmPassword = getTrimmedString(editConfirmPassword);
         final boolean isOrganizer = checkOrganizer.isChecked();
         final String companyName = isOrganizer ? getTrimmedString(editCompany) : null;
 
-        // --- Start Input Validation ---
-        if (TextUtils.isEmpty(firstName) || !InputValidator.isValidName(firstName)) {
+        if (TextUtils.isEmpty(firstName) || InputValidator.isValidName(firstName)) {
             editFirstName.setError("Enter a valid first name");
             editFirstName.requestFocus();
             return;
         }
-        if (TextUtils.isEmpty(lastName) || !InputValidator.isValidName(lastName)) {
+        if (TextUtils.isEmpty(lastName) || InputValidator.isValidName(lastName)) {
             editLastName.setError("Enter a valid last name");
             editLastName.requestFocus();
             return;
         }
-        // Username validation: ensure it's unique if you plan to use it as a login identifier
-        // For now, just basic validation. Uniqueness check would be more complex (query DB).
         if (TextUtils.isEmpty(username) || !InputValidator.isValidUsername(username)) {
             editUserName.setError("Enter a valid username (e.g., alphanumeric, 3-20 chars)");
             editUserName.requestFocus();
@@ -126,19 +111,17 @@ public class CreateAccountActivity extends AppCompatActivity {
             editEmail.requestFocus();
             return;
         }
-        // Phone: Optional, but validate if provided
-        if (!TextUtils.isEmpty(phone) && (phone.length() < 7 || !android.util.Patterns.PHONE.matcher(phone).matches())) {
+        if (!TextUtils.isEmpty(phone) || !InputValidator.isValidPhoneNumber(phone)) {
             editPhone.setError("Enter a valid phone number or leave blank");
             editPhone.requestFocus();
             return;
         }
-        // Password validation: Firebase requires min 6 chars.
-        if (TextUtils.isEmpty(password) || password.length() < 6) {
+        if (TextUtils.isEmpty(password) || !InputValidator.isValidPassword(password)) {
             editPassword.setError("Password must be at least 6 characters");
             editPassword.requestFocus();
             return;
         }
-        if (!password.equals(confirmPassword)) { // Compare original password string
+        if (!password.equals(confirmPassword)) {
             editConfirmPassword.setError("Passwords do not match");
             editConfirmPassword.requestFocus();
             return;
@@ -148,16 +131,13 @@ public class CreateAccountActivity extends AppCompatActivity {
             editCompany.requestFocus();
             return;
         }
-        // --- End Input Validation ---
 
-        // Show progress (e.g., progressBarCreateAccount.setVisibility(View.VISIBLE);)
-        buttonCreateAccount.setEnabled(false); // Disable button to prevent multiple clicks
+        buttonCreateAccount.setEnabled(false);
         Toast.makeText(CreateAccountActivity.this, "Creating account...", Toast.LENGTH_SHORT).show();
 
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> { // Using lambda for brevity
-                    // Hide progress (e.g., progressBarCreateAccount.setVisibility(View.GONE);)
-                    buttonCreateAccount.setEnabled(true); // Re-enable button
+                .addOnCompleteListener(this, task -> {
+                    buttonCreateAccount.setEnabled(true);
 
                     if (task.isSuccessful()) {
                         Log.d(TAG, "createUserWithEmail:success");
@@ -165,8 +145,6 @@ public class CreateAccountActivity extends AppCompatActivity {
                         if (firebaseUser != null) {
                             String userId = firebaseUser.getUid();
 
-                            // Optional: Set user's display name in Firebase Auth profile
-                            // Display name in Auth is often set to the user's full name.
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setDisplayName(firstName + " " + lastName)
                                     .build();
@@ -177,15 +155,14 @@ public class CreateAccountActivity extends AppCompatActivity {
                                         }
                                     });
 
-                            // Create User object (Participant or Organizer) for Realtime Database
                             User newUserProfile;
                             if (isOrganizer) {
                                 Organizer organizer = new Organizer();
                                 organizer.setUserID(userId);
                                 organizer.setFirstName(firstName);
                                 organizer.setLastName(lastName);
-                                organizer.setUsername(username.toLowerCase()); // Store username in lowercase for case-insensitive lookup
-                                organizer.setEmail(email); // Store original email from Auth
+                                organizer.setUsername(username.toLowerCase());
+                                organizer.setEmail(email);
                                 organizer.setRole("Organizer");
                                 organizer.setPhoneNumber(phone);
                                 organizer.setCompanyName(companyName);
@@ -195,31 +172,24 @@ public class CreateAccountActivity extends AppCompatActivity {
                                 participant.setUserID(userId);
                                 participant.setFirstName(firstName);
                                 participant.setLastName(lastName);
-                                participant.setUsername(username.toLowerCase()); // Store username in lowercase
+                                participant.setUsername(username.toLowerCase());
                                 participant.setEmail(email);
                                 participant.setRole("Participant");
                                 participant.setPhoneNumber(phone);
                                 newUserProfile = participant;
                             }
 
-                            // Save user profile to Realtime Database
                             mDatabaseUsersRef.child(userId).setValue(newUserProfile)
                                     .addOnCompleteListener(dbTask -> {
                                         if (dbTask.isSuccessful()) {
                                             Toast.makeText(CreateAccountActivity.this, "Account created successfully!", Toast.LENGTH_LONG).show();
-                                            // New user is created and profile saved.
-                                            // You might want to sign them out so they have to log in.
-                                            // mAuth.signOut();
                                             Intent intent = new Intent(CreateAccountActivity.this, LoginActivity.class);
                                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                             startActivity(intent);
-                                            finish(); // Close CreateAccountActivity
+                                            finish();
                                         } else {
                                             Log.e(TAG, "Failed to save user profile to DB.", dbTask.getException());
-                                            // Auth user was created, but DB save failed. This is an inconsistent state.
-                                            // Inform user, and ideally, you might try to delete the Auth user.
                                             Toast.makeText(CreateAccountActivity.this, "Account created, but profile save failed. Please contact support or try again.", Toast.LENGTH_LONG).show();
-                                            // Example: firebaseUser.delete().addOnCompleteListener(...);
                                         }
                                     });
                         } else {
