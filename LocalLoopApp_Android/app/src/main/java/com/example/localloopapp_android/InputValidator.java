@@ -12,7 +12,7 @@ public class InputValidator {
     );
 
     public static boolean isValidName(String name) {
-        return name != null && NAME_PATTERN.matcher(name).matches();
+        return name == null || !NAME_PATTERN.matcher(name).matches();
     }
 
     public static boolean isValidEmail(String email) {
@@ -20,10 +20,10 @@ public class InputValidator {
     }
 
     public static boolean isValidUsername(String username) {
-        return username != null && !username.isEmpty(); // Can adjust this line as needed for minimum username length
+        return username != null && !username.isEmpty();
     }
 
     public static boolean isValidPassword(String password) {
-        return password != null && password.length() >= 8; // Can adjust this line as needed for minimum password length or enforce regex for password complexity
+        return password != null && password.length() >= 6;
     }
 }
