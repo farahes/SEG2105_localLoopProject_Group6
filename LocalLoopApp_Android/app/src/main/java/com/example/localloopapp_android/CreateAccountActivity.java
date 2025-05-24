@@ -10,30 +10,48 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+// Firebase Auth imports
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException; // For specific error handling
+
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import java.util.UUID;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+
+// Assuming User, Participant, Organizer, Admin classes are correctly defined
+// and InputValidator is also available.
 
 public class CreateAccountActivity extends AppCompatActivity {
 
-    private DatabaseReference mDatabase;
+    private static final String TAG = "CreateAccountActivity";
+
+    private DatabaseReference mDatabaseUsersRef; // Reference to the "users" node
+    private FirebaseAuth mAuth;
 
     private EditText editFirstName, editLastName, editUserName, editEmail, editPhone, editPassword, editConfirmPassword, editCompany;
     private CheckBox checkOrganizer;
     private Button buttonCreateAccount;
-    private User newUser;
+    // It's good practice to have a ProgressBar for long operations
+    // private ProgressBar progressBarCreateAccount;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDatabase = FirebaseDatabase.getInstance().getReference("users");
+
+        mAuth = FirebaseAuth.getInstance();
+        mDatabaseUsersRef = FirebaseDatabase.getInstance().getReference("users");
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_create_account);
@@ -43,7 +61,6 @@ public class CreateAccountActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Initialising views
         editFirstName = findViewById(R.id.edit_first_name);
         editLastName = findViewById(R.id.edit_last_name);
         editUserName = findViewById(R.id.edit_username);
@@ -52,51 +69,41 @@ public class CreateAccountActivity extends AppCompatActivity {
         editPassword = findViewById(R.id.edit_password);
         editConfirmPassword = findViewById(R.id.edit_confirm_password);
         checkOrganizer = findViewById(R.id.check_organizer);
-        editCompany = findViewById(R.id.edit_company);
+        editCompany = findViewById(R.id.edit_company); // Initially hidden, shown if organizer
         buttonCreateAccount = findViewById(R.id.button_create_account);
+        // progressBarCreateAccount = findViewById(R.id.progressBarCreateAccount); // Assuming you add this to your XML
 
-        newUser = new Participant(); // start as a participant by default
+        // Set initial visibility for company EditText
+        editCompany.setVisibility(View.GONE);
 
-        //magic
         checkOrganizer.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                // switch to Organizer obj
-                // save all data entered by copying fields
-                newUser = new Organizer();
-                copyFieldsToUser(newUser);
-
                 editCompany.setVisibility(View.VISIBLE);
-                checkOrganizer.setVisibility(View.GONE); // hide the toggle btn after we're in Organizer
+            } else {
+                editCompany.setVisibility(View.GONE);
             }
         });
 
-        buttonCreateAccount.setOnClickListener(view -> createAccount());
+        buttonCreateAccount.setOnClickListener(view -> attemptAccountCreation());
     }
 
-    private void copyFieldsToUser(User user){
-        user.setFirstName(getTrimmedString(editFirstName));
-        user.setLastName(getTrimmedString(editLastName));
-        user.setUsername(getTrimmedString(editUserName));
-        user.setEmail(getTrimmedString(editEmail));
-
-        user.setRole(user instanceof Organizer ? "Organizer" : "Participant");
-        /**
-         * ADD PASSWORD AND PHONE TO USER
-         *  user.setPhone(getTrimmedString(editPhone));
-         *  user.setPassword(getTrimmedString(editPassword));
-         */
+    private String getTrimmedString(EditText input) {
+        if (input.getText() == null) return "";
+        return input.getText().toString().trim();
     }
 
-    private void createAccount() {
-        String firstName = getTrimmedString(editFirstName);
-        String lastName = getTrimmedString(editLastName);
-        String username = getTrimmedString(editUserName);
-        String email = getTrimmedString(editEmail);
-        String phone = getTrimmedString(editPhone);
-        String password = getTrimmedString(editPassword);
+    private void attemptAccountCreation() {
+        final String firstName = getTrimmedString(editFirstName);
+        final String lastName = getTrimmedString(editLastName);
+        final String username = getTrimmedString(editUserName); // This will be stored for potential username login
+        final String email = getTrimmedString(editEmail);
+        final String phone = getTrimmedString(editPhone);
+        final String password = getTrimmedString(editPassword); // Do not trim password, spaces can be intentional
         String confirmPassword = getTrimmedString(editConfirmPassword);
+        final boolean isOrganizer = checkOrganizer.isChecked();
+        final String companyName = isOrganizer ? getTrimmedString(editCompany) : null;
 
-        // Validate input (using InputValidatorClass)
+        // --- Start Input Validation ---
         if (TextUtils.isEmpty(firstName) || !InputValidator.isValidName(firstName)) {
             editFirstName.setError("Enter a valid first name");
             editFirstName.requestFocus();
@@ -107,70 +114,130 @@ public class CreateAccountActivity extends AppCompatActivity {
             editLastName.requestFocus();
             return;
         }
+        // Username validation: ensure it's unique if you plan to use it as a login identifier
+        // For now, just basic validation. Uniqueness check would be more complex (query DB).
         if (TextUtils.isEmpty(username) || !InputValidator.isValidUsername(username)) {
-            editUserName.setError("Enter a valid username");
+            editUserName.setError("Enter a valid username (e.g., alphanumeric, 3-20 chars)");
             editUserName.requestFocus();
             return;
         }
         if (TextUtils.isEmpty(email) || !InputValidator.isValidEmail(email)) {
-            editEmail.setError("Enter a valid email");
+            editEmail.setError("Enter a valid email address");
             editEmail.requestFocus();
             return;
         }
-        if (!TextUtils.isEmpty(phone) && phone.length() < 7) {
-            editPhone.setError("Enter a valid phone number");
+        // Phone: Optional, but validate if provided
+        if (!TextUtils.isEmpty(phone) && (phone.length() < 7 || !android.util.Patterns.PHONE.matcher(phone).matches())) {
+            editPhone.setError("Enter a valid phone number or leave blank");
             editPhone.requestFocus();
             return;
         }
-        if (TextUtils.isEmpty(password) || !InputValidator.isValidPassword(password)) {
-            editPassword.setError("Password must be at least 8 characters");
+        // Password validation: Firebase requires min 6 chars.
+        if (TextUtils.isEmpty(password) || password.length() < 6) {
+            editPassword.setError("Password must be at least 6 characters");
             editPassword.requestFocus();
             return;
         }
-        if (!password.equals(confirmPassword)) {
+        if (!password.equals(confirmPassword)) { // Compare original password string
             editConfirmPassword.setError("Passwords do not match");
             editConfirmPassword.requestFocus();
             return;
         }
-
-        // Update new user field with accumulated input values
-        copyFieldsToUser(newUser);
-
-        // for Organizer, get company name
-        String company = null;
-        if (newUser instanceof Organizer) {
-            company = getTrimmedString(editCompany);
+        if (isOrganizer && TextUtils.isEmpty(companyName)) {
+            editCompany.setError("Company name is required for organizers");
+            editCompany.requestFocus();
+            return;
         }
+        // --- End Input Validation ---
 
-        // Generate unique (random) userID
-        String userID = UUID.randomUUID().toString();
-        newUser.setUserID(userID);
+        // Show progress (e.g., progressBarCreateAccount.setVisibility(View.VISIBLE);)
+        buttonCreateAccount.setEnabled(false); // Disable button to prevent multiple clicks
+        Toast.makeText(CreateAccountActivity.this, "Creating account...", Toast.LENGTH_SHORT).show();
 
-        // Create Participant user
-        //Participant newUser = new Participant(userID, firstName, lastName, username, email, "Participant");
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> { // Using lambda for brevity
+                    // Hide progress (e.g., progressBarCreateAccount.setVisibility(View.GONE);)
+                    buttonCreateAccount.setEnabled(true); // Re-enable button
 
-        // Save to Firebase
-        mDatabase.child(userID).setValue(newUser).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(CreateAccountActivity.this, "Account created successfully!", Toast.LENGTH_LONG).show();
-                startActivity(new Intent(CreateAccountActivity.this, MainActivity.class));
-                finish();  // Close activity and maybe go back to login
-            } else {
-                Toast.makeText(CreateAccountActivity.this, "Failed to create account. Try again. Or go make yourself some tea, it might take forever.", Toast.LENGTH_LONG).show();
-                Log.e("FirebaseError", "Failed to save user", task.getException());
-            }
-        });
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "createUserWithEmail:success");
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            String userId = firebaseUser.getUid();
+
+                            // Optional: Set user's display name in Firebase Auth profile
+                            // Display name in Auth is often set to the user's full name.
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(firstName + " " + lastName)
+                                    .build();
+                            firebaseUser.updateProfile(profileUpdates)
+                                    .addOnCompleteListener(profileTask -> {
+                                        if (profileTask.isSuccessful()) {
+                                            Log.d(TAG, "User profile updated in Auth.");
+                                        }
+                                    });
+
+                            // Create User object (Participant or Organizer) for Realtime Database
+                            User newUserProfile;
+                            if (isOrganizer) {
+                                Organizer organizer = new Organizer();
+                                organizer.setUserID(userId);
+                                organizer.setFirstName(firstName);
+                                organizer.setLastName(lastName);
+                                organizer.setUsername(username.toLowerCase()); // Store username in lowercase for case-insensitive lookup
+                                organizer.setEmail(email); // Store original email from Auth
+                                organizer.setRole("Organizer");
+                                organizer.setPhoneNumber(phone);
+                                organizer.setCompanyName(companyName);
+                                newUserProfile = organizer;
+                            } else {
+                                Participant participant = new Participant();
+                                participant.setUserID(userId);
+                                participant.setFirstName(firstName);
+                                participant.setLastName(lastName);
+                                participant.setUsername(username.toLowerCase()); // Store username in lowercase
+                                participant.setEmail(email);
+                                participant.setRole("Participant");
+                                participant.setPhoneNumber(phone);
+                                newUserProfile = participant;
+                            }
+
+                            // Save user profile to Realtime Database
+                            mDatabaseUsersRef.child(userId).setValue(newUserProfile)
+                                    .addOnCompleteListener(dbTask -> {
+                                        if (dbTask.isSuccessful()) {
+                                            Toast.makeText(CreateAccountActivity.this, "Account created successfully!", Toast.LENGTH_LONG).show();
+                                            // New user is created and profile saved.
+                                            // You might want to sign them out so they have to log in.
+                                            // mAuth.signOut();
+                                            Intent intent = new Intent(CreateAccountActivity.this, LoginActivity.class);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                            finish(); // Close CreateAccountActivity
+                                        } else {
+                                            Log.e(TAG, "Failed to save user profile to DB.", dbTask.getException());
+                                            // Auth user was created, but DB save failed. This is an inconsistent state.
+                                            // Inform user, and ideally, you might try to delete the Auth user.
+                                            Toast.makeText(CreateAccountActivity.this, "Account created, but profile save failed. Please contact support or try again.", Toast.LENGTH_LONG).show();
+                                            // Example: firebaseUser.delete().addOnCompleteListener(...);
+                                        }
+                                    });
+                        } else {
+                            Log.e(TAG, "FirebaseUser is null after successful Auth creation. This should not happen.");
+                            Toast.makeText(CreateAccountActivity.this, "An unexpected error occurred after account creation. Please try again.", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                        String errorMessage = "Account creation failed.";
+                        if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                            errorMessage = "This email address is already in use.";
+                            editEmail.setError(errorMessage);
+                            editEmail.requestFocus();
+                        } else if (task.getException() != null) {
+                            errorMessage += " " + task.getException().getMessage();
+                        }
+                        Toast.makeText(CreateAccountActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    }
+                });
     }
-
-    public String getTrimmedString(EditText input){ return input.getText().toString().trim(); }
-
 }
-
-/**
- * lambda example:
- *
- * textCreateAccount.setOnClickListener(view -> {
- *     Intent intent = new Intent(MainActivity.this, CreateAccountActivity.class);
- *     startActivity(intent);
- * });
- */
