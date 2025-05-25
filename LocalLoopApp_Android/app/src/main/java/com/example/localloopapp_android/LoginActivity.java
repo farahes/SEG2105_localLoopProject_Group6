@@ -2,7 +2,9 @@ package com.example.localloopapp_android;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns; // Import Patterns for email validation
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -23,6 +25,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query; // Import Query
 import com.google.firebase.database.ValueEventListener;
 
 
@@ -30,12 +33,13 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
 
-    private EditText etEmail;
+    private EditText etIdentifier; // Renamed from etEmail to be more generic
     private EditText etPassword;
     private Button btnLogin;
+    // private ProgressBar progressBarLogin; // For future use
 
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabaseRoot; // Renamed for clarity, points to root
+    private DatabaseReference mDatabaseUsersRef; // Changed from mDatabaseRoot
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,78 +53,143 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        etEmail = findViewById(R.id.etEmail);
+        etIdentifier = findViewById(R.id.etIdentifier);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnSubmitLogin);
 
+
         mAuth = FirebaseAuth.getInstance();
-        mDatabaseRoot = FirebaseDatabase.getInstance().getReference(); // Get root reference
+        mDatabaseUsersRef = FirebaseDatabase.getInstance().getReference("users"); // Point to "users" node
 
         btnLogin.setOnClickListener(v -> {
-            String email = etEmail.getText().toString().trim();
+            String identifier = etIdentifier.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
-            if (email.isEmpty()) {
-                etEmail.setError("Required");
-                etEmail.requestFocus();
+            if (TextUtils.isEmpty(identifier)) {
+                etIdentifier.setError("Email or Username is required");
+                etIdentifier.requestFocus();
                 return;
             }
-            if (password.isEmpty()) {
-                etPassword.setError("Required");
+            if (TextUtils.isEmpty(password)) {
+                etPassword.setError("Password is required");
                 etPassword.requestFocus();
                 return;
             }
 
-            // Call the method that contains the Firebase Auth logic
-            signInUserWithEmailAndPassword(email, password);
+            // setLoadingState(true); // For future use
+            attemptLogin(identifier, password);
         });
     }
 
-    // This is where the Firebase Authentication logic goes
+    /* // For future use with ProgressBar
+    private void setLoadingState(boolean isLoading) {
+        if (progressBarLogin != null) {
+            progressBarLogin.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        }
+        etIdentifier.setEnabled(!isLoading);
+        etPassword.setEnabled(!isLoading);
+        btnLogin.setEnabled(!isLoading);
+    }
+    */
+
+    private void attemptLogin(final String identifier, final String password) {
+        // Basic check to see if it looks like an email
+        if (Patterns.EMAIL_ADDRESS.matcher(identifier).matches()) {
+            // Treat as email and attempt sign-in directly
+            signInUserWithEmailAndPassword(identifier, password);
+        } else {
+            // Treat as username, fetch email from database first
+            fetchEmailForUsernameAndSignIn(identifier.toLowerCase(), password); // Query with lowercase username
+        }
+    }
+
+    private void fetchEmailForUsernameAndSignIn(final String username, final String password) {
+        Toast.makeText(LoginActivity.this, "Looking up username...", Toast.LENGTH_SHORT).show();
+
+        Query usernameQuery = mDatabaseUsersRef.orderByChild("username").equalTo(username);
+
+        usernameQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Username found, expecting only one match due to uniqueness check at creation
+                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                        User user = userSnapshot.getValue(User.class); // Get the base User object
+                        if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
+                            String email = user.getEmail();
+                            Log.d(TAG, "Username '" + username + "' found. Associated email: " + email);
+                            signInUserWithEmailAndPassword(email, password);
+                            return; // Found email, proceed to sign in
+                        } else {
+                            // Should not happen if data is consistent, but handle it
+                            Log.e(TAG, "User found for username '" + username + "' but email is missing or empty.");
+                        }
+                    }
+                    // Fallthrough if loop completes without finding a valid email (highly unlikely with good data)
+                    Toast.makeText(LoginActivity.this, "Could not retrieve email for username. User data might be incomplete.", Toast.LENGTH_LONG).show();
+                    // setLoadingState(false); // For future use
+
+                } else {
+                    // Username not found in the database
+                    Log.w(TAG, "Username '" + username + "' not found in database.");
+                    Toast.makeText(LoginActivity.this, "Login failed: Invalid username or password.", Toast.LENGTH_LONG).show();
+                    // setLoadingState(false); // For future use
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w(TAG, "fetchEmailForUsername:onCancelled", databaseError.toException());
+                Toast.makeText(LoginActivity.this, "Failed to query database: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                // setLoadingState(false); // For future use
+            }
+        });
+    }
+
+
     private void signInUserWithEmailAndPassword(String email, String password) {
         Toast.makeText(LoginActivity.this, "Logging in...", Toast.LENGTH_SHORT).show();
-        // Show progress bar here
 
         mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() { // Ensure 'this' refers to the Activity context
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        // Hide progress bar here
+                        // setLoadingState(false); // For future use
                         if (task.isSuccessful()) {
-                            // Sign in success
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser firebaseUser = mAuth.getCurrentUser();
                             if (firebaseUser != null) {
-                                String userId = firebaseUser.getUid(); // THIS IS THE KEY
-                                // Now you have the userId, you can fetch their profile data
+                                String userId = firebaseUser.getUid();
                                 fetchUserProfileFromDatabaseAndProceed(userId);
                             } else {
-                                // This case should ideally not happen if task is successful but good to handle
                                 Toast.makeText(LoginActivity.this, "Authentication failed: No user found after successful sign-in.",
                                         Toast.LENGTH_SHORT).show();
                                 Log.e(TAG, "Authentication successful but firebaseUser is null");
                             }
                         } else {
-                            // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            String errorMessage = task.getException() != null ? task.getException().getMessage() : "Unknown authentication error";
-                            Toast.makeText(LoginActivity.this, "Authentication failed: " + errorMessage,
-                                    Toast.LENGTH_LONG).show();
+                            String errorMessage = "Login failed: Invalid credentials."; // More generic for both username/email attempts
+                            if (task.getException() != null && task.getException().getMessage() != null) {
+                                // You might want to be careful about exposing too specific Firebase error messages directly
+                                // For example, Firebase might say "user not found" for email, which is fine,
+                                // but if a username lookup failed and THEN email auth failed, the message might be confusing.
+                                // Keeping it generic like "Invalid credentials" is often safer.
+                                Log.e(TAG, "Firebase Auth Error: " + task.getException().getMessage());
+                            }
+                            Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                         }
                     }
                 });
     }
 
-
-    // Renamed this method for clarity to match its new trigger point
     private void fetchUserProfileFromDatabaseAndProceed(String userId) {
-        DatabaseReference userRef = mDatabaseRoot.child("users").child(userId); // Reference specific user
+        DatabaseReference userRef = mDatabaseUsersRef.child(userId); // Use mDatabaseUsersRef
 
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    User genericUser = dataSnapshot.getValue(User.class); // Get generic user to read role
+                    User genericUser = dataSnapshot.getValue(User.class);
 
                     if (genericUser != null && genericUser.getRole() != null) {
                         String role = genericUser.getRole();
@@ -138,23 +207,22 @@ public class LoginActivity extends AppCompatActivity {
                         }
 
                         if (specificUser != null) {
-                            if (specificUser.getUserID() == null) { // Double check if UID was set by Firebase
-                                specificUser.setUserID(userId); // Manually set if not automatically populated
+                            if (specificUser.getUserID() == null) {
+                                specificUser.setUserID(userId);
                             }
 
                             Log.d(TAG, "Successfully fetched user: " + specificUser.getFirstName() + ", Role: " + specificUser.getRole());
                             Toast.makeText(LoginActivity.this, "Login successful. Welcome " + specificUser.getFirstName(), Toast.LENGTH_SHORT).show();
-
                             navigateToDashboard(specificUser);
                         } else {
                             Toast.makeText(LoginActivity.this, "Could not parse user data for role: " + role, Toast.LENGTH_SHORT).show();
                             Log.e(TAG, "Failed to parse specific user type for role: " + role + " UID: " + userId);
-                            mAuth.signOut(); // Sign out if essential user data can't be parsed
+                            mAuth.signOut();
                         }
                     } else {
                         Toast.makeText(LoginActivity.this, "User data is incomplete (role missing).", Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "User data incomplete for UID: " + userId);
-                        mAuth.signOut(); // Sign out if essential user data is missing
+                        mAuth.signOut();
                     }
                 } else {
                     Toast.makeText(LoginActivity.this, "User profile not found in database.", Toast.LENGTH_SHORT).show();
@@ -167,34 +235,21 @@ public class LoginActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.w(TAG, "loadUser:onCancelled", databaseError.toException());
                 Toast.makeText(LoginActivity.this, "Failed to load user data: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                mAuth.signOut(); // Also sign out on critical data load failure
             }
         });
     }
 
-
     private void navigateToDashboard(User user) {
-        // ---- TEMPORARY TEST CODE ----
         String successMessage = "Login successful! User: " + user.getFirstName() + ", Role: " + user.getRole();
         if (user instanceof Organizer) {
             Organizer organizer = (Organizer) user;
-            successMessage += ", Company: " + organizer.getCompanyName(); // Example for Organizer
+            successMessage += ", Company: " + organizer.getCompanyName();
+        } else if (user instanceof Participant) {
+            // Participant specific if any
         }
 
-        Log.d(TAG, "navigateToDashboard (TEMPORARY): " + successMessage);
+        Log.d(TAG, "Navigate to Dashboard: " + successMessage);
         Toast.makeText(LoginActivity.this, successMessage, Toast.LENGTH_LONG).show();
-
-        // finish(); // You MIGHT want to call finish() if you want the login screen to close
-        // But for testing, maybe you want to stay on it to try another login.
-        // If you call finish(), and this is your launcher activity, the app might close.
-        // For now, let's keep it commented out to stay on the LoginActivity.
-
-        // ---- ORIGINAL NAVIGATION CODE (Commented out for now) ----
-    /*
-    Intent intent = new Intent(LoginActivity.this, NewDashboardActivity.class);
-    // Optional: Pass data. If User is Parcelable:
-    // intent.putExtra("USER_OBJECT", user);
-    startActivity(intent);
-    finish();
-    */
     }
 }
