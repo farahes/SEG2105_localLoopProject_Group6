@@ -1,4 +1,4 @@
-package com.example.localloopapp_android; // Replace with your actual package name
+package com.example.localloopapp_android;
 
 import android.content.Intent;
 import android.os.Bundle;
