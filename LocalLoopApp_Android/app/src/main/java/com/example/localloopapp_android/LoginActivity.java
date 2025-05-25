@@ -213,14 +213,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void navigateToDashboard(User user) {
-        String successMessage = "Login successful! User: " + user.getFirstName() + ", Role: " + user.getRole();
-        if (user instanceof Organizer) {
-            Organizer organizer = (Organizer) user;
-            successMessage += ", Company: " + organizer.getCompanyName();
-        } else if (user instanceof Participant) {
-        }
+        String firstName = user.getFirstName();
+        String role = user.getRole();
 
-        Log.d(TAG, "Navigate to Dashboard: " + successMessage);
-        Toast.makeText(LoginActivity.this, successMessage, Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
+        intent.putExtra(DashboardActivity.EXTRA_USER_FIRST_NAME, firstName);
+        intent.putExtra(DashboardActivity.EXTRA_USER_ROLE, role);
+        startActivity(intent);
     }
 }
