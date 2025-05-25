@@ -73,7 +73,7 @@
             android:id="@+id/edit_company"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Company (optional)"
+            android:hint="Company"
             android:visibility="gone"
             android:layout_marginTop="12dp"/>
 
