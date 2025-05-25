@@ -97,18 +97,18 @@ public class LoginActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                        String role = dataSnapshot.child("role").getValue(String.class);
+                        String role = userSnapshot.child("role").getValue(String.class);
 
                         User user;
                         switch (role) {
                             case "Admin":
-                                user = dataSnapshot.getValue(Admin.class);
+                                user = userSnapshot.getValue(Admin.class);
                                 break;
                             case "Organizer":
-                                user = dataSnapshot.getValue(Organizer.class);
+                                user = userSnapshot.getValue(Organizer.class);
                                 break;
                             case "Participant":
-                                user = dataSnapshot.getValue(Participant.class);
+                                user = userSnapshot.getValue(Participant.class);
                                 break;
                             default:
                                 throw new IllegalStateException("Unknown role: " + role);
