@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Patterns; // Import Patterns for email validation
+import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -25,7 +25,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query; // Import Query
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 
@@ -33,13 +33,12 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
 
-    private EditText etIdentifier; // Renamed from etEmail to be more generic
+    private EditText etIdentifier;
     private EditText etPassword;
     private Button btnLogin;
-    // private ProgressBar progressBarLogin; // For future use
 
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabaseUsersRef; // Changed from mDatabaseRoot
+    private DatabaseReference mDatabaseUsersRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
         mAuth = FirebaseAuth.getInstance();
-        mDatabaseUsersRef = FirebaseDatabase.getInstance().getReference("users"); // Point to "users" node
+        mDatabaseUsersRef = FirebaseDatabase.getInstance().getReference("users");
 
         btnLogin.setOnClickListener(v -> {
             String identifier = etIdentifier.getText().toString().trim();
@@ -76,30 +75,15 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // setLoadingState(true); // For future use
             attemptLogin(identifier, password);
         });
     }
 
-    /* // For future use with ProgressBar
-    private void setLoadingState(boolean isLoading) {
-        if (progressBarLogin != null) {
-            progressBarLogin.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        }
-        etIdentifier.setEnabled(!isLoading);
-        etPassword.setEnabled(!isLoading);
-        btnLogin.setEnabled(!isLoading);
-    }
-    */
-
     private void attemptLogin(final String identifier, final String password) {
-        // Basic check to see if it looks like an email
         if (Patterns.EMAIL_ADDRESS.matcher(identifier).matches()) {
-            // Treat as email and attempt sign-in directly
             signInUserWithEmailAndPassword(identifier, password);
         } else {
-            // Treat as username, fetch email from database first
-            fetchEmailForUsernameAndSignIn(identifier.toLowerCase(), password); // Query with lowercase username
+            fetchEmailForUsernameAndSignIn(identifier.toLowerCase(), password);
         }
     }
 
@@ -112,28 +96,22 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    // Username found, expecting only one match due to uniqueness check at creation
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                        User user = userSnapshot.getValue(User.class); // Get the base User object
+                        User user = userSnapshot.getValue(User.class);
                         if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
                             String email = user.getEmail();
                             Log.d(TAG, "Username '" + username + "' found. Associated email: " + email);
                             signInUserWithEmailAndPassword(email, password);
-                            return; // Found email, proceed to sign in
+                            return;
                         } else {
-                            // Should not happen if data is consistent, but handle it
                             Log.e(TAG, "User found for username '" + username + "' but email is missing or empty.");
                         }
                     }
-                    // Fallthrough if loop completes without finding a valid email (highly unlikely with good data)
                     Toast.makeText(LoginActivity.this, "Could not retrieve email for username. User data might be incomplete.", Toast.LENGTH_LONG).show();
-                    // setLoadingState(false); // For future use
 
                 } else {
-                    // Username not found in the database
                     Log.w(TAG, "Username '" + username + "' not found in database.");
                     Toast.makeText(LoginActivity.this, "Login failed: Invalid username or password.", Toast.LENGTH_LONG).show();
-                    // setLoadingState(false); // For future use
                 }
             }
 
@@ -141,7 +119,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.w(TAG, "fetchEmailForUsername:onCancelled", databaseError.toException());
                 Toast.makeText(LoginActivity.this, "Failed to query database: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-                // setLoadingState(false); // For future use
             }
         });
     }
@@ -154,7 +131,6 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        // setLoadingState(false); // For future use
                         if (task.isSuccessful()) {
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser firebaseUser = mAuth.getCurrentUser();
@@ -168,12 +144,8 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         } else {
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            String errorMessage = "Login failed: Invalid credentials."; // More generic for both username/email attempts
+                            String errorMessage = "Login failed: Invalid credentials.";
                             if (task.getException() != null && task.getException().getMessage() != null) {
-                                // You might want to be careful about exposing too specific Firebase error messages directly
-                                // For example, Firebase might say "user not found" for email, which is fine,
-                                // but if a username lookup failed and THEN email auth failed, the message might be confusing.
-                                // Keeping it generic like "Invalid credentials" is often safer.
                                 Log.e(TAG, "Firebase Auth Error: " + task.getException().getMessage());
                             }
                             Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
@@ -183,7 +155,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void fetchUserProfileFromDatabaseAndProceed(String userId) {
-        DatabaseReference userRef = mDatabaseUsersRef.child(userId); // Use mDatabaseUsersRef
+        DatabaseReference userRef = mDatabaseUsersRef.child(userId);
 
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -235,7 +207,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.w(TAG, "loadUser:onCancelled", databaseError.toException());
                 Toast.makeText(LoginActivity.this, "Failed to load user data: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-                mAuth.signOut(); // Also sign out on critical data load failure
+                mAuth.signOut();
             }
         });
     }
@@ -246,7 +218,6 @@ public class LoginActivity extends AppCompatActivity {
             Organizer organizer = (Organizer) user;
             successMessage += ", Company: " + organizer.getCompanyName();
         } else if (user instanceof Participant) {
-            // Participant specific if any
         }
 
         Log.d(TAG, "Navigate to Dashboard: " + successMessage);
