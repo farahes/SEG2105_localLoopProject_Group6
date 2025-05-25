@@ -97,7 +97,23 @@ public class LoginActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                        User user = userSnapshot.getValue(User.class);
+                        String role = dataSnapshot.child("role").getValue(String.class);
+
+                        User user;
+                        switch (role) {
+                            case "Admin":
+                                user = dataSnapshot.getValue(Admin.class);
+                                break;
+                            case "Organizer":
+                                user = dataSnapshot.getValue(Organizer.class);
+                                break;
+                            case "Participant":
+                                user = dataSnapshot.getValue(Participant.class);
+                                break;
+                            default:
+                                throw new IllegalStateException("Unknown role: " + role);
+                        }
+
                         if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
                             String email = user.getEmail();
                             Log.d(TAG, "Username '" + username + "' found. Associated email: " + email);
@@ -161,21 +177,24 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    User genericUser = dataSnapshot.getValue(User.class);
+                    String role = dataSnapshot.child("role").getValue(String.class);
 
-                    if (genericUser != null && genericUser.getRole() != null) {
-                        String role = genericUser.getRole();
+                    if (role != null) {
                         User specificUser = null;
 
-                        if ("Participant".equalsIgnoreCase(role)) {
-                            specificUser = dataSnapshot.getValue(Participant.class);
-                        } else if ("Organizer".equalsIgnoreCase(role)) {
-                            specificUser = dataSnapshot.getValue(Organizer.class);
-                        } else if ("Admin".equalsIgnoreCase(role)) {
-                            specificUser = dataSnapshot.getValue(Admin.class);
-                        } else {
-                            specificUser = genericUser;
-                            Log.w(TAG, "Unknown role: " + role + ". Defaulting to base User.");
+                        switch (role) {
+                            case "Participant":
+                                specificUser = dataSnapshot.getValue(Participant.class);
+                                break;
+                            case "Organizer":
+                                specificUser = dataSnapshot.getValue(Organizer.class);
+                                break;
+                            case "Admin":
+                                specificUser = dataSnapshot.getValue(Admin.class);
+                                break;
+                            default:
+                                Log.w(TAG, "Unknown role: " + role + ". Cannot instantiate user.");
+                                break;
                         }
 
                         if (specificUser != null) {
@@ -185,12 +204,14 @@ public class LoginActivity extends AppCompatActivity {
 
                             Log.d(TAG, "Successfully fetched user: " + specificUser.getFirstName() + ", Role: " + specificUser.getRole());
                             Toast.makeText(LoginActivity.this, "Login successful. Welcome " + specificUser.getFirstName(), Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Login successful, navigating to Dashboard");
                             navigateToDashboard(specificUser);
                         } else {
                             Toast.makeText(LoginActivity.this, "Could not parse user data for role: " + role, Toast.LENGTH_SHORT).show();
                             Log.e(TAG, "Failed to parse specific user type for role: " + role + " UID: " + userId);
                             mAuth.signOut();
                         }
+
                     } else {
                         Toast.makeText(LoginActivity.this, "User data is incomplete (role missing).", Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "User data incomplete for UID: " + userId);
@@ -202,6 +223,7 @@ public class LoginActivity extends AppCompatActivity {
                     mAuth.signOut();
                 }
             }
+
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
