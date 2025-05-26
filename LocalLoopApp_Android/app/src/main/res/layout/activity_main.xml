@@ -3,44 +3,62 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
     android:padding="32dp"
     android:background="#FFFFFF">
 
-    <!-- Hello message -->
-    <TextView
-        android:id="@+id/text_welcome_message"
+    <!-- Content block in the middle -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Welcome to LoopApp — where you can create any event you want... except underwater math competitions. We like to keep things dry here. And we don't like math."
-        android:textColor="#333333"
-        android:textSize="18sp"
-        android:textStyle="italic"
-        android:gravity="center"
-        android:layout_marginBottom="48dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center">
 
-    <!-- Big Log In button -->
+        <!-- Hello message -->
+        <TextView
+            android:id="@+id/text_welcome_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Welcome to LoopApp — where you can create any event you want... except underwater math competitions. We like to keep things dry here. And we don't like math."
+            android:textColor="#333333"
+            android:textSize="18sp"
+            android:textStyle="italic"
+            android:gravity="center"
+            android:layout_marginBottom="48dp" />
+
+        <!-- Big Log In button -->
+        <Button
+            android:id="@+id/button_login"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Log In"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:backgroundTint="#6200EE"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Smaller text link for Create an Account -->
+        <TextView
+            android:id="@+id/text_create_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create an Account"
+            android:textColor="#6200EE"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
+
+    <!-- Play a Game Button pinned to bottom -->
     <Button
-        android:id="@+id/button_login"
+        android:id="@+id/button_play_game"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="Log In"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:backgroundTint="#6200EE"
-        android:textColor="#FFFFFF"
-        android:layout_marginBottom="24dp" />
-
-    <!-- Smaller text link for Create an Account -->
-    <TextView
-        android:id="@+id/text_create_account"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create an Account"
-        android:textColor="#6200EE"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:clickable="true"
-        android:focusable="true" />
-
+        android:text="Play a Game"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#009688"
+        android:layout_marginTop="16dp" />
 </LinearLayout>

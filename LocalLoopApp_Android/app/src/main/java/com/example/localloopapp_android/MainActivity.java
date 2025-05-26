@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button buttonLogin;
+    private Button buttonLogin, buttonPlayGame;
     private TextView textCreateAccount;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
         buttonLogin = findViewById(R.id.button_login);
         textCreateAccount = findViewById(R.id.text_create_account);
+        buttonPlayGame = findViewById(R.id.button_play_game);
 
         buttonLogin.setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
@@ -46,6 +47,11 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, CreateAccountActivity.class);
                 startActivity(intent);
             }
+        });
+
+        buttonPlayGame.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, com.example.localloopapp_android.bombgame.GameActivity.class);
+            startActivity(intent);
         });
 
     }
