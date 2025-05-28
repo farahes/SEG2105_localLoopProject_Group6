@@ -10,6 +10,7 @@ When you save:
 
 ```java
 mDatabaseUsersRef.child(userId).setValue(newUserProfile);
+```
 
 Firebase serializes the entire object to JSON.  
 There’s **no way to add extra metadata** outside the object.  
@@ -24,6 +25,7 @@ Once data is retrieved, you lose the original type:
 
 ```java
 User user = snapshot.getValue(User.class); // Just a generic User
+```
 
 So you need a string marker (like role) to help decide how to reconstruct:
 
@@ -31,6 +33,7 @@ So you need a string marker (like role) to help decide how to reconstruct:
 if ("Organizer".equals(role)) {
     user = snapshot.getValue(Organizer.class);
 }
+```
 
 ## 🚫 Why Not Skip Subclasses?
 
