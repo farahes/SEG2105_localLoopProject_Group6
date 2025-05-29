@@ -15,6 +15,9 @@
   - Mary Yermolenko   - myerm102@uottawa.ca (#300404297)
   - Dany Nuriev       - dnuri029@uottawa.ca (#300429224)
 
+## Link to GitHub:
+https://github.com/farahes/SEG2105_localLoopProject_Group6/tree/main
+
 `Version: 21-05-2025`
 
 
