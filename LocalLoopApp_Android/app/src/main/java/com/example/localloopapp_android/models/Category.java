@@ -1,4 +1,4 @@
-package com.example.localloopapp_android;
+package com.example.localloopapp_android.models;
 
 public class Category {
     private String categoryId;  // Firebase key
@@ -20,7 +20,7 @@ public class Category {
     public void setDescription(String description){this.description = description;}
 
     public String toString() {
-        return "com.example.localloopapp_android.Category{" +
+        return "com.example.localloopapp_android.models.Category{" +
                 "categoryId='" + categoryId + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

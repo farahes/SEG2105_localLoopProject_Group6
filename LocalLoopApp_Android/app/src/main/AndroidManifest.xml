@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" >
-    <!-- Needed for Firebase Database network access -->
+    <!-- Needed for Firebase Database internet access -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -25,9 +25,6 @@
             android:exported="false" />
         <activity
             android:name=".xbombgame.GameActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.DashboardActivity"
             android:exported="false" />
         <activity
             android:name=".activities.CreateAccountActivity"

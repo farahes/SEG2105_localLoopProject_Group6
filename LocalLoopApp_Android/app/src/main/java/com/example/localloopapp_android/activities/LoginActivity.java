@@ -3,6 +3,7 @@ package com.example.localloopapp_android.activities;
 import com.example.localloopapp_android.activities.dashboard_activities.AdminDashboardActivity;
 import com.example.localloopapp_android.activities.dashboard_activities.OrganizerDashboardActivity;
 import com.example.localloopapp_android.activities.dashboard_activities.ParticipantDashboardActivity;
+import com.example.localloopapp_android.utils.Constants;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import com.example.localloopapp_android.models.Organizer;
 import com.example.localloopapp_android.models.Participant;
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.models.User;
+import com.example.localloopapp_android.utils.Constants;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -36,7 +38,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -261,8 +262,8 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, "Unknown role!", Toast.LENGTH_SHORT).show();
                 return;
         }
-        intent.putExtra("firstName", user.getFirstName());
-        intent.putExtra("lastName", user.getLastName());
+        intent.putExtra(Constants.EXTRA_FIRST_NAME, user.getFirstName());
+        intent.putExtra(Constants.EXTRA_LAST_NAME, user.getLastName());
         startActivity(intent);
     }
 }
