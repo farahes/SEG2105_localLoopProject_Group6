@@ -1,4 +1,8 @@
-package com.example.localloopapp_android;
+package com.example.localloopapp_android.activities;
+
+import com.example.localloopapp_android.activities.dashboard_activities.AdminDashboardActivity;
+import com.example.localloopapp_android.activities.dashboard_activities.OrganizerDashboardActivity;
+import com.example.localloopapp_android.activities.dashboard_activities.ParticipantDashboardActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +20,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.localloopapp_android.models.Admin;
+import com.example.localloopapp_android.models.Organizer;
+import com.example.localloopapp_android.models.Participant;
+import com.example.localloopapp_android.R;
+import com.example.localloopapp_android.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -235,12 +244,25 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void navigateToDashboard(User user) {
-        String firstName = user.getFirstName();
-        String role = user.getRole();
+        String role = user.getRole().toLowerCase();
 
-        Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
-        intent.putExtra(DashboardActivity.EXTRA_USER_FIRST_NAME, firstName);
-        intent.putExtra(DashboardActivity.EXTRA_USER_ROLE, role);
+        Intent intent;
+        switch (role) {
+            case "participant":
+                intent = new Intent(LoginActivity.this, ParticipantDashboardActivity.class);
+                break;
+            case "organizer":
+                intent = new Intent(LoginActivity.this, OrganizerDashboardActivity.class);
+                break;
+            case "admin":
+                intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                break;
+            default:
+                Toast.makeText(this, "Unknown role!", Toast.LENGTH_SHORT).show();
+                return;
+        }
+        intent.putExtra("firstName", user.getFirstName());
+        intent.putExtra("lastName", user.getLastName());
         startActivity(intent);
     }
 }

@@ -1,4 +1,4 @@
-package com.example.localloopapp_android.bombgame;
+package com.example.localloopapp_android.xbombgame;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;

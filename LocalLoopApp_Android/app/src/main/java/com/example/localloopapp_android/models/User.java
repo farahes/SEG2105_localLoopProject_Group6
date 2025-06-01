@@ -1,4 +1,4 @@
-package com.example.localloopapp_android;
+package com.example.localloopapp_android.models;
 
 import com.google.firebase.database.Exclude;
 

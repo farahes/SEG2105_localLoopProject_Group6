@@ -1,4 +1,4 @@
-package com.example.localloopapp_android;
+package com.example.localloopapp_android.utils;
 
 import java.util.regex.Pattern;
 

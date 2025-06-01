@@ -1,4 +1,4 @@
-package com.example.localloopapp_android;
+package com.example.localloopapp_android.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,11 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.localloopapp_android.utils.InputValidator;
+import com.example.localloopapp_android.models.Organizer;
+import com.example.localloopapp_android.models.Participant;
+import com.example.localloopapp_android.R;
+import com.example.localloopapp_android.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;

@@ -1,4 +1,4 @@
-package com.example.localloopapp_android;
+package com.example.localloopapp_android.models;
 
 public class Organizer extends User {
     protected String companyName;

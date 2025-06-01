@@ -1,4 +1,4 @@
-package com.example.localloopapp_android;
+package com.example.localloopapp_android.models;
 
 public class Participant extends User {
     public Participant() {

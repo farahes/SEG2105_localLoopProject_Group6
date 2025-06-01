@@ -1,5 +1,6 @@
-package com.example.localloopapp_android;
+package com.example.localloopapp_android.activities;
 
+import com.example.localloopapp_android.R;
 import com.google.firebase.FirebaseApp;
 
 import android.content.Intent;
@@ -7,16 +8,10 @@ import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         buttonPlayGame.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, com.example.localloopapp_android.bombgame.GameActivity.class);
+            Intent intent = new Intent(MainActivity.this, com.example.localloopapp_android.xbombgame.GameActivity.class);
             startActivity(intent);
         });
 
