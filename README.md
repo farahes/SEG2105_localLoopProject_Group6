@@ -1,5 +1,10 @@
 # [SEG2105-Z (2025/5)] LocalLoop Project (Group 6)
 
+## ✨ Developer Setup
+To enable GitHub Copilot Pro:
+- Install the [GitHub Copilot plugin](https://plugins.jetbrains.com/plugin/17718-github-copilot) in Android Studio.
+- Log in with your GitHub Education account.
+
 ### Brief Overview:
 
 1. Creating user accounts for Admin, Organizers, and Participants.
