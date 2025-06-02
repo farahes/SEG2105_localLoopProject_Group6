@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -29,7 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 public class AdminDashboardActivity extends AppCompatActivity {
 
     private static final String TAG = "AdminDashboardActivity";
-    private static final String CURRENT_ADMIN_ID = "25VWv0nGiBe4t5XODVOiI7jWMVq1";
+    private static final String CURRENT_ADMIN_ID = "25VWv0nGiBe4t5XODVOiI7jWMVq1"; // hardcoded admin ID — yes, it's ugly. We'll live.
 
     private TextView tvWelcomeMessage;
     private LinearLayout userListContainer;
@@ -40,29 +41,33 @@ public class AdminDashboardActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate reached!");
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_admin_dashboard);
+        setContentView(R.layout.activity_admin_dashboard); // Loads Admin-specific layout
 
+        // Handle padding for system UI (status bar, nav bar)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
+        // Init views and Firebase reference
         tvWelcomeMessage = findViewById(R.id.tvWelcomeMessage);
         userListContainer = findViewById(R.id.userListContainer);
         usersRef = FirebaseDatabase.getInstance().getReference("users");
 
+        // Greet admin by name if available, otherwise generic welcome
         String firstName = getIntent().getStringExtra(Constants.EXTRA_FIRST_NAME);
         tvWelcomeMessage.setText(firstName != null
                 ? "Welcome " + firstName + "! You are logged in as Admin."
                 : "Welcome, Admin!");
 
-        fetchAllUsersAndDisplay();
+        fetchAllUsersAndDisplay(); // 🎬 Main attraction
     }
 
     private void fetchAllUsersAndDisplay() {
         Log.d(TAG, "fetchAllUsersAndDisplay() called");
 
+        // One-time read of the users node from Firebase
         usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -71,17 +76,17 @@ public class AdminDashboardActivity extends AppCompatActivity {
                     return;
                 }
 
-                userListContainer.removeAllViews();
+                userListContainer.removeAllViews(); // Clear previous list
 
                 for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                    if (isCurrentAdmin(userSnapshot)) continue;
+                    if (isCurrentAdmin(userSnapshot)) continue; // Don't show yourself, ego isn't *that* big
 
                     User user = parseUser(userSnapshot);
                     View userRow = createUserRow(user, userSnapshot.getKey());
                     userListContainer.addView(userRow);
                 }
 
-                // Fix scroll bug by requesting layout after scrollview render
+                // Patch for that annoying ScrollView bug that sometimes refuses to scroll
                 userListContainer.post(userListContainer::requestLayout);
             }
 
@@ -92,13 +97,38 @@ public class AdminDashboardActivity extends AppCompatActivity {
         });
     }
 
+    // Spoiler alert: you're the admin
     private boolean isCurrentAdmin(DataSnapshot snapshot) {
         String userId = snapshot.child("userID").getValue(String.class);
         return CURRENT_ADMIN_ID.equals(userId);
     }
 
+    // This is where the admin gets to play judge, jury, and executioner
+    private void confirmAndDeleteUser(String firebaseKey, String displayName) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete User?")
+                .setMessage("Whoa. What did " + displayName + " do to deserve this? 😬\nThis action cannot be undone.")
+                .setPositiveButton("Delete Forever", (dialog, which) -> deleteUser(firebaseKey))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    // Actually erases the user from Firebase. No coming back from this one.
+    private void deleteUser(String firebaseKey) {
+        usersRef.child(firebaseKey).removeValue()
+                .addOnSuccessListener(unused -> {
+                    showToast("User deleted");
+                    fetchAllUsersAndDisplay(); // Refresh the list to reflect the apocalypse
+                })
+                .addOnFailureListener(e -> {
+                    showToast("Failed to delete user");
+                    Log.e(TAG, "deleteUser: " + e.getMessage(), e);
+                });
+    }
+
+    // Converts Firebase snapshot into a User object
     private User parseUser(DataSnapshot snapshot) {
-        User user = new User() {}; // Anonymous subclass because User is abstract
+        User user = new User() {}; // Anonymous subclass because User is abstract — don’t @ me
         user.setUserID(snapshot.child("userID").getValue(String.class));
         user.setFirstName(snapshot.child("firstName").getValue(String.class));
         user.setLastName(snapshot.child("lastName").getValue(String.class));
@@ -106,25 +136,28 @@ public class AdminDashboardActivity extends AppCompatActivity {
         user.setEmail(snapshot.child("email").getValue(String.class));
         user.setPhoneNumber(snapshot.child("phoneNumber").getValue(String.class));
         user.setRole(snapshot.child("role").getValue(String.class));
-        user.setStatus(snapshot.child("status").getValue(String.class)); // ✅ this is all you need
+        user.setStatus(snapshot.child("status").getValue(String.class)); // Let User handle its own enum drama
 
         return user;
     }
 
+    // Builds a UI card for a single user, with info and the fabled ⋮ menu
     private View createUserRow(User user, String firebaseKey) {
         View row = getLayoutInflater().inflate(R.layout.item_user_admin, userListContainer, false);
         TextView tvInfo = row.findViewById(R.id.tv_user_info);
         ImageView ivMenu = row.findViewById(R.id.iv_overflow_menu);
 
+        // Basic user info — the boring but necessary stuff
         String info = String.format("Name: %s\nRole: %s\nEmail: %s\nUsername: %s",
                 getOrDefault(user.getFirstName()),
                 getOrDefault(user.getRole()),
                 getOrDefault(user.getEmail()),
                 getOrDefault(user.getUsername()));
 
+        // If they’re inactive, show them the door (visually)
         if (user.getStatusEnum() == User.Status.INACTIVE) {
             info += "\n🚫 Inactive";
-            row.setAlpha(0.5f);
+            row.setAlpha(0.5f); // ghost them, literally
         }
 
         tvInfo.setText(info);
@@ -133,21 +166,24 @@ public class AdminDashboardActivity extends AppCompatActivity {
         return row;
     }
 
+    // Sets up the famous ⋮ menu with "Enable/Disable" and "Delete"
     private void setupOverflowMenu(ImageView menuIcon, User user, String firebaseKey) {
         menuIcon.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(this, menuIcon);
             popup.inflate(R.menu.menu_user_admin);
 
+            // Dynamically label the status toggle
             MenuItem toggleItem = popup.getMenu().findItem(R.id.action_toggle_status);
             toggleItem.setTitle(user.getStatusEnum() == User.Status.ACTIVE ? "Disable User" : "Enable User");
 
+            // What happens when you click a menu item
             popup.setOnMenuItemClickListener(item -> {
                 int id = item.getItemId();
                 if (id == R.id.action_toggle_status) {
                     toggleUserStatus(firebaseKey, user.getStatusEnum());
                     return true;
                 } else if (id == R.id.action_delete_user) {
-                    showToast("Delete not implemented yet");
+                    confirmAndDeleteUser(firebaseKey, user.getFirstName());
                     return true;
                 }
                 return false;
@@ -157,6 +193,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         });
     }
 
+    // Flips ACTIVE <-> INACTIVE like a good old light switch
     private void toggleUserStatus(String firebaseKey, User.Status currentStatus) {
         User.Status newStatus = currentStatus == User.Status.ACTIVE
                 ? User.Status.INACTIVE
@@ -165,20 +202,23 @@ public class AdminDashboardActivity extends AppCompatActivity {
         usersRef.child(firebaseKey).child("status").setValue(newStatus.name())
                 .addOnSuccessListener(unused -> {
                     showToast("Status updated");
-                    fetchAllUsersAndDisplay();
+                    fetchAllUsersAndDisplay(); // Reflect the changes immediately !!!!
                 })
                 .addOnFailureListener(e -> showToast("Failed to update status"));
     }
 
+    // Toast shortcut, for when you don't feel like typing `.makeText(...)` every time
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+    // Combine logging and user-facing error reporting, because why duplicate pain?
     private void logAndToastError(String message, Exception e) {
         Log.e(TAG, message, e);
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
+    // Null-safe fallback for missing user data — a polite "IDK"
     private String getOrDefault(String value) {
         return value != null ? value : "N/A";
     }
