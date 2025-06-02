@@ -7,12 +7,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.OnFailureListener;
-
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -33,9 +29,10 @@ import com.google.firebase.database.ValueEventListener;
 public class AdminDashboardActivity extends AppCompatActivity {
 
     private static final String TAG = "AdminDashboardActivity";
+    private static final String CURRENT_ADMIN_ID = "25VWv0nGiBe4t5XODVOiI7jWMVq1";
+
     private TextView tvWelcomeMessage;
     private LinearLayout userListContainer;
-
     private DatabaseReference usersRef;
 
     @Override
@@ -43,7 +40,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate reached!");
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_admin_dashboard); // admin-specific layout
+        setContentView(R.layout.activity_admin_dashboard);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -55,14 +52,12 @@ public class AdminDashboardActivity extends AppCompatActivity {
         userListContainer = findViewById(R.id.userListContainer);
         usersRef = FirebaseDatabase.getInstance().getReference("users");
 
-        // ADMIN-ONLY LOGIC: just get the first name and load users (for now)
         String firstName = getIntent().getStringExtra(Constants.EXTRA_FIRST_NAME);
-        if (firstName != null) {
-            tvWelcomeMessage.setText("Welcome " + firstName + "! You are logged in as Admin.");
-            fetchAllUsersAndDisplay();
-        } else {
-            tvWelcomeMessage.setText("Welcome, Admin!");
-        }
+        tvWelcomeMessage.setText(firstName != null
+                ? "Welcome " + firstName + "! You are logged in as Admin."
+                : "Welcome, Admin!");
+
+        fetchAllUsersAndDisplay();
     }
 
     private void fetchAllUsersAndDisplay() {
@@ -71,123 +66,120 @@ public class AdminDashboardActivity extends AppCompatActivity {
         usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                Log.d(TAG, "onDataChange triggered");
-
-                if (snapshot.exists()) {
-                    Log.d(TAG, "Snapshot exists: " + snapshot.getChildrenCount());
-
-                    userListContainer.removeAllViews();
-                    String currentAdminId = "25VWv0nGiBe4t5XODVOiI7jWMVq1";
-
-                    for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                        Log.d(TAG, "Reading user: " + userSnapshot.getKey());
-
-                        String userId = userSnapshot.child("userID").getValue(String.class);
-                        if (userId != null && userId.equals(currentAdminId)) {
-                            Log.d(TAG, "Skipping current admin: " + userId);
-                            continue;
-                        }
-
-                        String role = userSnapshot.child("role").getValue(String.class);
-                        String firstName = userSnapshot.child("firstName").getValue(String.class);
-                        String email = userSnapshot.child("email").getValue(String.class);
-                        String username = userSnapshot.child("username").getValue(String.class);
-                        String statusStr = userSnapshot.child("status").getValue(String.class);
-
-                        User.Status status = User.Status.ACTIVE;
-                        if (statusStr != null) {
-                            try {
-                                status = User.Status.valueOf(statusStr.toUpperCase());
-                            } catch (IllegalArgumentException ignored) {}
-                        }
-
-                        // Make status effectively final for inner class usage
-                        final User.Status userStatus = status;
-
-                        View userRow = getLayoutInflater().inflate(R.layout.item_user_admin, userListContainer, false);
-                        TextView tvInfo = userRow.findViewById(R.id.tv_user_info);
-                        ImageView ivOverflowMenu = userRow.findViewById(R.id.iv_overflow_menu);
-
-                        String userInfo = "Name: " + (firstName != null ? firstName : "N/A") + "\n"
-                                + "Role: " + (role != null ? role : "N/A") + "\n"
-                                + "Email: " + (email != null ? email : "N/A") + "\n"
-                                + "Username: " + (username != null ? username : "N/A");
-
-                        tvInfo.setText(userInfo);
-
-                        if (userStatus == User.Status.INACTIVE) {
-                            userRow.setAlpha(0.5f);
-                            tvInfo.append("\n🚫 Inactive");
-                        }
-
-                        ivOverflowMenu.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                PopupMenu popup = new PopupMenu(AdminDashboardActivity.this, ivOverflowMenu);
-                                popup.inflate(R.menu.menu_user_admin);
-
-                                MenuItem toggleItem = popup.getMenu().findItem(R.id.action_toggle_status);
-                                toggleItem.setTitle(userStatus == User.Status.ACTIVE ? "Disable User" : "Enable User");
-
-                                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                    @Override
-                                    public boolean onMenuItemClick(MenuItem item) {
-                                        int itemId = item.getItemId();
-
-                                        if (itemId == R.id.action_toggle_status) {
-                                            User.Status newStatus = (userStatus == User.Status.ACTIVE)
-                                                    ? User.Status.INACTIVE
-                                                    : User.Status.ACTIVE;
-
-                                            usersRef.child(userSnapshot.getKey()).child("status").setValue(newStatus.name())
-                                                    .addOnSuccessListener(unused -> {
-                                                        Toast.makeText(AdminDashboardActivity.this, "Status updated", Toast.LENGTH_SHORT).show();
-                                                        fetchAllUsersAndDisplay(); // ✅ force reload for correct UI and label
-                                                    })
-                                                    .addOnFailureListener(e -> {
-                                                        Toast.makeText(AdminDashboardActivity.this, "Failed to update status", Toast.LENGTH_SHORT).show();
-                                                    });
-
-                                            return true;
-
-                                        } else if (itemId == R.id.action_delete_user) {
-                                            Toast.makeText(AdminDashboardActivity.this, "Delete not implemented yet", Toast.LENGTH_SHORT).show();
-                                            return true;
-
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-
-                                });
-
-                                popup.show();
-                            }
-                        });
-
-                        userListContainer.addView(userRow);
-                    }
-                    /**
-                     * forces a layout refresh after the scollView finished rendering
-                     * BECAUSE SCROLLVIEW WASNT SCROLLING
-                     * duh
-                     */
-                    userListContainer.post(() -> {
-                        userListContainer.requestLayout();
-                    });
-
-                } else {
-                    Log.w(TAG, "No users found (snapshot.exists() = false)");
-                    Toast.makeText(AdminDashboardActivity.this, "No users found in database.", Toast.LENGTH_LONG).show();
+                if (!snapshot.exists()) {
+                    showToast("No users found in database.");
+                    return;
                 }
+
+                userListContainer.removeAllViews();
+
+                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                    if (isCurrentAdmin(userSnapshot)) continue;
+
+                    User user = parseUser(userSnapshot);
+                    View userRow = createUserRow(user, userSnapshot.getKey());
+                    userListContainer.addView(userRow);
+                }
+
+                // Fix scroll bug by requesting layout after scrollview render
+                userListContainer.post(userListContainer::requestLayout);
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
-                Log.e(TAG, "Database error: " + error.getMessage(), error.toException());
-                Toast.makeText(AdminDashboardActivity.this, "Failed to load users: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                logAndToastError("Failed to load users: " + error.getMessage(), error.toException());
             }
         });
     }
 
+    private boolean isCurrentAdmin(DataSnapshot snapshot) {
+        String userId = snapshot.child("userID").getValue(String.class);
+        return CURRENT_ADMIN_ID.equals(userId);
+    }
+
+    private User parseUser(DataSnapshot snapshot) {
+        User user = new User() {}; // Anonymous subclass because User is abstract
+        user.setUserID(snapshot.child("userID").getValue(String.class));
+        user.setFirstName(snapshot.child("firstName").getValue(String.class));
+        user.setLastName(snapshot.child("lastName").getValue(String.class));
+        user.setUsername(snapshot.child("username").getValue(String.class));
+        user.setEmail(snapshot.child("email").getValue(String.class));
+        user.setPhoneNumber(snapshot.child("phoneNumber").getValue(String.class));
+        user.setRole(snapshot.child("role").getValue(String.class));
+        user.setStatus(snapshot.child("status").getValue(String.class)); // ✅ this is all you need
+
+        return user;
+    }
+
+    private View createUserRow(User user, String firebaseKey) {
+        View row = getLayoutInflater().inflate(R.layout.item_user_admin, userListContainer, false);
+        TextView tvInfo = row.findViewById(R.id.tv_user_info);
+        ImageView ivMenu = row.findViewById(R.id.iv_overflow_menu);
+
+        String info = String.format("Name: %s\nRole: %s\nEmail: %s\nUsername: %s",
+                getOrDefault(user.getFirstName()),
+                getOrDefault(user.getRole()),
+                getOrDefault(user.getEmail()),
+                getOrDefault(user.getUsername()));
+
+        if (user.getStatusEnum() == User.Status.INACTIVE) {
+            info += "\n🚫 Inactive";
+            row.setAlpha(0.5f);
+        }
+
+        tvInfo.setText(info);
+        setupOverflowMenu(ivMenu, user, firebaseKey);
+
+        return row;
+    }
+
+    private void setupOverflowMenu(ImageView menuIcon, User user, String firebaseKey) {
+        menuIcon.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(this, menuIcon);
+            popup.inflate(R.menu.menu_user_admin);
+
+            MenuItem toggleItem = popup.getMenu().findItem(R.id.action_toggle_status);
+            toggleItem.setTitle(user.getStatusEnum() == User.Status.ACTIVE ? "Disable User" : "Enable User");
+
+            popup.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.action_toggle_status) {
+                    toggleUserStatus(firebaseKey, user.getStatusEnum());
+                    return true;
+                } else if (id == R.id.action_delete_user) {
+                    showToast("Delete not implemented yet");
+                    return true;
+                }
+                return false;
+            });
+
+            popup.show();
+        });
+    }
+
+    private void toggleUserStatus(String firebaseKey, User.Status currentStatus) {
+        User.Status newStatus = currentStatus == User.Status.ACTIVE
+                ? User.Status.INACTIVE
+                : User.Status.ACTIVE;
+
+        usersRef.child(firebaseKey).child("status").setValue(newStatus.name())
+                .addOnSuccessListener(unused -> {
+                    showToast("Status updated");
+                    fetchAllUsersAndDisplay();
+                })
+                .addOnFailureListener(e -> showToast("Failed to update status"));
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void logAndToastError(String message, Exception e) {
+        Log.e(TAG, message, e);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    private String getOrDefault(String value) {
+        return value != null ? value : "N/A";
+    }
 }
