@@ -3,6 +3,7 @@ package com.example.localloopapp_android.activities;
 import com.example.localloopapp_android.activities.dashboard_activities.AdminDashboardActivity;
 import com.example.localloopapp_android.activities.dashboard_activities.OrganizerDashboardActivity;
 import com.example.localloopapp_android.activities.dashboard_activities.ParticipantDashboardActivity;
+import com.example.localloopapp_android.models.UserRole;
 import com.example.localloopapp_android.utils.Constants;
 
 import android.content.Intent;
@@ -107,17 +108,17 @@ public class LoginActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                        String role = userSnapshot.child("role").getValue(String.class);
+                        UserRole role = UserRole.fromString( userSnapshot.child("role").getValue(String.class));
 
                         User user;
                         switch (role) {
-                            case "Admin":
+                            case ADMIN:
                                 user = userSnapshot.getValue(Admin.class);
                                 break;
-                            case "Organizer":
+                            case ORGANIZER:
                                 user = userSnapshot.getValue(Organizer.class);
                                 break;
-                            case "Participant":
+                            case PARTICIPANT:
                                 user = userSnapshot.getValue(Participant.class);
                                 break;
                             default:
@@ -187,19 +188,19 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    String role = dataSnapshot.child("role").getValue(String.class);
+                    UserRole role = UserRole.fromString(dataSnapshot.child("role").getValue(String.class));
 
                     if (role != null) {
                         User specificUser = null;
 
                         switch (role) {
-                            case "Participant":
+                            case PARTICIPANT:
                                 specificUser = dataSnapshot.getValue(Participant.class);
                                 break;
-                            case "Organizer":
+                            case ORGANIZER:
                                 specificUser = dataSnapshot.getValue(Organizer.class);
                                 break;
-                            case "Admin":
+                            case ADMIN:
                                 specificUser = dataSnapshot.getValue(Admin.class);
                                 break;
                             default:
@@ -245,17 +246,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void navigateToDashboard(User user) {
-        String role = user.getRole().toLowerCase();
+        UserRole role = UserRole.fromString(user.getRole());
 
         Intent intent;
         switch (role) {
-            case "participant":
+            case PARTICIPANT:
                 intent = new Intent(LoginActivity.this, ParticipantDashboardActivity.class);
                 break;
-            case "organizer":
+            case ORGANIZER:
                 intent = new Intent(LoginActivity.this, OrganizerDashboardActivity.class);
                 break;
-            case "admin":
+            case ADMIN:
                 intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
                 break;
             default:
