@@ -2,17 +2,27 @@ package com.example.localloopapp_android.activities.dashboard_activities;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnFailureListener;
+
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.localloopapp_android.R;
+import com.example.localloopapp_android.models.User;
 import com.example.localloopapp_android.utils.Constants;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -67,30 +77,105 @@ public class AdminDashboardActivity extends AppCompatActivity {
                     Log.d(TAG, "Snapshot exists: " + snapshot.getChildrenCount());
 
                     userListContainer.removeAllViews();
+                    String currentAdminId = "25VWv0nGiBe4t5XODVOiI7jWMVq1";
 
                     for (DataSnapshot userSnapshot : snapshot.getChildren()) {
                         Log.d(TAG, "Reading user: " + userSnapshot.getKey());
+
+                        String userId = userSnapshot.child("userID").getValue(String.class);
+                        if (userId != null && userId.equals(currentAdminId)) {
+                            Log.d(TAG, "Skipping current admin: " + userId);
+                            continue;
+                        }
 
                         String role = userSnapshot.child("role").getValue(String.class);
                         String firstName = userSnapshot.child("firstName").getValue(String.class);
                         String email = userSnapshot.child("email").getValue(String.class);
                         String username = userSnapshot.child("username").getValue(String.class);
+                        String statusStr = userSnapshot.child("status").getValue(String.class);
 
-                        Log.d(TAG, "Fetched user: " + firstName + " | " + role + " | " + email + " | " + username);
+                        User.Status status = User.Status.ACTIVE;
+                        if (statusStr != null) {
+                            try {
+                                status = User.Status.valueOf(statusStr.toUpperCase());
+                            } catch (IllegalArgumentException ignored) {}
+                        }
 
-                        StringBuilder userInfo = new StringBuilder();
-                        userInfo.append("Name: ").append(firstName != null ? firstName : "N/A").append("\n");
-                        userInfo.append("Role: ").append(role != null ? role : "N/A").append("\n");
-                        userInfo.append("Email: ").append(email != null ? email : "N/A").append("\n");
-                        userInfo.append("Username: ").append(username != null ? username : "N/A").append("\n");
-                        userInfo.append("-------------------------");
+                        // Make status effectively final for inner class usage
+                        final User.Status userStatus = status;
 
-                        TextView userTextView = new TextView(AdminDashboardActivity.this);
-                        userTextView.setText(userInfo.toString());
-                        userTextView.setPadding(10, 10, 10, 10);
+                        View userRow = getLayoutInflater().inflate(R.layout.item_user_admin, userListContainer, false);
+                        TextView tvInfo = userRow.findViewById(R.id.tv_user_info);
+                        ImageView ivOverflowMenu = userRow.findViewById(R.id.iv_overflow_menu);
 
-                        userListContainer.addView(userTextView);
+                        String userInfo = "Name: " + (firstName != null ? firstName : "N/A") + "\n"
+                                + "Role: " + (role != null ? role : "N/A") + "\n"
+                                + "Email: " + (email != null ? email : "N/A") + "\n"
+                                + "Username: " + (username != null ? username : "N/A");
+
+                        tvInfo.setText(userInfo);
+
+                        if (userStatus == User.Status.INACTIVE) {
+                            userRow.setAlpha(0.5f);
+                            tvInfo.append("\n🚫 Inactive");
+                        }
+
+                        ivOverflowMenu.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                PopupMenu popup = new PopupMenu(AdminDashboardActivity.this, ivOverflowMenu);
+                                popup.inflate(R.menu.menu_user_admin);
+
+                                MenuItem toggleItem = popup.getMenu().findItem(R.id.action_toggle_status);
+                                toggleItem.setTitle(userStatus == User.Status.ACTIVE ? "Disable User" : "Enable User");
+
+                                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                    @Override
+                                    public boolean onMenuItemClick(MenuItem item) {
+                                        int itemId = item.getItemId();
+
+                                        if (itemId == R.id.action_toggle_status) {
+                                            User.Status newStatus = (userStatus == User.Status.ACTIVE)
+                                                    ? User.Status.INACTIVE
+                                                    : User.Status.ACTIVE;
+
+                                            usersRef.child(userSnapshot.getKey()).child("status").setValue(newStatus.name())
+                                                    .addOnSuccessListener(unused -> {
+                                                        Toast.makeText(AdminDashboardActivity.this, "Status updated", Toast.LENGTH_SHORT).show();
+                                                        fetchAllUsersAndDisplay(); // ✅ force reload for correct UI and label
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Toast.makeText(AdminDashboardActivity.this, "Failed to update status", Toast.LENGTH_SHORT).show();
+                                                    });
+
+                                            return true;
+
+                                        } else if (itemId == R.id.action_delete_user) {
+                                            Toast.makeText(AdminDashboardActivity.this, "Delete not implemented yet", Toast.LENGTH_SHORT).show();
+                                            return true;
+
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+
+                                });
+
+                                popup.show();
+                            }
+                        });
+
+                        userListContainer.addView(userRow);
                     }
+                    /**
+                     * forces a layout refresh after the scollView finished rendering
+                     * BECAUSE SCROLLVIEW WASNT SCROLLING
+                     * duh
+                     */
+                    userListContainer.post(() -> {
+                        userListContainer.requestLayout();
+                    });
+
                 } else {
                     Log.w(TAG, "No users found (snapshot.exists() = false)");
                     Toast.makeText(AdminDashboardActivity.this, "No users found in database.", Toast.LENGTH_LONG).show();
@@ -104,4 +189,5 @@ public class AdminDashboardActivity extends AppCompatActivity {
             }
         });
     }
+
 }

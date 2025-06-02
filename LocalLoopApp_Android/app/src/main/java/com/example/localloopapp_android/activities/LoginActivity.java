@@ -108,9 +108,9 @@ public class LoginActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                        UserRole role = UserRole.fromString( userSnapshot.child("role").getValue(String.class));
-
+                        UserRole role = UserRole.fromString(userSnapshot.child("role").getValue(String.class));
                         User user;
+
                         switch (role) {
                             case ADMIN:
                                 user = userSnapshot.getValue(Admin.class);
@@ -125,22 +125,35 @@ public class LoginActivity extends AppCompatActivity {
                                 throw new IllegalStateException("Unknown role: " + role);
                         }
 
-                        if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
-                            String email = user.getEmail();
-                            Log.d(TAG, "Username '" + username + "' found. Associated email: " + email);
-                            signInUserWithEmailAndPassword(email, password);
-                            return;
-                        } else {
-                            Log.e(TAG, "User found for username '" + username + "' but email is missing or empty.");
+                        if (user != null) {
+                            // STATUS CHECK — prevent login if not active
+                            if (user.getStatusEnum() != User.Status.ACTIVE) {
+                                Log.w(TAG, "Login denied: User " + username + " is " + user.getStatusEnum());
+                                Toast.makeText(LoginActivity.this, "This account is currently disabled. Please contact support.", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+
+                            // proceed only if email exists
+                            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+                                String email = user.getEmail();
+                                Log.d(TAG, "Username '" + username + "' found. Associated email: " + email);
+                                signInUserWithEmailAndPassword(email, password);
+                                return;
+                            } else {
+                                Log.e(TAG, "User found for username '" + username + "' but email is missing or empty.");
+                            }
                         }
                     }
-                    Toast.makeText(LoginActivity.this, "Could not retrieve email for username. User data might be incomplete.", Toast.LENGTH_LONG).show();
+
+                    // Reached if no valid user was logged in after loop
+                    Toast.makeText(LoginActivity.this, "Could not retrieve valid user. Please check your credentials.", Toast.LENGTH_LONG).show();
 
                 } else {
                     Log.w(TAG, "Username '" + username + "' not found in database.");
                     Toast.makeText(LoginActivity.this, "Login failed: Invalid username or password.", Toast.LENGTH_LONG).show();
                 }
             }
+
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {

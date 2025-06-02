@@ -235,6 +235,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                                 organizer.setRole(role);
                                 organizer.setPhoneNumber(phone);
                                 organizer.setCompanyName(companyName);
+                                organizer.setStatusEnum(User.Status.ACTIVE); // NEW
                                 newUserProfile = organizer;
                             } else {
                                 Participant participant = new Participant();
@@ -245,6 +246,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                                 participant.setEmail(email);
                                 participant.setRole(role);
                                 participant.setPhoneNumber(phone);
+                                participant.setStatusEnum(User.Status.ACTIVE);// NEW
                                 newUserProfile = participant;
                             }
 
@@ -282,4 +284,5 @@ public class CreateAccountActivity extends AppCompatActivity {
                     }
                 });
     }
+
 }
