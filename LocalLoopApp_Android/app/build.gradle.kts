@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation("com.airbnb.android:lottie:6.1.0")
 
     // Firebase BOM for version management
     implementation(platform("com.google.firebase:firebase-bom:32.1.1"))

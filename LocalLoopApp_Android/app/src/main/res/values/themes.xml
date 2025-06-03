@@ -1,9 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme -->
     <style name="Base.Theme.LocalLoopApp_Android" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Disable automatic Material3 button theming -->
+        <item name="buttonStyle">@style/CustomButton</item>
     </style>
 
     <style name="Theme.LocalLoopApp_Android" parent="Base.Theme.LocalLoopApp_Android" />
+
+    <!-- Your custom button style -->
+    <style name="CustomButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/button_primary</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
 </resources>

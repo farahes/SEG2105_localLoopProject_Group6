@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Shadow layer -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#33000000" /> <!-- semi-transparent black -->
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+
+    <!-- Button background layer, inset so shadow is visible -->
+    <item android:right="6dp" android:bottom="6dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/cat_grey" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+
+</layer-list>
