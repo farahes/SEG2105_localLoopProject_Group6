@@ -24,14 +24,17 @@ public class InputValidator {
     }
 
     public static boolean isValidPhoneNumber(String phoneNumber) {
-        return phoneNumber != null && PHONE_PATTERN.matcher(phoneNumber).matches();
+        if (phoneNumber == null) return false;
+        String cleaned = phoneNumber.replaceAll("[-\\s]", ""); // removes dashes and spaces
+        return PHONE_PATTERN.matcher(cleaned).matches();
     }
 
     public static boolean isValidUsername(String username) {
-        return username != null && !username.isEmpty();
+        return username != null && !username.isEmpty() && username.matches("^[a-zA-Z0-9]+$") &&
+                3 <= username.length() && username.length() <= 20;
     }
 
     public static boolean isValidPassword(String password) {
-        return password != null && password.length() >= 6;
+        return password != null && 8 <= password.length() && password.length() <= 16;
     }
 }

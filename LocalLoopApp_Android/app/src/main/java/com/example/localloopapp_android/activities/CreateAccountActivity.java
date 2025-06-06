@@ -1,5 +1,16 @@
 package com.example.localloopapp_android.activities;
 
+/**
+ * CreateAccountActivity
+ *
+ * - Displays a form to let a new user (Participant or Organizer) register.
+ * - Validates all EditText fields (first/last name, username, email, password, etc.).
+ * - Checks that the chosen username is unique.
+ * - Calls FirebaseAuth to create a new user, updates displayName, then writes a User object
+ *   (Organizer or Participant) into Realtime Database under /users/{uid}.
+ * - On success, navigates back to LoginActivity.  On failure, shows field-specific errors or Toasts.
+ */
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,6 +22,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.localloopapp_android.utils.InputValidator;
+import com.example.localloopapp_android.utils.Convenience;
 import com.example.localloopapp_android.models.Organizer;
 import com.example.localloopapp_android.models.Participant;
 import com.example.localloopapp_android.R;
@@ -45,6 +57,11 @@ public class CreateAccountActivity extends AppCompatActivity {
     private CheckBox checkOrganizer;
     private Button buttonCreateAccount;
 
+    /**
+     * Sets up the Create Account screen. Initializes Firebase, configures UI components,
+     * and applies edge-to-edge layout. Hides the company name field unless "Organizer" is checked.
+     * Registers a listener to trigger account creation on button press.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,11 +97,10 @@ public class CreateAccountActivity extends AppCompatActivity {
         buttonCreateAccount.setOnClickListener(view -> performInputValidationsAndCreateAccount());
     }
 
-    private String getTrimmedString(EditText input) {
-        if (input.getText() == null) return "";
-        return input.getText().toString().trim();
-    }
-
+    /**
+     * Disables/enables all input fields and the create button
+     * while network calls (username check / FirebaseAuth) are in progress.
+     */
     private void setLoadingState(boolean isLoading) {
         buttonCreateAccount.setEnabled(!isLoading);
         editFirstName.setEnabled(!isLoading);
@@ -98,52 +114,48 @@ public class CreateAccountActivity extends AppCompatActivity {
         editCompany.setEnabled(!isLoading);
     }
 
+    /**
+     * Gathers form input, validates each field, and initiates account creation.
+     * Trims values, applies validation rules, checks password match, and ensures
+     * company name is provided for organizers. If valid, checks username uniqueness
+     * and creates a Firebase account if available.
+     */
     private void performInputValidationsAndCreateAccount() {
-        final String firstName = getTrimmedString(editFirstName);
-        final String lastName = getTrimmedString(editLastName);
-        final String username = getTrimmedString(editUserName);
-        final String email = getTrimmedString(editEmail);
-        final String phone = getTrimmedString(editPhone);
+        final String firstName = Convenience.capitalize(Convenience.getTrimmedString(editFirstName));
+        final String lastName = Convenience.capitalize(Convenience.getTrimmedString(editLastName));
+        final String username = (Convenience.getTrimmedString(editUserName)).toLowerCase();
+        final String email = Convenience.getTrimmedString(editEmail);
+        final String phone = Convenience.getTrimmedString(editPhone);
         final String password = editPassword.getText().toString();
         String confirmPassword = editConfirmPassword.getText().toString();
         final boolean isOrganizer = checkOrganizer.isChecked();
-        final String companyName = isOrganizer ? getTrimmedString(editCompany) : null;
+        final String companyName = isOrganizer ? Convenience.getTrimmedString(editCompany) : null;
 
         if (TextUtils.isEmpty(firstName) || InputValidator.isValidName(firstName)) {
             editFirstName.setError("Enter a valid first name");
             editFirstName.requestFocus();
             return;
         }
-        if (TextUtils.isEmpty(lastName) || InputValidator.isValidName(lastName)) {
-            editLastName.setError("Enter a valid last name");
-            editLastName.requestFocus();
-            return;
-        }
-        if (TextUtils.isEmpty(username) || !InputValidator.isValidUsername(username)) {
-            editUserName.setError("Enter a valid username (e.g., alphanumeric, 3-20 chars)");
-            editUserName.requestFocus();
-            return;
-        }
-        if (TextUtils.isEmpty(email) || !InputValidator.isValidEmail(email)) {
-            editEmail.setError("Enter a valid email address");
-            editEmail.requestFocus();
-            return;
-        }
+
+        if (!Convenience.validateField(editFirstName, firstName, s -> !InputValidator.isValidName(s), "Enter a valid first name")) return;
+        if (!Convenience.validateField(editLastName, lastName, s -> !InputValidator.isValidName(s), "Enter a valid last name")) return;
+        if (!Convenience.validateField(editUserName, username, InputValidator::isValidUsername, "Enter a valid username \n(alphanumeric and between 3-20 characters long)")) return;
+        if (!Convenience.validateField(editEmail, email, InputValidator::isValidEmail, "Enter a valid email address")) return;
+
         if (!TextUtils.isEmpty(phone) && !InputValidator.isValidPhoneNumber(phone)) {
             editPhone.setError("Enter a valid phone number or leave blank");
             editPhone.requestFocus();
             return;
         }
-        if (TextUtils.isEmpty(password) || !InputValidator.isValidPassword(password)) {
-            editPassword.setError("Password must be at least 6 characters");
-            editPassword.requestFocus();
-            return;
-        }
+
+        if (!Convenience.validateField(editPassword, password, InputValidator::isValidPassword, "Enter a valid password \n(must be between 8 and 16 characters long)")) return;
+
         if (!password.equals(confirmPassword)) {
             editConfirmPassword.setError("Passwords do not match");
             editConfirmPassword.requestFocus();
             return;
         }
+
         if (isOrganizer && TextUtils.isEmpty(companyName)) {
             editCompany.setError("Company name is required for organizers");
             editCompany.requestFocus();
@@ -176,11 +188,21 @@ public class CreateAccountActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Defines a callback for username uniqueness checks.
+     * onResult is called with true if the username is unique, false otherwise.
+     * onError is called if the Firebase query fails.
+     */
     interface UniquenessCallback {
         void onResult(boolean isUnique);
         void onError(DatabaseError error);
     }
 
+    /**
+     * Checks if a username already exists in the database.
+     * Calls onResult with false if taken, true if available.
+     * Calls onError if the query fails.
+     */
     private void checkUsernameUniqueness(final String usernameToCheck, final UniquenessCallback callback) {
         Query usernameQuery = mDatabaseUsersRef.orderByChild("username").equalTo(usernameToCheck);
 
@@ -201,6 +223,11 @@ public class CreateAccountActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Creates a Firebase Auth account and stores the user profile in the Realtime Database.
+     * Sets up display name and initializes user data based on role (Organizer or Participant).
+     * On success, navigates to the login screen; otherwise, displays appropriate error messages.
+     */
     private void createFirebaseUser(final String firstName, final String lastName, final String username,
                                     final String email, final String phone, final String password,
                                     final boolean isOrganizer, final String companyName) {
