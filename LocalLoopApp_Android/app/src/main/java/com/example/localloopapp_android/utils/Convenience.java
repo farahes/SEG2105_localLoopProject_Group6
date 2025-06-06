@@ -31,7 +31,7 @@ public class Convenience {
     /**
      * Returns a String with the first letter capitalized (if applicable).
      */
-    public static String capitalize(String input) {
+    public static String capitalizeFirstLetter(String input) {
         if (input == null || input.isEmpty()) return input;
         return input.substring(0, 1).toUpperCase() + input.substring(1);
     }

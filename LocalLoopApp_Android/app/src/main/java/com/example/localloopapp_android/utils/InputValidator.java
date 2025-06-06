@@ -1,3 +1,17 @@
+/**
+ * Pure utility class for validating user input.
+ * This class provides static methods to validate names, emails, phone numbers,
+ * usernames, and passwords based on specific patterns.
+ *
+ * Knows how to validate one thing at a time.
+ * It does not:
+ * 1. Know about UI fields (e.g. editFirstName.setError(...))
+ * 2. Handle Toast messages or focus shifting
+ *
+ * Thus, validateInputFields() does not belong here,
+ * since it requires passing in UI elements.
+ */
+
 package com.example.localloopapp_android.utils;
 
 import java.util.regex.Pattern;
