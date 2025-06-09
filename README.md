@@ -1,17 +1,8 @@
 # [SEG2105-Z (2025/5)] LocalLoop Project (Group 6)
 
-## ✨ Developer Setup
-To enable GitHub Copilot Pro:
-- Install the [GitHub Copilot plugin](https://plugins.jetbrains.com/plugin/17718-github-copilot) in Android Studio.
-- Log in with your GitHub Education account.
-
-### Brief Overview:
-
-1. Creating user accounts for Admin, Organizers, and Participants.
-
-2. Implementing a post-login welcome screen that displays user information.
-
-3. Setting up proper version control and team collaboration.
+## OUR MORAL CODEX
+#### (because I said so) 🐱 
+> Spaghetti logic today is tomorrow’s blocked deliverable.
 
 ## Collaborators:
   - Farah El Siss     - felsi072@uottawa.ca (#300168267)
@@ -23,7 +14,26 @@ To enable GitHub Copilot Pro:
 ## Link to GitHub:
 https://github.com/farahes/SEG2105_localLoopProject_Group6/tree/main
 
-`Version: 21-05-2025`
+## 🔍 Brief Overview:
+
+LocalLoop is a role-based community event management app built in Java for Android. It allows Admins, Organizers, and Participants to interact through a unified, scalable architecture.
+
+### 👥 User Roles
+1. **Admin**: Manages user accounts by enabling, disabling, or deleting them.
+2. **Organizer**: Creates, edits, and deletes local events under predefined categories.
+3. **Participant**: Browses events, requests to join, and receives approval or rejection.
+
+### 📱 Core Features
+1. Role-specific dashboard views and logic.
+2. Firebase-based user and event persistence.
+3. Clean architecture using Activities, Services, Repositories, and DTO models.
+
+### 🛠 Technologies
+1. Android Studio Koala (API 33+)
+2. Java
+3. Firebase Realtime Database
+
+`Version: 06-09-2025`
 
 
 
