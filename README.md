@@ -1,8 +1,9 @@
 # [SEG2105-Z (2025/5)] LocalLoop Project (Group 6)
 
-## OUR MORAL CODEX
-#### (because I said so) 🐱 
+
+## OUR MORAL CODEX:
 > Spaghetti logic today is tomorrow’s blocked deliverable.
+
 
 ## Collaborators:
   - Farah El Siss     - felsi072@uottawa.ca (#300168267)
@@ -11,8 +12,11 @@
   - Mary Yermolenko   - myerm102@uottawa.ca (#300404297)
   - Dany Nuriev       - dnuri029@uottawa.ca (#300429224)
 
+
 ## Link to GitHub:
 https://github.com/farahes/SEG2105_localLoopProject_Group6/tree/main
+
+
 
 ## 🔍 Brief Overview:
 
