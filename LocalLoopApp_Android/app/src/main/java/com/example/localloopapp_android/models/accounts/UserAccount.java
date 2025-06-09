@@ -1,8 +1,17 @@
-package com.example.localloopapp_android.models;
+package com.example.localloopapp_android.models.accounts;
 
 import com.google.firebase.database.Exclude;
 
-public abstract class User {
+/**
+ * Abstract base class for all user account types.
+ * Common fields: userID, name, email, role, etc.
+ * Should model identity and data — not behavior.
+ *
+ * A simple DTO (Data Transfer Object) for user accounts.
+ * -- Is used to move data around (between UI ⇄ DB ⇄ network)
+ */
+
+public abstract class UserAccount {
     public enum Status {
         ACTIVE, INACTIVE
     }
@@ -15,9 +24,9 @@ public abstract class User {
     protected String role;
     private Status status = Status.ACTIVE; // active by default
 
-    public User() {}
+    public UserAccount() {}
 
-    public User(String userID, String firstName, String lastName, String username, String email, String phoneNumber, String role) {
+    public UserAccount(String userID, String firstName, String lastName, String username, String email, String phoneNumber, String role) {
         this.userID = userID;
         this.firstName = firstName;
         this.lastName = lastName;

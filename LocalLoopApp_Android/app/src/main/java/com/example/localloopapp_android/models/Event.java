@@ -1,8 +1,8 @@
-package com.example.localloopapp_android.datastores;
+package com.example.localloopapp_android.models;
 
 /**
- * This class creates Event objects (called from an Organizer)
- * with basic encapsulation helper methods to be stored in EventRepository.
+ * A simple model class | model data transfer object (DTO)
+ * DOES NOT contain any business logic or behavior.
  */
 public class Event {
 
@@ -58,6 +58,8 @@ public class Event {
     public void setFee(double fee) { this.fee = fee; }
     public void setEventStart(long eventStart) { this.eventStart = eventStart; }
     public void setEventEnd(long eventEnd) { this.eventEnd = eventEnd; }
+
+    // pure domain mutators
     public void disableEvent() {
         if (eventActive) {
             this.eventActive = false; // uncomment below when implemented into an activity

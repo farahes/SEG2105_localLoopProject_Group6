@@ -22,12 +22,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.localloopapp_android.models.Admin;
-import com.example.localloopapp_android.models.Organizer;
-import com.example.localloopapp_android.models.Participant;
+import com.example.localloopapp_android.models.accounts.AdminAccount;
+import com.example.localloopapp_android.models.accounts.OrganizerAccount;
+import com.example.localloopapp_android.models.accounts.ParticipantAccount;
 import com.example.localloopapp_android.R;
-import com.example.localloopapp_android.models.User;
-import com.example.localloopapp_android.utils.Constants;
+import com.example.localloopapp_android.models.accounts.UserAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -39,6 +38,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+/**
+ * clean this up.
+ *
+ * we have THREE switch statements for role, definitely reusable.
+ */
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -98,6 +103,9 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * does multiple things, breaks single responsibility principle
+     */
     private void fetchEmailForUsernameAndSignIn(final String username, final String password) {
         Toast.makeText(LoginActivity.this, "Looking up username...", Toast.LENGTH_SHORT).show();
 
@@ -109,17 +117,17 @@ public class LoginActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
                         UserRole role = UserRole.fromString(userSnapshot.child("role").getValue(String.class));
-                        User user;
+                        UserAccount user;
 
                         switch (role) {
                             case ADMIN:
-                                user = userSnapshot.getValue(Admin.class);
+                                user = userSnapshot.getValue(AdminAccount.class);
                                 break;
                             case ORGANIZER:
-                                user = userSnapshot.getValue(Organizer.class);
+                                user = userSnapshot.getValue(OrganizerAccount.class);
                                 break;
                             case PARTICIPANT:
-                                user = userSnapshot.getValue(Participant.class);
+                                user = userSnapshot.getValue(ParticipantAccount.class);
                                 break;
                             default:
                                 throw new IllegalStateException("Unknown role: " + role);
@@ -127,7 +135,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         if (user != null) {
                             // STATUS CHECK — prevent login if not active
-                            if (user.getStatusEnum() != User.Status.ACTIVE) {
+                            if (user.getStatusEnum() != UserAccount.Status.ACTIVE) {
                                 Log.w(TAG, "Login denied: User " + username + " is " + user.getStatusEnum());
                                 Toast.makeText(LoginActivity.this, "This account is currently disabled. Please contact support.", Toast.LENGTH_LONG).show();
                                 return;
@@ -204,17 +212,17 @@ public class LoginActivity extends AppCompatActivity {
                     UserRole role = UserRole.fromString(dataSnapshot.child("role").getValue(String.class));
 
                     if (role != null) {
-                        User specificUser = null;
+                        UserAccount specificUser = null;
 
                         switch (role) {
                             case PARTICIPANT:
-                                specificUser = dataSnapshot.getValue(Participant.class);
+                                specificUser = dataSnapshot.getValue(ParticipantAccount.class);
                                 break;
                             case ORGANIZER:
-                                specificUser = dataSnapshot.getValue(Organizer.class);
+                                specificUser = dataSnapshot.getValue(OrganizerAccount.class);
                                 break;
                             case ADMIN:
-                                specificUser = dataSnapshot.getValue(Admin.class);
+                                specificUser = dataSnapshot.getValue(AdminAccount.class);
                                 break;
                             default:
                                 Log.w(TAG, "Unknown role: " + role + ". Cannot instantiate user.");
@@ -258,7 +266,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void navigateToDashboard(User user) {
+    private void navigateToDashboard(UserAccount user) {
         UserRole role = UserRole.fromString(user.getRole());
 
         Intent intent;

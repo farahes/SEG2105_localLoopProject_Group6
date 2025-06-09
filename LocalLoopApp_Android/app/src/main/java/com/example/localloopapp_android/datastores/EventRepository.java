@@ -1,5 +1,7 @@
 package com.example.localloopapp_android.datastores;
 
+import com.example.localloopapp_android.models.Event;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +10,10 @@ import java.util.List;
  * A placeholder repository for Event objects.
  * Currently manages an in-memory list of events for an organizer,
  * to be extended later for Firebase or other persistence.
+ *
+ * It stores & retrieves event objects, but doesn’t know who’s using them or why.
+ * Handles basic CRUD operations:
+ * - create, read, update, delete events.
  */
 public class EventRepository {
 

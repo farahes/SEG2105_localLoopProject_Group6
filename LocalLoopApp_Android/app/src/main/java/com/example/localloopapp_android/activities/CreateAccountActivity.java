@@ -14,10 +14,10 @@ import android.widget.Toast;
 import com.example.localloopapp_android.datastores.RegistrationForm;
 import com.example.localloopapp_android.utils.InputValidator;
 import com.example.localloopapp_android.utils.Convenience;
-import com.example.localloopapp_android.models.Organizer;
-import com.example.localloopapp_android.models.Participant;
+import com.example.localloopapp_android.models.accounts.OrganizerAccount;
+import com.example.localloopapp_android.models.accounts.ParticipantAccount;
 import com.example.localloopapp_android.R;
-import com.example.localloopapp_android.models.User;
+import com.example.localloopapp_android.models.accounts.UserAccount;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -234,7 +234,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                                             .build()
                             );
 
-                            User newUserProfile = buildNewUserProfile(userId, form);
+                            UserAccount newUserProfile = buildNewUserProfile(userId, form);
 
                             mDatabaseUsersRef.child(userId).setValue(newUserProfile)
                                     .addOnCompleteListener(dbTask -> {
@@ -274,9 +274,9 @@ public class CreateAccountActivity extends AppCompatActivity {
     /**
      * Builds the Organizer or Participant object based on the form data.
      */
-    private User buildNewUserProfile(String userId, RegistrationForm form) {
+    private UserAccount buildNewUserProfile(String userId, RegistrationForm form) {
         if (form.isOrganizer) {
-            Organizer organizer = new Organizer();
+            OrganizerAccount organizer = new OrganizerAccount();
             organizer.setUserID(userId);
             organizer.setFirstName(form.firstName);
             organizer.setLastName(form.lastName);
@@ -285,10 +285,10 @@ public class CreateAccountActivity extends AppCompatActivity {
             organizer.setPhoneNumber(form.phone);
             organizer.setCompanyName(form.companyName);
             organizer.setRole("Organizer");
-            organizer.setStatusEnum(User.Status.ACTIVE);
+            organizer.setStatusEnum(UserAccount.Status.ACTIVE);
             return organizer;
         } else {
-            Participant participant = new Participant();
+            ParticipantAccount participant = new ParticipantAccount();
             participant.setUserID(userId);
             participant.setFirstName(form.firstName);
             participant.setLastName(form.lastName);
@@ -296,7 +296,7 @@ public class CreateAccountActivity extends AppCompatActivity {
             participant.setEmail(form.email);
             participant.setPhoneNumber(form.phone);
             participant.setRole("Participant");
-            participant.setStatusEnum(User.Status.ACTIVE);
+            participant.setStatusEnum(UserAccount.Status.ACTIVE);
             return participant;
         }
     }
