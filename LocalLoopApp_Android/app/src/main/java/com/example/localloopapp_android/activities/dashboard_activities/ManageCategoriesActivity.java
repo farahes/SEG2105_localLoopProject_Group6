@@ -10,13 +10,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.models.Category;
-import com.example.localloopapp_android.viewmodels.CategoryViewModel;
+import com.example.localloopapp_android.services.CategoryService;
 
 import java.util.List;
 
+/**
+ * ManageCategoriesActivity
+ *
+ * Allows admin to add, edit, or delete categories.
+ * Displays a list of all categories with options to manage them.
+ * Uses CategoryViewModel for data operations.
+ */
+
 public class ManageCategoriesActivity extends AppCompatActivity {
 
-    private CategoryViewModel categoryViewModel;
+    private CategoryService categoryService;
     private LinearLayout categoryListContainer;
     private Button btnAddCategory;
 
@@ -28,15 +36,21 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         categoryListContainer = findViewById(R.id.categoryListContainer);
         btnAddCategory = findViewById(R.id.btnAddCategory);
 
-        categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
+        categoryService = new ViewModelProvider(this).get(CategoryService.class);
 
         btnAddCategory.setOnClickListener(v -> showAddOrEditDialog(null));
 
-        categoryViewModel.getCategories().observe(this, this::displayCategories);
+        categoryService.getCategories().observe(this, this::displayCategories);
 
-        categoryViewModel.fetchCategories();
+        categoryService.fetchCategories();
     }
 
+    /**
+     * Displays the list of categories in the UI.
+     * Each category has options to edit or delete.
+     *
+     * @param categories List of categories to display
+     */
     private void displayCategories(List<Category> categories) {
         categoryListContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -59,6 +73,13 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Shows a dialog to add or edit a category.
+     * If categoryToEdit is null, it adds a new category.
+     * Otherwise, it edits the existing category.
+     *
+     * @param categoryToEdit The category to edit, or null to add a new one
+     */
     private void showAddOrEditDialog(@Nullable Category categoryToEdit) {
         boolean isEdit = categoryToEdit != null;
 
@@ -87,21 +108,27 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             if (isEdit) {
                 categoryToEdit.setName(name);
                 categoryToEdit.setDescription(desc);
-                categoryViewModel.editCategory(categoryToEdit);
+                categoryService.editCategory(categoryToEdit);
             } else {
                 Category newCategory = new Category(null, name, desc);
-                categoryViewModel.addCategory(newCategory);
+                categoryService.addCategory(newCategory);
             }
         });
         builder.setNegativeButton("Cancel", null);
         builder.show();
     }
 
+    /**
+     * Confirms deletion of a category with a dialog.
+     * If confirmed, deletes the category using the ViewModel.
+     *
+     * @param category The category to delete
+     */
     private void confirmAndDeleteCategory(Category category) {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Category?")
                 .setMessage("Are you sure you want to delete \"" + category.getName() + "\"? This cannot be undone.")
-                .setPositiveButton("Delete", (dialog, which) -> categoryViewModel.deleteCategory(category.getCategoryId()))
+                .setPositiveButton("Delete", (dialog, which) -> categoryService.deleteCategory(category.getCategoryId()))
                 .setNegativeButton("Cancel", null)
                 .show();
     }

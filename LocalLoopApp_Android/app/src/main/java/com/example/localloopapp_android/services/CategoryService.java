@@ -1,4 +1,4 @@
-package com.example.localloopapp_android.viewmodels;
+package com.example.localloopapp_android.services;
 
 import android.util.Log;
 
@@ -16,11 +16,18 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CategoryViewModel extends ViewModel {
+
+public class CategoryService extends ViewModel {
 
     private final MutableLiveData<List<Category>> categories = new MutableLiveData<>();
     private final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("categories");
 
+    /**
+     * Returns a LiveData object containing the list of categories.
+     * If the categories are not yet loaded, it fetches them from the database.
+     *
+     * @return LiveData containing the list of categories
+     */
     public LiveData<List<Category>> getCategories() {
         if (categories.getValue() == null) {
             fetchCategories();
@@ -28,6 +35,10 @@ public class CategoryViewModel extends ViewModel {
         return categories;
     }
 
+    /**
+     * Fetches all categories from the Firebase database.
+     * Updates the LiveData object with the list of categories.
+     */
     public void fetchCategories() {
         dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -47,6 +58,12 @@ public class CategoryViewModel extends ViewModel {
         });
     }
 
+    /**
+     * Adds a new category to the database.
+     * Automatically generates a unique ID for the category.
+     *
+     * @param category The category to add
+     */
     public void addCategory(Category category) {
         String id = dbRef.push().getKey();
         category.setCategoryId(id);
@@ -54,10 +71,23 @@ public class CategoryViewModel extends ViewModel {
         fetchCategories(); // refresh
     }
 
+    /**
+     * Edits an existing category in the database.
+     * The category must already have a valid ID.
+     *
+     * @param category The category with updated information
+     */
     public void editCategory(Category category) {
         dbRef.child(category.getCategoryId()).setValue(category);
         fetchCategories(); // refresh
     }
+
+    /**
+     * Deletes a category from the database.
+     * The category must have a valid ID.
+     *
+     * @param categoryId The ID of the category to delete
+     */
     public void deleteCategory(String categoryId) {
         dbRef.child(categoryId).removeValue();
         fetchCategories(); // refresh
