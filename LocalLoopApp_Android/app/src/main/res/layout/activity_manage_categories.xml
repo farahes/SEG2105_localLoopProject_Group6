@@ -12,27 +12,16 @@
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/btnManageCategories"
+            android:id="@+id/btnAddCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Manage Categories"
-            android:layout_marginTop="16dp"/>
+            android:text="Add Category"
+            android:layout_marginBottom="16dp"/>
 
-        <!-- Welcome stays outside the dynamic user list -->
-        <TextView
-            android:id="@+id/tvWelcomeMessage"
-            android:text="Welcome!"
-            android:textSize="18sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="16dp"/>
-
-        <!-- Dynamic user list here -->
         <LinearLayout
-            android:id="@+id/userListContainer"
+            android:id="@+id/categoryListContainer"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </LinearLayout>
 </ScrollView>
-

@@ -54,6 +54,10 @@ public class CategoryViewModel extends ViewModel {
         fetchCategories(); // refresh
     }
 
+    public void editCategory(Category category) {
+        dbRef.child(category.getCategoryId()).setValue(category);
+        fetchCategories(); // refresh
+    }
     public void deleteCategory(String categoryId) {
         dbRef.child(categoryId).removeValue();
         fetchCategories(); // refresh
