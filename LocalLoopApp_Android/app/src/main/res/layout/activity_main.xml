@@ -71,24 +71,10 @@
         app:lottie_autoPlay="true"
         app:lottie_loop="true"
         app:layout_constraintTop_toBottomOf="@id/center_block"
-        app:layout_constraintBottom_toTopOf="@id/button_play_game"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp" />
 
-    <!-- Play a Game Button (bottom-pinned) -->
-    <Button
-        android:id="@+id/button_play_game"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="🎮 Play a Game"
-        android:textSize="18sp"
-        android:textColor="#FFFFFF"
-        android:background="@drawable/button_secondary"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:backgroundTint="@null"
-        android:layout_marginBottom="32dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
