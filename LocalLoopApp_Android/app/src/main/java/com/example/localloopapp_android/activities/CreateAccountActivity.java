@@ -11,7 +11,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.localloopapp_android.datastores.RegistrationForm;
+import com.example.localloopapp_android.models.RegistrationForm;
 import com.example.localloopapp_android.utils.InputValidator;
 import com.example.localloopapp_android.utils.Convenience;
 import com.example.localloopapp_android.models.accounts.OrganizerAccount;

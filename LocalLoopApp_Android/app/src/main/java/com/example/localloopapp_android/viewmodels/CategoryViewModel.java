@@ -1,4 +1,4 @@
-package com.example.localloopapp_android.services;
+package com.example.localloopapp_android.viewmodels;
 
 import android.util.Log;
 
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class CategoryService extends ViewModel {
+public class CategoryViewModel extends ViewModel {
 
     private final MutableLiveData<List<Category>> categories = new MutableLiveData<>();
     private final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("categories");

@@ -24,7 +24,7 @@ public class EventRepository {
      * Creates a new Event and adds it to the in-memory list.
      * The Event ID and persistence will be handled later.
      */
-    public Event createEvent(String organizerId, String name, String description, String categoryId,
+    public Event addEvent(String organizerId, String name, String description, String categoryId,
                              double fee, long eventStart, long eventEnd) {
         Event e = new Event(
                 /* eventId */ null,

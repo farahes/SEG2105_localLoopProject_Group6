@@ -1,4 +1,4 @@
-package com.example.localloopapp_android.services;
+package com.example.localloopapp_android.viewmodels;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import java.util.List;
  * Handles participant-specific operations like searching, joining, and managing event participation.
  * Invoked by ParticipantDashboardActivity or EventSearchActivity.
  */
-public class ParticipantService {
+public class ParticipantViewModel {
 
     /**
      * Registers the participant for an event by adding a join request to the event.

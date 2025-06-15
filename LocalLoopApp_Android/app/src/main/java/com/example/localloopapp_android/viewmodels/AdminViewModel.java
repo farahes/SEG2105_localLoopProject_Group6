@@ -1,6 +1,11 @@
-package com.example.localloopapp_android.services;
+package com.example.localloopapp_android.viewmodels;
 
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.example.localloopapp_android.models.accounts.UserAccount;
 import com.google.firebase.database.DataSnapshot;
@@ -11,26 +16,21 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
- * AdminService
- *
- * Handles admin-specific backend operations:
- * - Fetching user list
- * - Toggling user active/inactive status
- * - Deleting users
- *
- * Called by AdminDashboardActivity. Acts as a bridge to Firebase,
- * keeping business logic out of the UI.
+ * ViewModel for admin operations: managing users.
+ * Exposes LiveData so the UI can react to changes automatically.
  */
-public class AdminService {
+public class AdminViewModel extends ViewModel {
 
     private final DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
 
-    /**
-     * Represents a single user row from Firebase with its key and parsed user.
-     */
+    private final MutableLiveData<List<UserRow>> userList = new MutableLiveData<>();
+
+    public LiveData<List<UserRow>> getUserList() {
+        return userList;
+    }
+
     public static class UserRow {
         public final String firebaseKey;
         public final UserAccount user;
@@ -42,46 +42,46 @@ public class AdminService {
     }
 
     /**
-     * Fetches all users from the Firebase database.
+     * Loads users into LiveData.
      */
-    public void getAllUsers(Consumer<List<UserRow>> onSuccess, Consumer<DatabaseError> onError) {
+    public void fetchAllUsers() {
         usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 List<UserRow> result = new ArrayList<>();
                 for (DataSnapshot userSnapshot : snapshot.getChildren()) {
                     UserAccount user = parseUser(userSnapshot);
                     result.add(new UserRow(userSnapshot.getKey(), user));
                 }
-                onSuccess.accept(result);
+                userList.setValue(result);
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
-                onError.accept(error);
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("AdminViewModel", "Error loading users", error.toException());
             }
         });
     }
 
     /**
-     * Toggles a user's active/inactive status.
+     * Toggles a user's status and refreshes the list.
      */
-    public void toggleUserStatus(String firebaseKey, UserAccount.Status currentStatus, Runnable onComplete) {
+    public void toggleUserStatus(String firebaseKey, UserAccount.Status currentStatus) {
         UserAccount.Status newStatus = (currentStatus == UserAccount.Status.ACTIVE)
                 ? UserAccount.Status.INACTIVE
                 : UserAccount.Status.ACTIVE;
 
         usersRef.child(firebaseKey).child("status").setValue(newStatus.name())
-                .addOnSuccessListener(unused -> onComplete.run());
+                .addOnSuccessListener(unused -> fetchAllUsers());
     }
 
     /**
-     * Deletes a user from Firebase.
+     * Deletes a user and refreshes the list.
      */
-    public void deleteUser(String firebaseKey, Runnable onComplete) {
+    public void deleteUser(String firebaseKey) {
         usersRef.child(firebaseKey).removeValue()
-                .addOnSuccessListener(unused -> onComplete.run())
-                .addOnFailureListener(e -> Log.e("AdminService", "deleteUser: " + e.getMessage(), e));
+                .addOnSuccessListener(unused -> fetchAllUsers())
+                .addOnFailureListener(e -> Log.e("AdminViewModel", "deleteUser: " + e.getMessage(), e));
     }
 
     /**

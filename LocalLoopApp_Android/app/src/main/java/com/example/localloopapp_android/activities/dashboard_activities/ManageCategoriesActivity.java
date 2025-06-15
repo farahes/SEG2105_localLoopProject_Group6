@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.models.Category;
-import com.example.localloopapp_android.services.CategoryService;
+import com.example.localloopapp_android.viewmodels.CategoryViewModel;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ import java.util.List;
 
 public class ManageCategoriesActivity extends AppCompatActivity {
 
-    private CategoryService categoryService;
+    private CategoryViewModel categoryViewModel;
     private LinearLayout categoryListContainer;
     private Button btnAddCategory;
 
@@ -36,13 +36,13 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         categoryListContainer = findViewById(R.id.categoryListContainer);
         btnAddCategory = findViewById(R.id.btnAddCategory);
 
-        categoryService = new ViewModelProvider(this).get(CategoryService.class);
+        categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
 
         btnAddCategory.setOnClickListener(v -> showAddOrEditDialog(null));
 
-        categoryService.getCategories().observe(this, this::displayCategories);
+        categoryViewModel.getCategories().observe(this, this::displayCategories);
 
-        categoryService.fetchCategories();
+        categoryViewModel.fetchCategories();
     }
 
     /**
@@ -108,10 +108,10 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             if (isEdit) {
                 categoryToEdit.setName(name);
                 categoryToEdit.setDescription(desc);
-                categoryService.editCategory(categoryToEdit);
+                categoryViewModel.editCategory(categoryToEdit);
             } else {
                 Category newCategory = new Category(null, name, desc);
-                categoryService.addCategory(newCategory);
+                categoryViewModel.addCategory(newCategory);
             }
         });
         builder.setNegativeButton("Cancel", null);
@@ -128,7 +128,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Category?")
                 .setMessage("Are you sure you want to delete \"" + category.getName() + "\"? This cannot be undone.")
-                .setPositiveButton("Delete", (dialog, which) -> categoryService.deleteCategory(category.getCategoryId()))
+                .setPositiveButton("Delete", (dialog, which) -> categoryViewModel.deleteCategory(category.getCategoryId()))
                 .setNegativeButton("Cancel", null)
                 .show();
     }

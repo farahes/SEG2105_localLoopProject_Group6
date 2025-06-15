@@ -18,16 +18,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.models.accounts.UserAccount;
 import com.example.localloopapp_android.utils.Constants;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.example.localloopapp_android.services.AdminService;
+import com.example.localloopapp_android.viewmodels.AdminViewModel;
 
 /**
  * AdminDashboardActivity
@@ -36,7 +32,7 @@ import com.example.localloopapp_android.services.AdminService;
  * Allows the admin to enable/disable or permanently delete user accounts
  * via an overflow menu (⋮).
  *
- * Delegates data operations to AdminService.
+ * Delegates data operations to AdminViewModel.
  */
 
 public class AdminDashboardActivity extends AppCompatActivity {
@@ -47,11 +43,8 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private TextView tvWelcomeMessage;
     private LinearLayout userListContainer;
 
-    private AdminService adminService;
+    private AdminViewModel adminViewModel;
 
-    /**
-     * Initializes the admin dashboard screen and triggers user fetch.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate reached!");
@@ -67,15 +60,38 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         tvWelcomeMessage = findViewById(R.id.tvWelcomeMessage);
         userListContainer = findViewById(R.id.userListContainer);
-        adminService = new AdminService();
+
+        // Correct ViewModel lifecycle-safe usage
+        adminViewModel = new ViewModelProvider(this).get(AdminViewModel.class);
 
         String firstName = getIntent().getStringExtra(Constants.EXTRA_FIRST_NAME);
         tvWelcomeMessage.setText(firstName != null
                 ? "Welcome " + firstName + "! You are logged in as Admin."
                 : "Welcome, Admin!");
 
-        fetchAllUsersAndDisplay();
+        observeUserList();
+        adminViewModel.fetchAllUsers(); // triggers loading
+        setupManageCategoriesButton();
+    }
 
+    /**
+     * Observes the user list LiveData from the ViewModel.
+     * Updates the UI whenever the user list changes.
+     */
+    private void observeUserList() {
+        adminViewModel.getUserList().observe(this, userList -> {
+            userListContainer.removeAllViews();
+            for (AdminViewModel.UserRow row : userList) {
+                if (CURRENT_ADMIN_ID.equals(row.user.getUserID())) continue;
+                userListContainer.addView(createUserRow(row.user, row.firebaseKey));
+            }
+        });
+    }
+
+    /**
+     * Sets up the "Manage Categories" button to navigate to the ManageCategoriesActivity.
+     */
+    private void setupManageCategoriesButton() {
         Button btnManageCategories = findViewById(R.id.btnManageCategories);
         btnManageCategories.setOnClickListener(v -> {
             Intent intent = new Intent(this, ManageCategoriesActivity.class);
@@ -84,22 +100,12 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     /**
-     * Fetches all users from the database and displays them in the UI.
-     */
-    private void fetchAllUsersAndDisplay() {
-        adminService.getAllUsers(userList -> {
-            userListContainer.removeAllViews();
-            for (AdminService.UserRow row : userList) {
-                if (CURRENT_ADMIN_ID.equals(row.user.getUserID())) continue;
-                userListContainer.addView(createUserRow(row.user, row.firebaseKey));
-            }
-        }, error -> {
-            logAndToastError("Failed to load users: " + error.getMessage(), error.toException());
-        });
-    }
-
-    /**
-     * Creates a styled row (card) for a single user, including overflow menu.
+     * Creates a user row view for the admin dashboard.
+     * Displays user info and sets up the overflow menu for actions.
+     *
+     * @param user The UserAccount object containing user details.
+     * @param firebaseKey The Firebase key for the user.
+     * @return A View representing the user row.
      */
     private View createUserRow(UserAccount user, String firebaseKey) {
         View row = getLayoutInflater().inflate(R.layout.item_user_admin, userListContainer, false);
@@ -123,7 +129,12 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up the overflow (⋮) menu for a user, with enable/disable and delete options.
+     * Sets up the overflow menu for user actions (enable/disable, delete).
+     * Displays a popup menu when the menu icon is clicked.
+     *
+     * @param menuIcon The ImageView that acts as the menu button.
+     * @param user The UserAccount object for the user.
+     * @param firebaseKey The Firebase key for the user.
      */
     private void setupOverflowMenu(ImageView menuIcon, UserAccount user, String firebaseKey) {
         menuIcon.setOnClickListener(v -> {
@@ -131,11 +142,13 @@ public class AdminDashboardActivity extends AppCompatActivity {
             popup.inflate(R.menu.menu_user_admin);
 
             MenuItem toggleItem = popup.getMenu().findItem(R.id.action_toggle_status);
-            toggleItem.setTitle(user.getStatusEnum() == UserAccount.Status.ACTIVE ? "Disable User" : "Enable User");
+            toggleItem.setTitle(user.getStatusEnum() == UserAccount.Status.ACTIVE
+                    ? "Disable User"
+                    : "Enable User");
 
             popup.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.action_toggle_status) {
-                    adminService.toggleUserStatus(firebaseKey, user.getStatusEnum(), this::fetchAllUsersAndDisplay);
+                    adminViewModel.toggleUserStatus(firebaseKey, user.getStatusEnum());
                     return true;
                 } else if (item.getItemId() == R.id.action_delete_user) {
                     confirmAndDeleteUser(firebaseKey, user.getFirstName());
@@ -149,20 +162,28 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows a confirmation dialog, then deletes a user if confirmed.
+     * Confirms with the admin before permanently deleting a user.
+     * Displays an AlertDialog with confirmation options.
+     *
+     * @param firebaseKey The Firebase key of the user to delete.
+     * @param displayName The display name of the user for confirmation message.
      */
     private void confirmAndDeleteUser(String firebaseKey, String displayName) {
         new AlertDialog.Builder(this)
                 .setTitle("Delete User?")
                 .setMessage("Whoa. What did " + displayName + " do to deserve this? 😬\nThis action cannot be undone.")
                 .setPositiveButton("Delete Forever", (dialog, which) ->
-                        adminService.deleteUser(firebaseKey, this::fetchAllUsersAndDisplay))
+                        adminViewModel.deleteUser(firebaseKey))
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
     /**
-     * Logs an error and shows a toast to the user.
+     * Logs an error message and shows a Toast to the user.
+     * Used for error handling in data operations.
+     *
+     * @param message The error message to log and display.
+     * @param e The exception that caused the error.
      */
     private void logAndToastError(String message, Exception e) {
         Log.e(TAG, message, e);
@@ -170,7 +191,11 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     /**
-     * Returns the value if not null, or "N/A" otherwise (for UI display).
+     * Returns a non-null string or "N/A" if the value is null.
+     * Used to ensure UI displays meaningful information.
+     *
+     * @param value The string value to check.
+     * @return The original value or "N/A" if null.
      */
     private String getOrDefault(String value) {
         return value != null ? value : "N/A";

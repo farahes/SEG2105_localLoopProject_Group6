@@ -1,4 +1,4 @@
-package com.example.localloopapp_android.datastores;
+package com.example.localloopapp_android.models;
 
 /**
  * A simple model class that stores trimmed and formatted user input

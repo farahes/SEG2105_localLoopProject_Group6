@@ -1,4 +1,6 @@
-package com.example.localloopapp_android.services;
+package com.example.localloopapp_android.viewmodels;
+
+import androidx.lifecycle.ViewModel;
 
 import com.example.localloopapp_android.datastores.EventRepository;
 import com.example.localloopapp_android.models.Event;
@@ -6,15 +8,18 @@ import com.example.localloopapp_android.models.Event;
 import java.util.List;
 
 /**
+ * OrganizerViewModel
+ *
  * Handles organizer-specific operations like creating or managing events.
- * Called by OrganizerDashboardActivity. Does not know about UI.
+ * Called by OrganizerDashboardActivity or other UI controllers.
+ * Does not reference UI directly and survives configuration changes.
  */
-public class OrganizerService {
+public class OrganizerViewModel extends ViewModel {
 
     private final EventRepository eventRepo;
 
-    public OrganizerService() {
-        this.eventRepo = new EventRepository();  // could be injected in future
+    public OrganizerViewModel() {
+        this.eventRepo = new EventRepository();  // could be injected in the future
     }
 
     /**
@@ -31,7 +36,7 @@ public class OrganizerService {
      */
     public Event createEvent(String organizerId, String name, String description,
                              String categoryId, double fee, long eventStart, long eventEnd) {
-        return eventRepo.createEvent(organizerId, name, description, categoryId, fee, eventStart, eventEnd);
+        return eventRepo.addEvent(organizerId, name, description, categoryId, fee, eventStart, eventEnd);
     }
 
     /**
@@ -70,18 +75,3 @@ public class OrganizerService {
         return eventRepo.getMyEvents();
     }
 }
-
-/**
- * OrganizerService acts as a business logic layer between the UI (e.g. OrganizerDashboardActivity)
- * and the data layer (EventRepository). It coordinates event-related operations while keeping
- * Activities clean and free of logic or direct data access.
- *
- * Why use a service layer instead of calling EventRepository directly?
- *
- * - ✅ Input Validation: Service methods can enforce rules (e.g., fee must be ≥ 0, dates must make sense)
- * - ✅ Business Logic: You can add future behaviors like checking role permissions or status
- * - ✅ Extensibility: Easily add analytics, logging, or undo/redo behavior here
- * - ✅ Abstraction: Hides how events are stored or fetched — you can swap out or adapt the underlying repository later
- *
- * This keeps the architecture clean, testable, and scalable.
- */
