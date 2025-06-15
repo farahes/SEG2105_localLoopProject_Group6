@@ -1,38 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:padding="16dp"
+    <!-- ScrollView for the main content -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:layout_above="@id/btnManageCategories"
+        android:fillViewport="true">
 
-        <Button
-            android:id="@+id/btnManageCategories"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Manage Categories"
-            android:layout_marginTop="16dp"/>
-
-        <!-- Welcome stays outside the dynamic user list -->
-        <TextView
-            android:id="@+id/tvWelcomeMessage"
-            android:text="Welcome!"
-            android:textSize="18sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="16dp"/>
-
-        <!-- Dynamic user list here -->
         <LinearLayout
-            android:id="@+id/userListContainer"
             android:orientation="vertical"
+            android:padding="16dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-</ScrollView>
+            android:layout_height="wrap_content">
 
+            <!-- Welcome stays outside the dynamic user list -->
+            <TextView
+                android:id="@+id/tvWelcomeMessage"
+                android:text="Welcome!"
+                android:textSize="18sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="16dp"/>
+
+            <!-- Dynamic user list here -->
+            <LinearLayout
+                android:id="@+id/userListContainer"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Fixed button at bottom -->
+    <Button
+        android:id="@+id/btnManageCategories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Manage Categories"
+        android:padding="16dp"
+        android:background="?attr/colorPrimary"
+        android:textColor="@android:color/white"
+        android:elevation="8dp"/>
+
+</RelativeLayout>
