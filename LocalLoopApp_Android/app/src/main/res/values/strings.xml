@@ -4,4 +4,16 @@
     <string name="create_account">CREATE ACCOUNT</string>
     <string name="login">LOGIN</string>
 
+    <string name="create_account_title">Create Your Account</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="phone">Phone (optional)</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="organizer_checkbox">Im an organizer</string>
+    <string name="company">Company</string>
+
+
 </resources>
