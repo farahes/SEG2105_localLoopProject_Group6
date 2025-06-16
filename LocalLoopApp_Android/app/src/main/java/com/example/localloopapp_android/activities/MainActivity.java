@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button buttonLogin, buttonPlayGame;
+    private Button buttonLogin;
     private TextView textCreateAccount;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,8 +27,6 @@ public class MainActivity extends AppCompatActivity {
 
         buttonLogin = findViewById(R.id.button_login);
         textCreateAccount = findViewById(R.id.text_create_account);
-        buttonPlayGame = findViewById(R.id.button_play_game);
-
         buttonLogin.setOnClickListener(new View.OnClickListener(){
             public void onClick(View view){
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
@@ -44,10 +42,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonPlayGame.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, com.example.localloopapp_android.xbombgame.GameActivity.class);
-            startActivity(intent);
-        });
 
     }
 }
