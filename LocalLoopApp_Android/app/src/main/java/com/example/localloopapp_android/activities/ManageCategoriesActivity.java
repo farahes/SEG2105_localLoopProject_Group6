@@ -1,4 +1,4 @@
-package com.example.localloopapp_android.activities.dashboard_activities;
+package com.example.localloopapp_android.activities;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

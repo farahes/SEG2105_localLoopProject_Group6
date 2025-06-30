@@ -21,6 +21,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
+import com.example.localloopapp_android.activities.ManageCategoriesActivity;
 import com.example.localloopapp_android.models.accounts.UserAccount;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.AdminViewModel;
