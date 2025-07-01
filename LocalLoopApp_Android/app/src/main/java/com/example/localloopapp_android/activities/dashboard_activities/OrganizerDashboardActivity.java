@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
+import com.example.localloopapp_android.activities.CreateEventActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
@@ -25,6 +26,7 @@ import java.util.List;
 
 public class OrganizerDashboardActivity extends AppCompatActivity {
 
+    private TextView tvTotalEvents, tvUpcomingEvents;
     private OrganizerViewModel viewModel;
     private LinearLayout eventListContainer;
 
@@ -46,6 +48,8 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
         // UI setup
         TextView welcomeText = findViewById(R.id.tvWelcomeMessage);
+        TextView tvTotalEvents = findViewById(R.id.tvTotalEvents);
+        TextView tvUpcomingEvents = findViewById(R.id.tvUpcomingEvents);
         eventListContainer = findViewById(R.id.eventListContainer);
 
         String firstName = getIntent().getStringExtra(Constants.EXTRA_FIRST_NAME);
@@ -57,14 +61,36 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
         viewModel.setOrganizerId(organizerId); // Set the organizer ID to fetch their events
 
-        //A LiveData observer is registered to update the UI when the list of events changes
+        /** This LiveData observer will be triggered whenever the events list in the ViewModel changes.
+         * It updates the UI with the latest events and statistics.
+         */
         viewModel.getEventsLiveData().observe(this, events -> {
-            //update UI with event data
+            // UI: refresh the cards
             displayMyEvents();
+
+            // Stats
+            tvTotalEvents.setText("Total Events: " + events.size());
+
+            int upcomingCount = 0;
+            long now = System.currentTimeMillis();
+            for (Event e : events) {
+                if (e.getEventStart() > now) {
+                    upcomingCount++;
+                }
+            }
+
+            tvUpcomingEvents.setText("Upcoming: " + upcomingCount);
         });
+
         // does not display the events. only triggers the data flow that eventually leads to displaying them
         viewModel.fetchEventsByOrganizer();
-        
+
+        FloatingActionButton fabCreateEvent = findViewById(R.id.fabCreateEvent);
+        fabCreateEvent.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CreateEventActivity.class);
+            intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
+            startActivity(intent);
+        });
     }
 
     private void displayMyEvents() {

@@ -15,6 +15,9 @@
         android:theme="@style/Theme.LocalLoopApp_Android"
         tools:targetApi="31">
         <activity
+            android:name=".activities.CreateEventActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.ManageEventsActivity"
             android:exported="false" />
         <activity
