@@ -14,7 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
-import com.example.localloopapp_android.activities.CreateEventActivity;
+import com.example.localloopapp_android.activities.ManageEventActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
@@ -29,6 +29,13 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     private TextView tvTotalEvents, tvUpcomingEvents;
     private OrganizerViewModel viewModel;
     private LinearLayout eventListContainer;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh events when returning to this activity
+        viewModel.fetchEventsByOrganizer();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +55,8 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
         // UI setup
         TextView welcomeText = findViewById(R.id.tvWelcomeMessage);
-        TextView tvTotalEvents = findViewById(R.id.tvTotalEvents);
-        TextView tvUpcomingEvents = findViewById(R.id.tvUpcomingEvents);
+        tvTotalEvents = findViewById(R.id.tvTotalEvents);
+        tvUpcomingEvents = findViewById(R.id.tvUpcomingEvents);
         eventListContainer = findViewById(R.id.eventListContainer);
 
         String firstName = getIntent().getStringExtra(Constants.EXTRA_FIRST_NAME);
@@ -66,20 +73,10 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
          */
         viewModel.getEventsLiveData().observe(this, events -> {
             // UI: refresh the cards
-            displayMyEvents();
+            displayMyEvents(events);
 
             // Stats
-            tvTotalEvents.setText("Total Events: " + events.size());
-
-            int upcomingCount = 0;
-            long now = System.currentTimeMillis();
-            for (Event e : events) {
-                if (e.getEventStart() > now) {
-                    upcomingCount++;
-                }
-            }
-
-            tvUpcomingEvents.setText("Upcoming: " + upcomingCount);
+            displayStats(events);
         });
 
         // does not display the events. only triggers the data flow that eventually leads to displaying them
@@ -87,16 +84,14 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
         FloatingActionButton fabCreateEvent = findViewById(R.id.fabCreateEvent);
         fabCreateEvent.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CreateEventActivity.class);
+            Intent intent = new Intent(this, ManageEventActivity.class);
             intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
             startActivity(intent);
         });
     }
 
-    private void displayMyEvents() {
-        List<Event> events = viewModel.getMyEvents();
-        eventListContainer.removeAllViews(); // Clear previous cards
-
+    private void displayMyEvents(List<Event> events) {
+        eventListContainer.removeAllViews(); // Clear previous event cards
         LayoutInflater inflater = LayoutInflater.from(this);
 
         for (Event event : events) {
@@ -110,10 +105,33 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             nameView.setText("🟣 " + event.getName());
             descView.setText(event.getDescription());
             feeView.setText("Fee: $" + event.getFee());
-
             dateView.setText("📅 " + Constants.formatDate(event.getEventStart()));
+
+            // passing all the extras to know that we're managing the event,
+            card.setOnClickListener(v -> {
+                Intent intent = new Intent(this, ManageEventActivity.class);
+                intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
+                intent.putExtra(Constants.EXTRA_EVENT_OBJECT, event);
+
+                startActivity(intent);
+            });
 
             eventListContainer.addView(card);
         }
+    }
+
+
+    private void displayStats(List<Event> events) {
+        tvTotalEvents.setText("Total Events: " + events.size());
+
+        int upcomingCount = 0;
+        long now = System.currentTimeMillis();
+        for (Event e : events) {
+            if (e.getEventStart() > now) {
+                upcomingCount++;
+            }
+        }
+
+        tvUpcomingEvents.setText("Upcoming: " + upcomingCount);
     }
 }

@@ -1,10 +1,12 @@
 package com.example.localloopapp_android.models;
 
+import java.io.Serializable;
+
 /**
  * A simple model class | model data transfer object (DTO)
  * DOES NOT contain any business logic or behavior.
  */
-public class Event {
+public class Event implements Serializable {
 
     private String eventId;
     private String organizerId;

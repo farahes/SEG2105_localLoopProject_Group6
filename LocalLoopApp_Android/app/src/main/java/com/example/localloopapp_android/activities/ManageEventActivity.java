@@ -4,42 +4,51 @@ import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
+
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.models.Category;
+import com.example.localloopapp_android.models.Event;
+import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.CategoryViewModel;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
-import com.example.localloopapp_android.utils.Constants;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class CreateEventActivity extends AppCompatActivity {
+public class ManageEventActivity extends AppCompatActivity {
 
     private EditText etName, etDesc, etFee, etStartDate, etEndDate;
     private Spinner spinnerCategory;
     private Button btnCreateEvent;
-
-    private String organizerId;
+    private ImageButton btnDelete, btnClose;
     private final Calendar eventStartCalendar = Calendar.getInstance();
     private final Calendar eventEndCalendar = Calendar.getInstance();
-
     private List<Category> categoryList = new ArrayList<>();
     private String selectedCategoryId = null;
 
     private OrganizerViewModel organizerViewModel;
     private CategoryViewModel categoryViewModel;
 
+    private boolean isEditMode = false;
+    private String organizerId;
+    private Event eventToEdit;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_event);
+        setContentView(R.layout.activity_manage_event);
 
+        // Get extras
         organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
+        eventToEdit = getIntent().getSerializableExtra(Constants.EXTRA_EVENT_OBJECT, Event.class);
+        isEditMode = eventToEdit != null;
 
+        // Bind views
         etName = findViewById(R.id.etEventName);
         etDesc = findViewById(R.id.etEventDesc);
         etFee = findViewById(R.id.etEventFee);
@@ -47,15 +56,48 @@ public class CreateEventActivity extends AppCompatActivity {
         etEndDate = findViewById(R.id.etEventEndDate);
         spinnerCategory = findViewById(R.id.spinnerCategory);
         btnCreateEvent = findViewById(R.id.btnCreateEvent);
+        btnDelete = findViewById(R.id.btnDelete);
+        btnClose = findViewById(R.id.btnClose);
 
+        // ViewModels
         organizerViewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
         organizerViewModel.setOrganizerId(organizerId);
 
         categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
-        setupCategorySpinner();
 
+        // Setup logic
+        setupCategorySpinner();
         setupDatePickers();
 
+        if (isEditMode) {
+            populateFieldsForEdit();
+            btnCreateEvent.setText("Update Event");
+        }
+
+        /**
+         * BUTTONS
+         */
+        // Show delete button only in edit mode
+        if (isEditMode) {
+            btnDelete.setVisibility(View.VISIBLE);
+            btnDelete.setOnClickListener(v -> {
+                new AlertDialog.Builder(this)
+                        .setTitle("Delete Event")
+                        .setMessage("Are you sure you want to delete this event?")
+                        .setPositiveButton("Yes", (dialog, which) -> {
+                            organizerViewModel.deleteEvent(eventToEdit);
+                            Toast.makeText(this, "Event deleted", Toast.LENGTH_SHORT).show();
+                            finish();
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+            });
+        } else {
+            btnDelete.setVisibility(View.GONE);
+        }
+
+        // set up close and create buttons
+        btnClose.setOnClickListener(v -> finish());
         btnCreateEvent.setOnClickListener(v -> {
             String name = etName.getText().toString().trim();
             String desc = etDesc.getText().toString().trim();
@@ -75,17 +117,29 @@ public class CreateEventActivity extends AppCompatActivity {
             }
 
             long start = eventStartCalendar.getTimeInMillis();
-            long end = eventEndCalendar.getTimeInMillis();
+            long end = eventEndCalendar.getTimeInMillis(); // For now, end = start
 
-            if (end < start) {
-                Toast.makeText(this, "End date cannot be before start date", Toast.LENGTH_SHORT).show();
-                return;
+            if (isEditMode) {
+                organizerViewModel.updateEvent(eventToEdit, name, desc, selectedCategoryId, fee, start, end);
+                Toast.makeText(this, "Event updated", Toast.LENGTH_SHORT).show();
+            } else {
+                organizerViewModel.createEvent(name, desc, selectedCategoryId, fee, start, end); // start = end for now
+                Toast.makeText(this, "Event created", Toast.LENGTH_SHORT).show();
             }
 
-            organizerViewModel.createEvent(name, desc, selectedCategoryId, fee, start, end);
-            Toast.makeText(this, "Event created successfully", Toast.LENGTH_SHORT).show();
             finish();
         });
+    }
+
+    private void populateFieldsForEdit() {
+        etName.setText(eventToEdit.getName());
+        etDesc.setText(eventToEdit.getDescription());
+        etFee.setText(String.valueOf(eventToEdit.getFee()));
+        eventStartCalendar.setTimeInMillis(eventToEdit.getEventStart());
+        eventEndCalendar.setTimeInMillis(eventToEdit.getEventEnd());
+        updateDateField(etStartDate, eventStartCalendar);
+
+        // We'll select the category once the spinner loads
     }
 
     private void setupCategorySpinner() {
@@ -104,42 +158,65 @@ public class CreateEventActivity extends AppCompatActivity {
             adapter.clear();
             adapter.addAll(names);
             adapter.notifyDataSetChanged();
+
+            // Pre-select if editing
+            if (isEditMode) {
+                for (int i = 0; i < categoryList.size(); i++) {
+                    if (categoryList.get(i).getCategoryId().equals(eventToEdit.getCategoryId())) {
+                        spinnerCategory.setSelection(i);
+                        selectedCategoryId = categoryList.get(i).getCategoryId();
+                        break;
+                    }
+                }
+            }
         });
 
         spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedCategoryId = categoryList.get(position).getCategoryId();
             }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            @Override public void onNothingSelected(AdapterView<?> parent) {
                 selectedCategoryId = null;
             }
         });
     }
 
     private void setupDatePickers() {
+        // Start Date Picker
         etStartDate.setOnClickListener(v -> {
             int y = eventStartCalendar.get(Calendar.YEAR);
             int m = eventStartCalendar.get(Calendar.MONTH);
             int d = eventStartCalendar.get(Calendar.DAY_OF_MONTH);
 
-            new DatePickerDialog(this, (view, year, month, day) -> {
+            DatePickerDialog startDialog = new DatePickerDialog(this, (view, year, month, day) -> {
                 eventStartCalendar.set(year, month, day);
                 updateDateField(etStartDate, eventStartCalendar);
-            }, y, m, d).show();
+
+                // Set end date to start date
+                eventEndCalendar.setTimeInMillis(eventStartCalendar.getTimeInMillis());
+                updateDateField(etEndDate, eventEndCalendar);
+            }, y, m, d);
+
+            // Disable past dates
+            startDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+            startDialog.show();
         });
 
+        // End Date Picker
         etEndDate.setOnClickListener(v -> {
             int y = eventEndCalendar.get(Calendar.YEAR);
             int m = eventEndCalendar.get(Calendar.MONTH);
             int d = eventEndCalendar.get(Calendar.DAY_OF_MONTH);
 
-            new DatePickerDialog(this, (view, year, month, day) -> {
+            DatePickerDialog endDialog = new DatePickerDialog(this, (view, year, month, day) -> {
                 eventEndCalendar.set(year, month, day);
                 updateDateField(etEndDate, eventEndCalendar);
-            }, y, m, d).show();
+            }, y, m, d);
+
+            // End date can't be before start date
+            endDialog.getDatePicker().setMinDate(eventStartCalendar.getTimeInMillis());
+            endDialog.show();
         });
     }
 
