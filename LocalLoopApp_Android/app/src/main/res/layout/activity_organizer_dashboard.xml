@@ -44,71 +44,98 @@
         android:layout_marginTop="?attr/actionBarSize"
         android:layout_marginBottom="56dp"
         android:fillViewport="true">
-
         <LinearLayout
-            android:orientation="vertical"
-            android:padding="16dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <!-- Welcome Message -->
-            <TextView
-                android:id="@+id/tvWelcomeMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Welcome! You are logged in as Organizer."
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
+        <!-- 🟪 Welcome + Stats Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/welcomeStatsCardContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:elevation="2dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="#F2E7FB"
+            android:animateLayoutChanges="true">
 
-            <!-- Optional: Stats Summary -->
-            <!-- Can be removed if not needed -->
             <LinearLayout
-                android:id="@+id/statsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:id="@+id/tvTotalEvents"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Total Events: 0"
-                    android:textStyle="bold"
-                    android:padding="8dp" />
-
-                <TextView
-                    android:id="@+id/tvUpcomingEvents"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Upcoming: 0"
-                    android:textStyle="bold"
-                    android:padding="8dp" />
-            </LinearLayout>
-
-            <!-- Event Management Header -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="My Events:"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="#333333"
-                android:layout_marginBottom="8dp" />
-
-            <!-- Events List -->
-            <LinearLayout
-                android:id="@+id/eventListContainer"
+                android:id="@+id/welcomeStatsCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:divider="?android:attr/dividerHorizontal"
-                android:showDividers="middle"
-                android:dividerPadding="8dp" />
+                android:padding="12dp">
+
+                <!-- 👋 Welcome Message -->
+                <TextView
+                    android:id="@+id/tvWelcomeMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Welcome! You are logged in as Organizer."
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- 📊 Stats Row: Upcoming / Past -->
+                <LinearLayout
+                    android:id="@+id/statsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginLeft="8dp">
+
+                    <TextView
+                        android:id="@+id/tvUpcomingEvents"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Upcoming: 0"
+                        android:textStyle="bold"
+                        android:padding="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvPastEvents"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Past Events: 0"
+                        android:textStyle="bold"
+                        android:padding="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+            <!-- separator line -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#DDDDDD"
+                android:layout_marginVertical="2dp" />
+
+        <!-- 🔵 Filter Spinner (styled like a button, placed below card) -->
+        <Spinner
+            android:id="@+id/eventFilterSpinner"
+            android:layout_width="235dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginBottom="12dp"
+            android:spinnerMode="dropdown"
+            android:background="@null"
+            android:layout_marginTop="24dp"
+            />
+
+        <!-- 📋 Events List Container -->
+        <LinearLayout
+            android:id="@+id/eventListContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:divider="?android:attr/dividerHorizontal"
+            android:showDividers="middle"
+            android:dividerPadding="8dp" />
         </LinearLayout>
     </ScrollView>
 

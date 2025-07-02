@@ -15,5 +15,10 @@
     <string name="organizer_checkbox">Im an organizer</string>
     <string name="company">Company</string>
 
+    <string-array name="event_filters">
+        <item>Upcoming Events</item>
+        <item>Past Events</item>
+    </string-array>
+
 
 </resources>
