@@ -37,7 +37,18 @@ LocalLoop is a role-based community event management app built in Java for Andro
 2. Java
 3. Firebase Realtime Database
 
-`Version: 06-09-2025`
+### Color Scheme Used
+Blue: #62CDD9
+Purple Primary: #673AB7
+Secondary Lighter Purple: #8F50E7
+Tertiary Grey: #8F50E7
+Tertiary Black: #373D3F ( Used for text ) 
+
+### Figma Wirefranes
+- Used to plan our design.
+- Link: 
+
+`Version: 07-03-2025`
 
 
 
