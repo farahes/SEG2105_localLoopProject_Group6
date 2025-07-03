@@ -1,19 +1,21 @@
 package com.example.localloopapp_android.activities.dashboard_activities;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
@@ -21,20 +23,36 @@ import com.example.localloopapp_android.activities.ManageEventActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
+import com.example.localloopapp_android.utils.CalendarUtilsKt;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.kizitonwose.calendar.view.CalendarView;
+
+import java.time.DayOfWeek;
 
 import android.content.Intent;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.Set;
+import java.util.HashSet;
 
 public class OrganizerDashboardActivity extends AppCompatActivity {
 
-    private TextView tvPastEvents, tvUpcomingEvents;
+    private TextView tvPastEvents, tvUpcomingEvents, tvMonthTitle;
+    private AppCompatButton btnToggleCalendar;
+    private ImageButton btnPrevMonth, btnNextMonth;
+    CalendarView calendarView;
     private OrganizerViewModel viewModel;
     private LinearLayout eventListContainer;
+    private Set<LocalDate> eventDateSet = new HashSet<>();
 
     @Override
     protected void onResume() {
@@ -51,8 +69,10 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         extractIntentExtras();
         setupUI();
         setupViewModel();
+        setupCalendar();
         setupFabButton();
     }
+
 
 
     //-------------------------Supporting-Methods---------------------------------
@@ -81,6 +101,13 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         tvUpcomingEvents = findViewById(R.id.tvUpcomingEvents);
         tvPastEvents = findViewById(R.id.tvPastEvents);
         eventListContainer = findViewById(R.id.eventListContainer);
+
+        // Bind the calendar view and navigation buttons
+        btnToggleCalendar = findViewById(R.id.btnToggleCalendar);
+        tvMonthTitle = findViewById(R.id.tvMonthTitle);
+        btnPrevMonth = findViewById(R.id.btnPrevMonth);
+        btnNextMonth = findViewById(R.id.btnNextMonth);
+        calendarView = findViewById(R.id.calendarView);
     }
 
     /**
@@ -89,6 +116,14 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
      */
     private void setupViewModel() {
         viewModel.getEventsLiveData().observe(this, events -> {
+            // Update eventDateSet here
+            eventDateSet.clear();
+            for (Event event : events) {
+                eventDateSet.add(Instant.ofEpochMilli(event.getEventStart())
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate());
+            }
+
             setupEventFilterSpinner(events);
             displayStats(events);
         });
@@ -141,7 +176,16 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
             nameView.setText(blob + " " + event.getName());
             descView.setText(event.getDescription());
-            feeView.setText("Fee: $" + event.getFee());
+            if (event.getFee() == 0.0) {
+                feeView.setText("Free");
+                feeView.setTextColor(Color.parseColor("#4CAF50")); // Material green
+                feeView.setTypeface(null, Typeface.BOLD);
+            } else {
+                feeView.setText("Fee: $" + event.getFee());
+                feeView.setTextColor(Color.BLACK); // to the normal color
+                feeView.setTypeface(null, Typeface.NORMAL);
+            }
+
             dateView.setText("📅 " + Constants.formatDate(event.getEventStart()));
 
             card.setOnClickListener(v -> {
@@ -208,6 +252,56 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    /**
+     * Sets up the calendar view with the current month and navigation buttons.
+     * It also configures how each day looks based on the events.
+     */
+    private void setupCalendar() {
+        // Set visible calendar range
+        YearMonth current = YearMonth.now();
+        calendarView.setup(current.minusMonths(6), current.plusMonths(6), DayOfWeek.MONDAY);
+        calendarView.scrollToMonth(current);
+
+        // Configure how each day looks
+        CalendarUtilsKt.setupCalendar(calendarView, eventDateSet);
+
+        // Toggle visibility
+        btnToggleCalendar.setOnClickListener(v -> {
+            boolean show = calendarView.getVisibility() != View.VISIBLE;
+            calendarView.setVisibility(show ? View.VISIBLE : View.GONE);
+            findViewById(R.id.calendarHeader).setVisibility(show ? View.VISIBLE : View.GONE);
+            btnToggleCalendar.setSelected(show);
+        });
+
+        // Month name and navigation
+        final YearMonth[] currentMonth = {current};
+        updateMonthHeader(tvMonthTitle, currentMonth[0]);
+
+        btnPrevMonth.setOnClickListener(v -> {
+            currentMonth[0] = currentMonth[0].minusMonths(1);
+            calendarView.scrollToMonth(currentMonth[0]);
+            updateMonthHeader(tvMonthTitle, currentMonth[0]);
+        });
+
+        btnNextMonth.setOnClickListener(v -> {
+            currentMonth[0] = currentMonth[0].plusMonths(1);
+            calendarView.scrollToMonth(currentMonth[0]);
+            updateMonthHeader(tvMonthTitle, currentMonth[0]);
+        });
+    }
+
+    // helper method to check if there is an event on a specific date
+    private boolean hasEventOnDate(LocalDate date) {
+        return eventDateSet.contains(date);
+    }
+
+    // Helper method to update the month header in the calendar view
+    private void updateMonthHeader(TextView header, YearMonth yearMonth) {
+        String formatted = yearMonth.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault())
+                + " " + yearMonth.getYear();
+        header.setText(formatted);
     }
 
 }
