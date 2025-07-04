@@ -23,10 +23,8 @@ public class OrganizerViewModel extends ViewModel {
     private final EventRepository eventRepo;
     private final MutableLiveData<List<Event>> eventsLiveData = new MutableLiveData<>();
 
-
     public OrganizerViewModel() {
         this.eventRepo = new EventRepository();  // could be injected in the future
-        // no refresh on create since we'd need to pass organizerId in the constructor -> need a factory method or similar
     }
 
     public LiveData<List<Event>> getEventsLiveData() {
@@ -44,10 +42,7 @@ public class OrganizerViewModel extends ViewModel {
 
     /**
      * Fetches all events created by this organizer from firebase.
-     * Updates the LiveData with the list of events.
-     * This will be called when the ViewModel is initialized or when the user navigates to the organizer dashboard.
      */
-    // facade method to fetch events by organizer ID
     public void fetchEventsByOrganizer() {
         if (organizerId == null) {
             Log.e("OrganizerViewModel", "Organizer ID is not set. Cannot fetch events.");
@@ -67,56 +62,52 @@ public class OrganizerViewModel extends ViewModel {
     }
 
     /**
-     * Creates a new event and stores it in memory (or Firebase in the future).
-     *
-     * @param name          Name of the event
-     * @param description   Description of the event
-     * @param categoryId    Category ID from the admin-defined list
-     * @param fee           Participation fee for the event
-     * @param eventStart    Start date/time of the event (epoch ms)
-     * @param eventEnd      End date/time of the event (epoch ms)
-     * @return              The created Event object
+     * Creates a new event.
      */
     public Event createEvent(String name, String description,
-                             String categoryId, double fee, long eventStart, long eventEnd) {
-        Event event = eventRepo.addEvent(organizerId, name, description, categoryId, fee, eventStart, eventEnd);
-        fetchEventsByOrganizer(); // Refresh the list after creation
+                             String categoryId, String location, double fee, long eventStart, long eventEnd) {
+        Event event = eventRepo.addEvent(organizerId, name, description, categoryId, location, fee, eventStart, eventEnd);
+        fetchEventsByOrganizer();
         return event;
     }
 
     /**
-     * Deletes an existing event from the data store.
-     * Currently marks it as inactive and removes from the in-memory list.
-     *
-     * @param eventToDelete The Event object to be deleted
+     * Deletes an event.
      */
     public void deleteEvent(Event eventToDelete) {
         eventRepo.deleteEvent(eventToDelete);
-        fetchEventsByOrganizer(); // Refresh the list after deletion
+        fetchEventsByOrganizer();
     }
 
     /**
-     * Updates the details of an existing event.
-     *
-     * @param eventToEdit   The existing Event object to modify
-     * @param newName       New event name
-     * @param newDescription New event description
-     * @param newCategoryId New category ID
-     * @param newFee        Updated participation fee
-     * @param newEventStart      Updated start time (epoch ms)
-     * @param newEventEnd        Updated end time (epoch ms)
+     * Updates an existing event.
      */
     public void updateEvent(Event eventToEdit, String newName, String newDescription,
-                            String newCategoryId, double newFee, long newEventStart, long newEventEnd) {
-        eventRepo.editEvent(eventToEdit, newName, newDescription, newCategoryId, newFee, newEventStart, newEventEnd);
-        fetchEventsByOrganizer(); // Refresh the list after update
+                            String newCategoryId, String newLocation, double newFee, long newEventStart, long newEventEnd) {
+        // Update event fields
+        eventToEdit.setName(newName);
+        eventToEdit.setDescription(newDescription);
+        eventToEdit.setCategoryId(newCategoryId);
+        eventToEdit.setLocation(newLocation);
+        eventToEdit.setFee(newFee);
+        eventToEdit.setEventStart(newEventStart);
+        eventToEdit.setEventEnd(newEventEnd);
+
+        eventRepo.editEvent(
+                eventToEdit,
+                newName,
+                newDescription,
+                newCategoryId,
+                newLocation,
+                newFee,
+                newEventStart,
+                newEventEnd
+        ); // send updated object to repo
+        fetchEventsByOrganizer();
     }
 
     /**
-     * Returns a list of all events created by the current organizer.
-     * In the future, this can be filtered or fetched from Firebase.
-     *
-     * @return Unmodifiable list of Event objects
+     * Returns all events created by this organizer.
      */
     public List<Event> getMyEvents() {
         return eventRepo.getMyEvents();

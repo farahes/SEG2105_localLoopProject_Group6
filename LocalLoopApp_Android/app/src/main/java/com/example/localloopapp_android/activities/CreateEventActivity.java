@@ -22,7 +22,7 @@ import java.util.*;
 
 public class CreateEventActivity extends AppCompatActivity {
 
-    private EditText etName, etDesc, etFee, etStartDate, etEndDate;
+    private EditText etName, etDesc, etFee, etLocation, etStartDate, etEndDate;
     private Spinner spinnerCategory;
     private Button btnCreateEvent;
     private ImageButton btnDelete, btnClose;
@@ -51,6 +51,7 @@ public class CreateEventActivity extends AppCompatActivity {
         // Bind views
         etName = findViewById(R.id.etEventName);
         etDesc = findViewById(R.id.etEventDesc);
+        etLocation = findViewById(R.id.etEventLocation);
         etFee = findViewById(R.id.etEventFee);
         etStartDate = findViewById(R.id.etEventStartDate);
         etEndDate = findViewById(R.id.etEventEndDate);
@@ -74,10 +75,7 @@ public class CreateEventActivity extends AppCompatActivity {
             btnCreateEvent.setText("Update Event");
         }
 
-        /**
-         * BUTTONS
-         */
-        // Show delete button only in edit mode
+        // Delete button
         if (isEditMode) {
             btnDelete.setVisibility(View.VISIBLE);
             btnDelete.setOnClickListener(v -> {
@@ -96,15 +94,17 @@ public class CreateEventActivity extends AppCompatActivity {
             btnDelete.setVisibility(View.GONE);
         }
 
-        // set up close and create buttons
+        // Close & Create
         btnClose.setOnClickListener(v -> finish());
+
         btnCreateEvent.setOnClickListener(v -> {
             String name = etName.getText().toString().trim();
             String desc = etDesc.getText().toString().trim();
+            String location = etLocation.getText().toString().trim();
             String feeStr = etFee.getText().toString().trim();
 
-            if (name.isEmpty() || desc.isEmpty() || feeStr.isEmpty() || selectedCategoryId == null) {
-                Toast.makeText(this, "Please fill all fields and select a category", Toast.LENGTH_SHORT).show();
+            if (name.isEmpty() || desc.isEmpty() || location.isEmpty() || feeStr.isEmpty() || selectedCategoryId == null) {
+                Toast.makeText(this, "Please fill all fields including location and select a category", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -117,13 +117,13 @@ public class CreateEventActivity extends AppCompatActivity {
             }
 
             long start = eventStartCalendar.getTimeInMillis();
-            long end = eventEndCalendar.getTimeInMillis(); // For now, end = start
+            long end = eventEndCalendar.getTimeInMillis();
 
             if (isEditMode) {
-                organizerViewModel.updateEvent(eventToEdit, name, desc, selectedCategoryId, fee, start, end);
+                organizerViewModel.updateEvent(eventToEdit, name, desc, selectedCategoryId, location, fee, start, end);
                 Toast.makeText(this, "Event updated", Toast.LENGTH_SHORT).show();
             } else {
-                organizerViewModel.createEvent(name, desc, selectedCategoryId, fee, start, end); // start = end for now
+                organizerViewModel.createEvent(name, desc, selectedCategoryId, location, fee, start, end);
                 Toast.makeText(this, "Event created", Toast.LENGTH_SHORT).show();
             }
 
@@ -134,12 +134,12 @@ public class CreateEventActivity extends AppCompatActivity {
     private void populateFieldsForEdit() {
         etName.setText(eventToEdit.getName());
         etDesc.setText(eventToEdit.getDescription());
+        etLocation.setText(eventToEdit.getLocation());
         etFee.setText(String.valueOf(eventToEdit.getFee()));
         eventStartCalendar.setTimeInMillis(eventToEdit.getEventStart());
         eventEndCalendar.setTimeInMillis(eventToEdit.getEventEnd());
         updateDateField(etStartDate, eventStartCalendar);
-
-        // We'll select the category once the spinner loads
+        updateDateField(etEndDate, eventEndCalendar);
     }
 
     private void setupCategorySpinner() {
@@ -193,12 +193,11 @@ public class CreateEventActivity extends AppCompatActivity {
                 eventStartCalendar.set(year, month, day);
                 updateDateField(etStartDate, eventStartCalendar);
 
-                // Set end date to start date
+                // Set end date to match start date
                 eventEndCalendar.setTimeInMillis(eventStartCalendar.getTimeInMillis());
                 updateDateField(etEndDate, eventEndCalendar);
             }, y, m, d);
 
-            // Disable past dates
             startDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
             startDialog.show();
         });
@@ -214,7 +213,6 @@ public class CreateEventActivity extends AppCompatActivity {
                 updateDateField(etEndDate, eventEndCalendar);
             }, y, m, d);
 
-            // End date can't be before start date
             endDialog.getDatePicker().setMinDate(eventStartCalendar.getTimeInMillis());
             endDialog.show();
         });
@@ -225,3 +223,4 @@ public class CreateEventActivity extends AppCompatActivity {
         editText.setText(sdf.format(calendar.getTime()));
     }
 }
+
