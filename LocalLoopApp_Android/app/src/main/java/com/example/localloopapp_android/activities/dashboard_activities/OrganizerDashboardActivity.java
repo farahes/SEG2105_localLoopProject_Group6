@@ -67,7 +67,6 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         extractIntentExtras();
         setupUI();
         setupViewModel();
-        setupCalendar();
         setupFabButton();
     }
 
@@ -76,7 +75,6 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
     /**
      * Extracts intent extras and initializes the ViewModel.
-     * Sets the welcome message based on the first name provided in the intent.
      */
     private void extractIntentExtras() {
         String organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
@@ -85,10 +83,6 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
         viewModel.setOrganizerId(organizerId);
 
-        TextView welcomeText = findViewById(R.id.tvWelcomeMessage);
-        welcomeText.setText(firstName != null
-                ? "Welcome " + firstName + "! You are logged in as Organizer."
-                : "Welcome, Organizer!");
     }
 
     /**
@@ -120,6 +114,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate());
             }
+            setupCalendar();
         });
 
         viewModel.fetchEventsByOrganizer();
