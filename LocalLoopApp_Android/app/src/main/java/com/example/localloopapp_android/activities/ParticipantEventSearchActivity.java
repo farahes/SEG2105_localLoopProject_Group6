@@ -157,7 +157,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 // Date and time filter
                 if (selectedDate != null) {
                     Calendar eventCal = Calendar.getInstance();
-                    eventCal.setTime(event.getDate()); // assumes getDate() returns java.util.Date
+                    eventCal.setTime(new Date(event.getEventStart()));
                     if (eventCal.get(Calendar.YEAR) != selectedDate.get(Calendar.YEAR) ||
                         eventCal.get(Calendar.MONTH) != selectedDate.get(Calendar.MONTH) ||
                         eventCal.get(Calendar.DAY_OF_MONTH) != selectedDate.get(Calendar.DAY_OF_MONTH)) continue;
@@ -181,7 +181,8 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 ((TextView) card.findViewById(R.id.tvEventCategory)).setText(event.getCategoryName());
                 ((TextView) card.findViewById(R.id.tvEventFee)).setText(event.getParticipationFee() == 0 ? "Free" : "$" + event.getParticipationFee());
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-                ((TextView) card.findViewById(R.id.tvEventDateTime)).setText(sdf.format(event.getDate()));
+                String dateTime = sdf.format(new Date(event.getEventStart())) + " - " + sdf.format(new Date(event.getEventEnd()));
+(               (TextView) card.findViewById(R.id.tvEventDateTime)).setText(dateTime);
                 resultsContainer.addView(card);
             }
             if (resultsContainer.getChildCount() == 0) {
