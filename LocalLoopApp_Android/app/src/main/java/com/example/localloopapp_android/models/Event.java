@@ -13,7 +13,7 @@ public class Event implements Serializable {
     private String name;
     private String description;
     private String categoryId;
-    private String location; // ✅ New field added
+    private String location;
     private double fee;
     private long eventStart, eventEnd;
     private boolean eventActive;

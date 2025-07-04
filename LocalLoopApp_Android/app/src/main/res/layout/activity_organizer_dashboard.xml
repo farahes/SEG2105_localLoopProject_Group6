@@ -72,6 +72,11 @@
                     android:gravity="center" />
             </androidx.cardview.widget.CardView>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#CCCCCC" />
+
             <!-- Calendar Toggle + Header + View -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -141,6 +146,10 @@
                     android:visibility="gone" />
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#CCCCCC" />
 
             <!-- Action Buttons -->
             <LinearLayout
