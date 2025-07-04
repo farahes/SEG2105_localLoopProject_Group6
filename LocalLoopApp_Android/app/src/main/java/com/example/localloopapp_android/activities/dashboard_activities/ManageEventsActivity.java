@@ -61,6 +61,8 @@ public class ManageEventsActivity extends AppCompatActivity {
 
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
+        String organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
+        viewModel.setOrganizerId(organizerId);
         viewModel.getEventsLiveData().observe(this, events -> {
             allEvents = events;
             showUpcomingEvents(); // default
@@ -127,6 +129,9 @@ public class ManageEventsActivity extends AppCompatActivity {
                 TextView nameView = card.findViewById(R.id.tvEventName);
                 TextView locationView = card.findViewById(R.id.tvEventLocation);
                 TextView dateView = card.findViewById(R.id.tvEventDate);
+
+                TextView timeView = card.findViewById(R.id.tvEventTime);
+                TextView categoryView = card.findViewById(R.id.tvEventCategory);
 
                 nameView.setText(e.getName());
                 locationView.setText(e.getLocation());
