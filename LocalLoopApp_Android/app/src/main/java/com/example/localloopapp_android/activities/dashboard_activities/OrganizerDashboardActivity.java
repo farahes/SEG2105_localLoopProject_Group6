@@ -139,8 +139,9 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         });
 
         manageEventsCard.setOnClickListener(v -> {
-            // TODO: Replace with real destination when ready
-            Log.d("OrganizerDashboard", "Manage Events clicked");
+            Intent intent = new Intent(this, ManageEventsActivity.class);
+            intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
+            startActivity(intent);
         });
 
         manageRegistrationCard.setOnClickListener(v -> {
