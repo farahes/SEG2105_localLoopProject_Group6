@@ -130,6 +130,9 @@ public class ManageEventsActivity extends AppCompatActivity {
                 TextView locationView = card.findViewById(R.id.tvEventLocation);
                 TextView dateView = card.findViewById(R.id.tvEventDate);
 
+                TextView timeView = card.findViewById(R.id.tvEventTime);
+                TextView categoryView = card.findViewById(R.id.tvEventCategory);
+
                 nameView.setText(e.getName());
                 locationView.setText(e.getLocation());
                 dateView.setText(Constants.formatDate(e.getEventStart()));
