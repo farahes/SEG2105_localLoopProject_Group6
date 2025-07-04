@@ -32,31 +32,35 @@ public class EventRepository {
      * Creates a new Event and adds it to Firebase and memory.
      */
     public Event addEvent(String organizerId, String name, String description, String categoryId,
-                          double fee, long eventStart, long eventEnd) {
+                          String location, double fee, long eventStart, long eventEnd) {
 
         String eventId = dbRef.push().getKey();
-        Event e = new Event(eventId, organizerId, name, description, categoryId, fee, eventStart, eventEnd);
+        Event e = new Event(eventId, organizerId, name, description, categoryId, location, fee, eventStart, eventEnd);
 
         dbRef.child(eventId).setValue(e);
         myEvents.add(e);
         return e;
     }
 
+
     /**
      * Updates the properties of an existing Event in Firebase and memory.
      */
-    public void editEvent(Event eventToEdit, String newName, String newDescription, String newCategoryId,
-                          double newFee, long newEventStart, long newEventEnd) {
+    public void editEvent(Event eventToEdit, String newName, String newDescription,
+                          String newCategoryId, String newLocation, double newFee,
+                          long newEventStart, long newEventEnd) {
 
         eventToEdit.setName(newName);
         eventToEdit.setDescription(newDescription);
         eventToEdit.setCategoryId(newCategoryId);
+        eventToEdit.setLocation(newLocation);
         eventToEdit.setFee(newFee);
         eventToEdit.setEventStart(newEventStart);
         eventToEdit.setEventEnd(newEventEnd);
 
         dbRef.child(eventToEdit.getEventId()).setValue(eventToEdit);
     }
+
 
     /**
      * Removes an event from Firebase and in-memory cache.

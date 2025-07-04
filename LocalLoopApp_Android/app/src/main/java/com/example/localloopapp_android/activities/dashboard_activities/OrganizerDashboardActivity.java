@@ -17,10 +17,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.activities.CreateEventActivity;
+import com.example.localloopapp_android.activities.dashboard_activities.ManageEventsActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
 import com.example.localloopapp_android.utils.CalendarUtilsKt;
+
 
 import com.kizitonwose.calendar.view.CalendarView;
 
@@ -184,7 +186,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 TextView nameView = card.findViewById(R.id.tvEventName);
                 TextView descView = card.findViewById(R.id.tvEventDescription);
                 TextView feeView = card.findViewById(R.id.tvEventFee);
-                TextView dateView = card.findViewById(R.id.tvEventTime);
+                TextView dateView = card.findViewById(R.id.tvEventDate);
 
                 nameView.setText(blob + " " + event.getName());
                 descView.setText(event.getDescription());
