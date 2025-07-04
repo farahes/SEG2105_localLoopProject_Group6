@@ -51,26 +51,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Welcome Message -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/welcomeStatsCardContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:elevation="2dp"
-                app:cardCornerRadius="12dp"
-                app:cardBackgroundColor="#F2E7FB">
-
-                <TextView
-                    android:id="@+id/tvWelcomeMessage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Welcome! You are logged in as Organizer."
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:padding="16dp"
-                    android:gravity="center" />
-            </androidx.cardview.widget.CardView>
+            <!-- Welcome Message got kicked out -->
 
             <View
                 android:layout_width="match_parent"
