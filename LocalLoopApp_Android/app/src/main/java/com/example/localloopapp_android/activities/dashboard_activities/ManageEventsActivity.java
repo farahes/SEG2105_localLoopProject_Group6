@@ -188,7 +188,6 @@ public class ManageEventsActivity extends AppCompatActivity {
                 dateView.setText(Constants.formatDate(e.getEventStart()));
 
                 ImageButton btnEdit = card.findViewById(R.id.btnEdit);
-                ImageButton btnDelete = card.findViewById(R.id.btnDelete);
 
                 btnEdit.setOnClickListener(v -> {
                     Intent intent = new Intent(this, CreateEventActivity.class);
@@ -197,10 +196,6 @@ public class ManageEventsActivity extends AppCompatActivity {
                     startActivity(intent);
                 });
 
-                btnDelete.setOnClickListener(v -> {
-                    viewModel.deleteEvent(e);
-                    Toast.makeText(this, "Event deleted", Toast.LENGTH_SHORT).show();
-                });
 
                 eventListContainer.addView(card);
             }
@@ -211,7 +206,7 @@ public class ManageEventsActivity extends AppCompatActivity {
         btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
 
         btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
-        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_700));  // Use lighter purple here
+        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // Use lighter purple here
     }
 
 
