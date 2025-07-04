@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -49,61 +50,76 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- 🗂️ Tab Buttons -->
-            <LinearLayout
+            <!-- 🗂️ Card View Container for Tabs & Events -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="0dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#8F50E7">
 
-                <Button
-                    android:id="@+id/btnUpcoming"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="#Upcoming"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#8F50E7"
-                    android:textStyle="bold" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="0dp">
 
-                <Button
-                    android:id="@+id/btnEventHistory"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Event History"
-                    android:textColor="#8F50E7"
-                    android:backgroundTint="#E0D7F7"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                    <!-- Rounded Tab Buttons -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
 
-            <!-- 📅 No Events Placeholder -->
-            <FrameLayout
-                android:id="@+id/noEventsPlaceholder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:gravity="center"
-                android:visibility="gone">
+                        <Button
+                            android:id="@+id/btnUpcoming"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_tab_left_selected"
+                            android:text="UPCOMING"
+                            android:textStyle="bold" />
 
-                <include layout="@layout/no_events_placeholder" />
-            </FrameLayout>
+                        <Button
+                            android:id="@+id/btnEventHistory"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_tab_right_unselected"
+                            android:text="EVENT HISTORY"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
-            <!-- 📋 Event List -->
-            <LinearLayout
-                android:id="@+id/eventListContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:divider="?android:attr/dividerHorizontal"
-                android:dividerPadding="8dp"
-                android:showDividers="middle" />
+
+                    <!-- 📅 No Events Placeholder -->
+                    <FrameLayout
+                        android:id="@+id/noEventsPlaceholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center"
+                        android:visibility="gone">
+
+                        <include layout="@layout/no_events_placeholder" />
+                    </FrameLayout>
+
+                    <!-- 📋 Event List Inside the Card -->
+                    <LinearLayout
+                        android:id="@+id/eventListContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:divider="?android:attr/dividerHorizontal"
+                        android:dividerPadding="8dp"
+                        android:orientation="vertical"
+                        android:showDividers="middle" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
         </LinearLayout>
     </ScrollView>
 
-    <!-- 🔽 Bottom Navigation Bar -->
+    <!-- 🔽 Bottom Navigation -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
@@ -115,7 +131,7 @@
         android:paddingVertical="4dp"
         android:weightSum="3">
 
-        <!-- Profile -->
+        <!-- Account -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -167,7 +183,7 @@
                 android:layout_marginTop="2dp" />
         </LinearLayout>
 
-        <!-- Notifications -->
+        <!-- Inbox -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"

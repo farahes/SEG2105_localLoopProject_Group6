@@ -1,6 +1,5 @@
 package com.example.localloopapp_android.activities.dashboard_activities;
 
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,16 +8,17 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
+import com.example.localloopapp_android.activities.CreateEventActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
-import com.example.localloopapp_android.activities.CreateEventActivity;
-
 
 import java.util.Comparator;
 import java.util.List;
@@ -41,18 +41,20 @@ public class ManageEventsActivity extends AppCompatActivity {
         setupUI();
         setupViewModel();
         setupTabs();
+        applyInitialTabStyle();
+
     }
 
-    private void setupUI() {
-        // Back button
-        ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> finish());
 
-        // Containers
+    private void setupUI() {
+        ImageButton btnBack = findViewById(R.id.btnBack);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
         eventListContainer = findViewById(R.id.eventListContainer);
         noEventsPlaceholder = findViewById(R.id.noEventsPlaceholder);
 
-        // Tabs
         btnUpcoming = findViewById(R.id.btnUpcoming);
         btnEventHistory = findViewById(R.id.btnEventHistory);
     }
@@ -81,19 +83,20 @@ public class ManageEventsActivity extends AppCompatActivity {
 
     private void highlightTab(boolean isUpcoming) {
         if (isUpcoming) {
-            btnUpcoming.setBackgroundTintList(getColorStateList(R.color.purple_700));
-            btnUpcoming.setTextColor(getColor(R.color.white));
+            btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_selected);
+            btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
 
-            btnEventHistory.setBackgroundTintList(getColorStateList(R.color.purple_200));
-            btnEventHistory.setTextColor(getColor(R.color.purple_700));
+            btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
+            btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_700));
         } else {
-            btnUpcoming.setBackgroundTintList(getColorStateList(R.color.purple_200));
-            btnUpcoming.setTextColor(getColor(R.color.purple_700));
+            btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_unselected);
+            btnUpcoming.setTextColor(ContextCompat.getColor(this, R.color.purple_700));
 
-            btnEventHistory.setBackgroundTintList(getColorStateList(R.color.purple_700));
-            btnEventHistory.setTextColor(getColor(R.color.white));
+            btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_selected);
+            btnEventHistory.setTextColor(ContextCompat.getColor(this, android.R.color.white));
         }
     }
+
 
     private void showUpcomingEvents() {
         displayFilteredEvents(true);
@@ -140,11 +143,22 @@ public class ManageEventsActivity extends AppCompatActivity {
                 });
 
                 btnDelete.setOnClickListener(v -> {
-                    // TODO: Show confirmation and delete logic
+                    viewModel.deleteEvent(e);
+                    Toast.makeText(this, "Event deleted", Toast.LENGTH_SHORT).show();
                 });
 
                 eventListContainer.addView(card);
             }
         }
     }
+    private void applyInitialTabStyle() {
+        // Set default: UPCOMING selected
+        btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_selected);
+        btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+
+        btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
+        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_700));
+    }
+
+
 }
