@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.cardview.widget.CardView;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
@@ -98,12 +99,10 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
      * Sets up the UI components and binds them to their respective views.
      */
     private void setupUI() {
-        tvUpcomingEvents = findViewById(R.id.tvUpcomingEvents);
-        tvPastEvents = findViewById(R.id.tvPastEvents);
+
         eventListContainer = findViewById(R.id.eventListContainer);
 
         // Bind the calendar view and navigation buttons
-        btnToggleCalendar = findViewById(R.id.btnToggleCalendar);
         tvMonthTitle = findViewById(R.id.tvMonthTitle);
         btnPrevMonth = findViewById(R.id.btnPrevMonth);
         btnNextMonth = findViewById(R.id.btnNextMonth);
@@ -125,9 +124,6 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate());
             }
-
-            setupEventFilterSpinner(events);
-            displayStats(events);
         });
 
         viewModel.fetchEventsByOrganizer();
@@ -138,11 +134,24 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
      * When clicked, it starts the ManageEventActivity with the organizer ID.
      */
     private void setupFabButton() {
-        FloatingActionButton fabCreateEvent = findViewById(R.id.fabCreateEvent);
+        CardView fabCreateEvent = findViewById(R.id.fabCreateEvent);
+        CardView manageEventsCard = findViewById(R.id.btnManageEvents);
+        CardView manageRegistrationCard = findViewById(R.id.btnManageRegistration);
+
         fabCreateEvent.setOnClickListener(v -> {
             Intent intent = new Intent(this, ManageEventActivity.class);
             intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
             startActivity(intent);
+        });
+
+        manageEventsCard.setOnClickListener(v -> {
+            // TODO: Replace with real destination when ready
+            Log.d("OrganizerDashboard", "Manage Events clicked");
+        });
+
+        manageRegistrationCard.setOnClickListener(v -> {
+            // TODO: Replace with real destination when ready
+            Log.d("OrganizerDashboard", "Manage Registration clicked");
         });
     }
 
@@ -209,60 +218,6 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Displays the statistics of past and upcoming events.
-     *
-     * @param events
-     */
-    private void displayStats(List<Event> events) {
-        int pastCount = 0;
-        int upcomingCount = 0;
-        long now = System.currentTimeMillis();
-        for (Event e : events) {
-            if (e.getEventStart() > now) {
-                upcomingCount++;
-            } else {
-                pastCount++;
-            }
-        }
-
-        tvPastEvents.setText("Past Events: " + pastCount);
-        tvUpcomingEvents.setText("Upcoming: " + upcomingCount);
-    }
-
-    /**
-     * Sets up the spinner to filter events by past and upcoming.
-     *
-     * @param events The list of events to filter.
-     */
-    private void setupEventFilterSpinner(List<Event> events) {
-        Spinner spinner = findViewById(R.id.eventFilterSpinner);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                this,
-                R.layout.custom_spinner_button, // custom no_events_placeholder.xml for each item
-                Arrays.asList("Upcoming Events", "Past Events")
-        );
-
-        // Optional: for dropdown items we can use a simpler style
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        spinner.setAdapter(adapter);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (events == null) return;
-
-                displayEvents(events, position == 0); // 0 = upcoming, 1 = past
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
-    }
 
     /**
      * Sets up the calendar view with the current month and navigation buttons.
@@ -278,12 +233,9 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         CalendarUtilsKt.setupCalendar(calendarView, eventDateSet);
 
         // Toggle visibility
-        btnToggleCalendar.setOnClickListener(v -> {
-            boolean show = calendarView.getVisibility() != View.VISIBLE;
-            calendarView.setVisibility(show ? View.VISIBLE : View.GONE);
-            findViewById(R.id.calendarHeader).setVisibility(show ? View.VISIBLE : View.GONE);
-            btnToggleCalendar.setSelected(show);
-        });
+        calendarView.setVisibility(View.VISIBLE);
+        findViewById(R.id.calendarHeader).setVisibility(View.VISIBLE);
+
 
         // Month name and navigation
         final YearMonth[] currentMonth = {current};
@@ -311,3 +263,4 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     }
 
 }
+
