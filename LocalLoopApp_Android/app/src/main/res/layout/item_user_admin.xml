@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- The horizontal no_events_placeholder.xml of one user card -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:gravity="center_vertical">
+
+    <!-- Text block showing user info -->
+    <TextView
+        android:id="@+id/tv_user_info"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="User info goes here"
+        android:textSize="16sp"
+        android:textColor="#000000"/>
+
+    <!-- three dot menu -->
+    <ImageView
+        android:id="@+id/iv_overflow_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_more"
+        android:contentDescription="User options"
+        android:layout_gravity="end"
+        android:padding="8dp" />
+
+</LinearLayout>

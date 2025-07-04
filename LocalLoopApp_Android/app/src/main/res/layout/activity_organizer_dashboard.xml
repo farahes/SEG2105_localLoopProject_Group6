@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.dashboard_activities.OrganizerDashboardActivity">
+
+    <!-- Top Bar -->
+    <LinearLayout
+        android:id="@+id/appBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#673AB7"
+        android:elevation="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp">
+
+        <ImageView
+            android:id="@+id/logoIcon"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="LocalLoop Logo"
+            android:src="@drawable/locallooplogo" />
+
+        <TextView
+            android:id="@+id/organizerToolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Organizer Dashboard"
+            android:textColor="#FFFFFF"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Main Scrollable Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginBottom="56dp"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Welcome Message -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/welcomeStatsCardContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:elevation="2dp"
+                app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="#F2E7FB">
+
+                <TextView
+                    android:id="@+id/tvWelcomeMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Welcome! You are logged in as Organizer."
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:padding="16dp"
+                    android:gravity="center" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- Calendar Toggle + Header + View -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="12dp">
+
+                <!-- calendar title -->
+                <TextView
+                    android:id="@+id/calendarSectionTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="MY CALENDAR"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#673AB7"
+                    android:drawableStart="@drawable/ic_calendar_month"
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:layout_marginBottom="0dp" />
+
+                <!-- Calendar Month Navigation Header -->
+                <LinearLayout
+                    android:id="@+id/calendarHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:paddingVertical="8dp"
+                    android:visibility="gone">
+
+                    <ImageButton
+                        android:id="@+id/btnPrevMonth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_chevron_left"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="Previous month" />
+
+                    <TextView
+                        android:id="@+id/tvMonthTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="July 2025"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="16dp" />
+
+                    <ImageButton
+                        android:id="@+id/btnNextMonth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_chevron_right"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="Next month" />
+                </LinearLayout>
+
+                <!-- Calendar Widget -->
+                <com.kizitonwose.calendar.view.CalendarView
+                    android:id="@+id/calendarView"
+                    app:cv_dayViewResource="@layout/calendar_day_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp">
+
+
+                <!-- Create New Event -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/fabCreateEvent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="4dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="16dp"
+                            android:contentDescription="Create Event"
+                            android:src="@drawable/ic_add"
+                            android:scaleType="center"
+                            android:importantForAccessibility="no"
+                            app:fabCustomSize="40dp"
+                            app:backgroundTint="#673AB7"
+                            app:tint="#FFF6FC"
+                            app:useCompatPadding="true" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="CREATE NEW EVENT"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+
+                <!-- Manage Events Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/btnManageEvents"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="4dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="16dp"
+                            android:contentDescription="Manage Events"
+                            android:src="@drawable/manageeventsicon"
+                            android:scaleType="centerInside"
+                            app:fabCustomSize="40dp"
+                            app:backgroundTint="#424242"
+                            app:tint="@android:color/white"
+                            app:useCompatPadding="true" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MANAGE EVENTS"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#000000" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Manage Registrations Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/btnManageRegistration"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="4dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="16dp"
+                            android:contentDescription="Manage Registrations"
+                            android:src="@drawable/manageregistrationicon"
+                            android:scaleType="centerInside"
+                            app:fabCustomSize="40dp"
+                            app:backgroundTint="#424242"
+                            app:tint="@android:color/white"
+                            app:useCompatPadding="true" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MANAGE REGISTRATIONS "
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#000000" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+
+            </LinearLayout>
+
+            <!-- Events List Placeholder -->
+            <FrameLayout
+                android:id="@+id/noEventsPlaceholder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:gravity="center"
+                android:visibility="gone">
+
+                <include layout="@layout/no_events_placeholder" />
+            </FrameLayout>
+
+
+
+        <LinearLayout
+                android:id="@+id/eventListContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="?android:attr/dividerHorizontal"
+                android:showDividers="middle"
+                android:dividerPadding="8dp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation (unchanged) -->
+    <LinearLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        android:paddingVertical="4dp"
+        android:weightSum="3">
+
+        <!-- Profile -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Profile"
+                android:scaleType="centerInside"
+                android:src="@drawable/profilebutton" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ACCOUNT"
+                android:textSize="10sp"
+                android:textColor="#00BCD4"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Home -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnHome"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Home"
+                android:scaleType="centerInside"
+                android:src="@drawable/homebutton" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HOME"
+                android:textSize="10sp"
+                android:textColor="#00BCD4"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Notifications -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnNotifications"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Notification Center"
+                android:scaleType="centerInside"
+                android:src="@drawable/notificationcentrebutton" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="INBOX"
+                android:textSize="10sp"
+                android:textColor="#00BCD4"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
