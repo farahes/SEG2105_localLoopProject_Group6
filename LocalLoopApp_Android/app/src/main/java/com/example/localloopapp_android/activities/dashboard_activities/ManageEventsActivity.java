@@ -61,6 +61,8 @@ public class ManageEventsActivity extends AppCompatActivity {
 
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
+        String organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
+        viewModel.setOrganizerId(organizerId);
         viewModel.getEventsLiveData().observe(this, events -> {
             allEvents = events;
             showUpcomingEvents(); // default
