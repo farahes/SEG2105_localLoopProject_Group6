@@ -32,5 +32,11 @@ public class ParticipantDashboardActivity extends AppCompatActivity {
         welcomeText.setText(firstName != null
                 ? "Welcome " + firstName + "! You are logged in as Participant."
                 : "Welcome, Participant!");
+
+        Button btnSearchEvents = findViewById(R.id.btnSearchEvents);
+        btnSearchEvents.setOnClickListener(v -> {
+            Intent intent = new Intent(this, com.example.localloopapp_android.activities.participant.ParticipantEventSearchActivity.class);
+            startActivity(intent);
+        });
     }
 }
