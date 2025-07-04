@@ -20,7 +20,7 @@ import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class ManageEventActivity extends AppCompatActivity {
+public class CreateEventActivity extends AppCompatActivity {
 
     private EditText etName, etDesc, etFee, etStartDate, etEndDate;
     private Spinner spinnerCategory;
@@ -41,7 +41,7 @@ public class ManageEventActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_manage_event);
+        setContentView(R.layout.activity_create_event);
 
         // Get extras
         organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
