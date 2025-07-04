@@ -103,45 +103,94 @@
     </ScrollView>
 
     <!-- Bottom Navigation Bar -->
+    <!-- Bottom Navigation Bar (same as Admin) -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_gravity="bottom"
-        android:orientation="horizontal"
         android:background="#FFFFFF"
-        android:weightSum="3"
         android:elevation="8dp"
-        android:paddingVertical="4dp">
+        android:orientation="horizontal"
+        android:paddingVertical="4dp"
+        android:weightSum="3">
 
-        <ImageButton
-            android:id="@+id/btnProfile"
+        <!-- Profile -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/profilebutton"
-            android:background="@android:color/transparent"
-            android:contentDescription="Profile"
-            android:scaleType="centerInside" />
+            android:orientation="vertical"
+            android:gravity="center">
 
-        <ImageButton
-            android:id="@+id/btnHome"
+            <ImageButton
+                android:id="@+id/btnProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Profile"
+                android:scaleType="centerInside"
+                android:src="@drawable/profilebutton" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ACCOUNT"
+                android:textSize="10sp"
+                android:textColor="#00BCD4"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
+
+        <!-- Home -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/homebutton"
-            android:background="@android:color/transparent"
-            android:contentDescription="Home"
-            android:scaleType="centerInside" />
+            android:orientation="vertical"
+            android:gravity="center">
 
-        <ImageButton
-            android:id="@+id/btnNotifications"
+            <ImageButton
+                android:id="@+id/btnHome"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Home"
+                android:scaleType="centerInside"
+                android:src="@drawable/homebutton" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HOME"
+                android:textSize="10sp"
+                android:textColor="#00BCD4"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
+
+        <!-- Notifications -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/notificationcentrebutton"
-            android:background="@android:color/transparent"
-            android:contentDescription="Notification Center"
-            android:scaleType="centerInside" />
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnNotifications"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Notification Center"
+                android:scaleType="centerInside"
+                android:src="@drawable/notificationcentrebutton" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MAIL"
+                android:textSize="10sp"
+                android:textColor="#00BCD4"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
