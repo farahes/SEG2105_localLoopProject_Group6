@@ -61,6 +61,13 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="12dp" />
 
+            <Button
+                android:id="@+id/btnSearchEvents"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Search Events"
+                android:layout_marginTop="16dp"/>
+
 
         </LinearLayout>
     </ScrollView>
