@@ -167,6 +167,13 @@ public class ManageEventsActivity extends AppCompatActivity {
                 TextView tvCategory = card.findViewById(R.id.tvEventCategory);
                 tvCategory.setText(categoryName != null ? categoryName : "Unknown Category");
 
+                // Set event description
+                TextView tvDesc = card.findViewById(R.id.tvEventDescription);
+                tvDesc.setText(e.getDescription());
+
+                // Set event fee
+                TextView tvFee = card.findViewById(R.id.tvEventFee);
+                tvFee.setText("Fee: $" + String.format("%.2f", e.getFee()));
 
                 nameView.setText(e.getName());
                 locationView.setText(e.getLocation());
