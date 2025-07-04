@@ -150,7 +150,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 if (!selectedCategoryIds.isEmpty() && (event.getCategoryId() == null ||
                         !selectedCategoryIds.contains(event.getCategoryId()))) continue;
                 // Fee filter
-                double fee = event.getParticipationFee();
+                double fee = event.getFee();
                 if ("Free".equals(feeOption) && fee != 0) continue;
                 if ("< $50".equals(feeOption) && !(fee > 0 && fee < 50)) continue;
                 if ("> $50".equals(feeOption) && !(fee > 50)) continue;
@@ -178,11 +178,11 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 View card = getLayoutInflater().inflate(R.layout.participant_event_card, resultsContainer, false);
                 ((TextView) card.findViewById(R.id.tvEventName)).setText(event.getName());
                 ((TextView) card.findViewById(R.id.tvEventDescription)).setText(event.getDescription());
-                ((TextView) card.findViewById(R.id.tvEventCategory)).setText(event.getCategoryName());
-                ((TextView) card.findViewById(R.id.tvEventFee)).setText(event.getParticipationFee() == 0 ? "Free" : "$" + event.getParticipationFee());
+                ((TextView) card.findViewById(R.id.tvEventCategory)).setText(getCategoryName(event));
+                ((TextView) card.findViewById(R.id.tvEventFee)).setText(event.getFee() == 0 ? "Free" : "$" + event.getFee());
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
                 String dateTime = sdf.format(new Date(event.getEventStart())) + " - " + sdf.format(new Date(event.getEventEnd()));
-(               (TextView) card.findViewById(R.id.tvEventDateTime)).setText(dateTime);
+                ((TextView) card.findViewById(R.id.tvEventDateTime)).setText(dateTime);
                 resultsContainer.addView(card);
             }
             if (resultsContainer.getChildCount() == 0) {
@@ -192,5 +192,15 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             }
         });
         eventViewModel.fetchEvents();
+    }
+
+    private String getCategoryName(Event event) {
+        String categoryId = event.getCategoryId();
+        for (Category category : allCategories) {
+            if (category.getCategoryId().equals(categoryId)) {
+                return category.getName();
+            }
+        }
+        return "Unknown";
     }
 }
