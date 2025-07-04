@@ -49,7 +49,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
     /**
      * Sets up the Create Account screen. Initializes Firebase, configures UI components,
-     * and applies edge-to-edge layout. Hides the company name field unless "Organizer" is checked.
+     * and applies edge-to-edge no_events_placeholder.xml. Hides the company name field unless "Organizer" is checked.
      * Registers a listener to trigger account creation on button press.
      */
     @Override

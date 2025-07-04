@@ -49,6 +49,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     private TextView tvPastEvents, tvUpcomingEvents, tvMonthTitle;
     private AppCompatButton btnToggleCalendar;
     private ImageButton btnPrevMonth, btnNextMonth;
+    private View noEventsPlaceholder; // Placeholder for no events
     CalendarView calendarView;
     private OrganizerViewModel viewModel;
     private LinearLayout eventListContainer;
@@ -72,7 +73,6 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         setupCalendar();
         setupFabButton();
     }
-
 
 
     //-------------------------Supporting-Methods---------------------------------
@@ -108,6 +108,8 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         btnPrevMonth = findViewById(R.id.btnPrevMonth);
         btnNextMonth = findViewById(R.id.btnNextMonth);
         calendarView = findViewById(R.id.calendarView);
+
+        noEventsPlaceholder = findViewById(R.id.noEventsPlaceholder);
     }
 
     /**
@@ -163,39 +165,47 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 .sorted(Comparator.comparingLong(Event::getEventStart))
                 .toList();
 
-        // Choose color
-        String blob = showUpcoming ? "🟣" : "🔵";
+        if (filteredEvents.isEmpty()) {
+            noEventsPlaceholder.setVisibility(View.VISIBLE);
+        } else {
+            noEventsPlaceholder.setVisibility(View.GONE);
+            // render event cards
 
-        for (Event event : filteredEvents) {
-            View card = inflater.inflate(R.layout.item_event_card, eventListContainer, false);
+            // Choose color
+            String blob = showUpcoming ? "🟣" : "🔵";
 
-            TextView nameView = card.findViewById(R.id.tvEventName);
-            TextView descView = card.findViewById(R.id.tvEventDescription);
-            TextView feeView = card.findViewById(R.id.tvEventFee);
-            TextView dateView = card.findViewById(R.id.tvEventTime);
+            for (Event event : filteredEvents) {
+                View card = inflater.inflate(R.layout.item_event_card, eventListContainer, false);
 
-            nameView.setText(blob + " " + event.getName());
-            descView.setText(event.getDescription());
-            if (event.getFee() == 0.0) {
-                feeView.setText("Free");
-                feeView.setTextColor(Color.parseColor("#4CAF50")); // Material green
-                feeView.setTypeface(null, Typeface.BOLD);
-            } else {
-                feeView.setText("Fee: $" + event.getFee());
-                feeView.setTextColor(Color.BLACK); // to the normal color
-                feeView.setTypeface(null, Typeface.NORMAL);
+                TextView nameView = card.findViewById(R.id.tvEventName);
+                TextView descView = card.findViewById(R.id.tvEventDescription);
+                TextView feeView = card.findViewById(R.id.tvEventFee);
+                TextView dateView = card.findViewById(R.id.tvEventTime);
+
+                nameView.setText(blob + " " + event.getName());
+                descView.setText(event.getDescription());
+                if (event.getFee() == 0.0) {
+                    feeView.setText("Free");
+                    feeView.setTextColor(Color.parseColor("#4CAF50")); // Material green
+                    feeView.setTypeface(null, Typeface.BOLD);
+                } else {
+                    feeView.setText("Fee: $" + event.getFee());
+                    feeView.setTextColor(Color.BLACK); // to the normal color
+                    feeView.setTypeface(null, Typeface.NORMAL);
+                }
+
+                dateView.setText("📅 " + Constants.formatDate(event.getEventStart()));
+
+                card.setOnClickListener(v -> {
+                    Intent intent = new Intent(this, ManageEventActivity.class);
+                    intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
+                    intent.putExtra(Constants.EXTRA_EVENT_OBJECT, event);
+                    startActivity(intent);
+                });
+
+                eventListContainer.addView(card);
             }
 
-            dateView.setText("📅 " + Constants.formatDate(event.getEventStart()));
-
-            card.setOnClickListener(v -> {
-                Intent intent = new Intent(this, ManageEventActivity.class);
-                intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
-                intent.putExtra(Constants.EXTRA_EVENT_OBJECT, event);
-                startActivity(intent);
-            });
-
-            eventListContainer.addView(card);
         }
     }
 
@@ -230,7 +240,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,
-                R.layout.custom_spinner_button, // custom layout for each item
+                R.layout.custom_spinner_button, // custom no_events_placeholder.xml for each item
                 Arrays.asList("Upcoming Events", "Past Events")
         );
 
@@ -292,10 +302,6 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         });
     }
 
-    // helper method to check if there is an event on a specific date
-    private boolean hasEventOnDate(LocalDate date) {
-        return eventDateSet.contains(date);
-    }
 
     // Helper method to update the month header in the calendar view
     private void updateMonthHeader(TextView header, YearMonth yearMonth) {
