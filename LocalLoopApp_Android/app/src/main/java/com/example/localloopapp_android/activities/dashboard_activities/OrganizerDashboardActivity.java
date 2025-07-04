@@ -6,12 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,13 +16,12 @@ import androidx.cardview.widget.CardView;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
-import com.example.localloopapp_android.activities.ManageEventActivity;
+import com.example.localloopapp_android.activities.CreateEventActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
 import com.example.localloopapp_android.utils.CalendarUtilsKt;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.kizitonwose.calendar.view.CalendarView;
 
 import java.time.DayOfWeek;
@@ -40,7 +35,6 @@ import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
 import java.util.HashSet;
@@ -139,7 +133,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         CardView manageRegistrationCard = findViewById(R.id.btnManageRegistration);
 
         fabCreateEvent.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ManageEventActivity.class);
+            Intent intent = new Intent(this, CreateEventActivity.class);
             intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
             startActivity(intent);
         });
@@ -206,7 +200,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 dateView.setText("📅 " + Constants.formatDate(event.getEventStart()));
 
                 card.setOnClickListener(v -> {
-                    Intent intent = new Intent(this, ManageEventActivity.class);
+                    Intent intent = new Intent(this, CreateEventActivity.class);
                     intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
                     intent.putExtra(Constants.EXTRA_EVENT_OBJECT, event);
                     startActivity(intent);
