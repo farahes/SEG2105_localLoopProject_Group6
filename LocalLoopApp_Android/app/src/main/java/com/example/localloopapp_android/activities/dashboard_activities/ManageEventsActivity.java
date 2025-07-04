@@ -13,6 +13,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.Observer;
+import com.example.localloopapp_android.models.Category;
+import com.example.localloopapp_android.viewmodels.CategoryViewModel;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.activities.CreateEventActivity;
@@ -22,6 +28,7 @@ import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
 
 import java.util.Comparator;
 import java.util.List;
+
 
 public class ManageEventsActivity extends AppCompatActivity {
 
@@ -33,6 +40,9 @@ public class ManageEventsActivity extends AppCompatActivity {
 
     private List<Event> allEvents;
 
+    private CategoryViewModel categoryViewModel;
+    private Map<String, String> categoryIdToName = new HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +52,14 @@ public class ManageEventsActivity extends AppCompatActivity {
         setupViewModel();
         setupTabs();
         applyInitialTabStyle();
+        CategoryViewModel categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
+        categoryViewModel.getCategories().observe(this, categories -> {
+            categoryIdToName.clear();
+            for (Category c : categories) {
+                categoryIdToName.put(c.getCategoryId(), c.getName());
+            }
+            // Optionally refresh event list UI here if needed
+        });
 
     }
 
@@ -61,6 +79,8 @@ public class ManageEventsActivity extends AppCompatActivity {
 
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
+        categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
+
         String organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
         viewModel.setOrganizerId(organizerId);
         viewModel.getEventsLiveData().observe(this, events -> {
@@ -69,6 +89,14 @@ public class ManageEventsActivity extends AppCompatActivity {
         });
 
         viewModel.fetchEventsByOrganizer();
+
+        // Observe categories
+        categoryViewModel.getCategories().observe(this, categories -> {
+            categoryIdToName.clear();
+            for (Category category : categories) {
+                categoryIdToName.put(category.getCategoryId(), category.getName());
+            }
+        });
     }
 
     private void setupTabs() {
@@ -132,6 +160,13 @@ public class ManageEventsActivity extends AppCompatActivity {
 
                 TextView timeView = card.findViewById(R.id.tvEventTime);
                 TextView categoryView = card.findViewById(R.id.tvEventCategory);
+
+
+                // Set category name
+                String categoryName = categoryIdToName.get(e.getCategoryId());
+                TextView tvCategory = card.findViewById(R.id.tvEventCategory);
+                tvCategory.setText(categoryName != null ? categoryName : "Unknown Category");
+
 
                 nameView.setText(e.getName());
                 locationView.setText(e.getLocation());
