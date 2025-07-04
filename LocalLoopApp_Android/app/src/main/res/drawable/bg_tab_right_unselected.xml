@@ -1,7 +1,8 @@
+<!-- Example for bg_tab_left_unselected.xml -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="#F2E7FB"/> <!-- Softer light purple -->
+    <solid android:color="@color/purple_200"/>
     <corners
-        android:topLeftRadius="24dp"
+        android:topLeftRadius="0dp"
         android:topRightRadius="24dp"
         android:bottomLeftRadius="0dp"
         android:bottomRightRadius="0dp"/>

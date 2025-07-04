@@ -31,12 +31,10 @@ import java.util.List;
 
 
 public class ManageEventsActivity extends AppCompatActivity {
-
+    private Button btnUpcoming, btnEventHistory;
     private LinearLayout eventListContainer;
     private View noEventsPlaceholder;
     private OrganizerViewModel viewModel;
-
-    private Button btnUpcoming, btnEventHistory;
 
     private List<Event> allEvents;
 
@@ -51,7 +49,9 @@ public class ManageEventsActivity extends AppCompatActivity {
         setupUI();
         setupViewModel();
         setupTabs();
+
         applyInitialTabStyle();
+
         CategoryViewModel categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         categoryViewModel.getCategories().observe(this, categories -> {
             categoryIdToName.clear();
@@ -60,6 +60,13 @@ public class ManageEventsActivity extends AppCompatActivity {
             }
             // Optionally refresh event list UI here if needed
         });
+
+        // Bind views
+        btnUpcoming = findViewById(R.id.btnUpcoming);
+        btnEventHistory = findViewById(R.id.btnEventHistory);
+        eventListContainer = findViewById(R.id.eventListContainer);
+        noEventsPlaceholder = findViewById(R.id.noEventsPlaceholder);
+
 
     }
 
@@ -117,15 +124,16 @@ public class ManageEventsActivity extends AppCompatActivity {
             btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
 
             btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
-            btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_700));
+            btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // lighter purple here
         } else {
             btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_unselected);
-            btnUpcoming.setTextColor(ContextCompat.getColor(this, R.color.purple_700));
+            btnUpcoming.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // lighter purple here
 
             btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_selected);
             btnEventHistory.setTextColor(ContextCompat.getColor(this, android.R.color.white));
         }
     }
+
 
 
     private void showUpcomingEvents() {
@@ -199,13 +207,13 @@ public class ManageEventsActivity extends AppCompatActivity {
         }
     }
     private void applyInitialTabStyle() {
-        // Set default: UPCOMING selected
         btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_selected);
         btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
 
         btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
-        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_700));
+        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_700));  // Use lighter purple here
     }
+
 
 
 }
