@@ -150,7 +150,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="MAIL"
+                android:text="INBOX"
                 android:textSize="10sp"
                 android:textColor="#00BCD4"
                 android:layout_marginTop="2dp"/>

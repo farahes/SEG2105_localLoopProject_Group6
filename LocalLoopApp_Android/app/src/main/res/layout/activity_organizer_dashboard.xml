@@ -48,201 +48,252 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- 🟪 Welcome + Stats Card -->
+            <!-- Welcome Message -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/welcomeStatsCardContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="12dp"
-                android:animateLayoutChanges="true"
+                android:layout_marginBottom="12dp"
                 android:elevation="2dp"
-                app:cardBackgroundColor="#F2E7FB"
-                app:cardCornerRadius="12dp">
+                app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="#F2E7FB">
 
-                <LinearLayout
-                    android:id="@+id/welcomeStatsCard"
+                <TextView
+                    android:id="@+id/tvWelcomeMessage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-
-                    <!-- 👋 Welcome Message -->
-                    <TextView
-                        android:id="@+id/tvWelcomeMessage"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="Welcome! You are logged in as Organizer."
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <!-- 📊 Stats Row: Upcoming / Past -->
-                    <LinearLayout
-                        android:id="@+id/statsContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginBottom="4dp"
-                        android:orientation="horizontal"
-                        android:weightSum="2">
-
-                        <TextView
-                            android:id="@+id/tvUpcomingEvents"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:padding="4dp"
-                            android:text="Upcoming: 0"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvPastEvents"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:padding="4dp"
-                            android:text="Past Events: 0"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
+                    android:text="Welcome! You are logged in as Organizer."
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:padding="16dp"
+                    android:gravity="center" />
             </androidx.cardview.widget.CardView>
 
-            <!-- separator line -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="2dp"
-                android:background="#DDDDDD" />
-
-            <!-- 🔵 Filter Spinner (styled like a button, placed below card) -->
+            <!-- Calendar Toggle + Header + View -->
             <LinearLayout
-                android:id="@+id/buttonRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="12dp">
+                android:orientation="vertical"
+                android:layout_marginBottom="12dp">
 
-                <!-- Existing Spinner styled as button -->
-                <Spinner
-                    android:id="@+id/eventFilterSpinner"
-                    android:layout_width="235dp"
+                <!-- calendar title -->
+                <TextView
+                    android:id="@+id/calendarSectionTitle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="0"
-                    android:background="@null"
-                    android:spinnerMode="dropdown" />
-
-                <!-- Calendar Toggle Button -->
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btnToggleCalendar"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_calendar_toggle"
-                    android:text="Calendar"
-                    android:textColor="#673AB7"
-                    android:textSize="14sp"
+                    android:text="MY CALENDAR"
+                    android:textSize="16sp"
                     android:textStyle="bold"
+                    android:textColor="#673AB7"
                     android:drawableStart="@drawable/ic_calendar_month"
                     android:drawablePadding="8dp"
                     android:gravity="center_vertical"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp" />
+                    android:padding="16dp"
+                    android:layout_marginBottom="0dp" />
+
+                <!-- Calendar Month Navigation Header -->
+                <LinearLayout
+                    android:id="@+id/calendarHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:paddingVertical="8dp"
+                    android:visibility="gone">
+
+                    <ImageButton
+                        android:id="@+id/btnPrevMonth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_chevron_left"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="Previous month" />
+
+                    <TextView
+                        android:id="@+id/tvMonthTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="July 2025"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="16dp" />
+
+                    <ImageButton
+                        android:id="@+id/btnNextMonth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_chevron_right"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="Next month" />
+                </LinearLayout>
+
+                <!-- Calendar Widget -->
+                <com.kizitonwose.calendar.view.CalendarView
+                    android:id="@+id/calendarView"
+                    app:cv_dayViewResource="@layout/calendar_day_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="gone" />
             </LinearLayout>
 
+
+            <!-- Action Buttons -->
             <LinearLayout
-                android:id="@+id/calendarHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:paddingVertical="8dp"
-                android:visibility="gone">
+                android:orientation="vertical"
+                android:layout_marginTop="8dp">
 
-                <ImageButton
-                    android:id="@+id/btnPrevMonth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_chevron_left"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:contentDescription="Previous month" />
 
-                <TextView
-                    android:id="@+id/tvMonthTitle"
-                    android:layout_width="wrap_content"
+                <!-- Create New Event -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/fabCreateEvent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="July 2025"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:paddingHorizontal="16dp" />
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="4dp">
 
-                <ImageButton
-                    android:id="@+id/btnNextMonth"
-                    android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="16dp"
+                            android:contentDescription="Create Event"
+                            android:src="@drawable/ic_add"
+                            android:scaleType="center"
+                            android:importantForAccessibility="no"
+                            app:fabCustomSize="40dp"
+                            app:backgroundTint="#673AB7"
+                            app:tint="#FFF6FC"
+                            app:useCompatPadding="true" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="CREATE NEW EVENT"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+
+                <!-- Manage Events Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/btnManageEvents"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_chevron_right"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:contentDescription="Next month" />
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="4dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="16dp"
+                            android:contentDescription="Manage Events"
+                            android:src="@drawable/manageeventsicon"
+                            android:scaleType="centerInside"
+                            app:fabCustomSize="40dp"
+                            app:backgroundTint="#424242"
+                            app:tint="@android:color/white"
+                            app:useCompatPadding="true" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MANAGE EVENTS"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#000000" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Manage Registrations Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/btnManageRegistration"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="4dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="16dp"
+                            android:contentDescription="Manage Registrations"
+                            android:src="@drawable/manageregistrationicon"
+                            android:scaleType="centerInside"
+                            app:fabCustomSize="40dp"
+                            app:backgroundTint="#424242"
+                            app:tint="@android:color/white"
+                            app:useCompatPadding="true" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MANAGE REGISTRATIONS "
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#000000" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+
             </LinearLayout>
 
-            <!-- 🗓️ Calendar View (hidden by default) -->
-            <com.kizitonwose.calendar.view.CalendarView
-                android:id="@+id/calendarView"
-                app:cv_dayViewResource="@layout/calendar_day_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp" />
-
-            <!-- 📅 No Events Placeholder -->
+            <!-- Events List Placeholder -->
             <FrameLayout
                 android:id="@+id/noEventsPlaceholder"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_marginTop="16dp"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:gravity="center"
                 android:visibility="gone">
 
-                <include
-                    layout="@layout/no_events_placeholder" />
+                <include layout="@layout/no_events_placeholder" />
             </FrameLayout>
 
-            <!-- 📋 Events List Container -->
-            <LinearLayout
+
+
+        <LinearLayout
                 android:id="@+id/eventListContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:divider="?android:attr/dividerHorizontal"
-                android:dividerPadding="8dp"
                 android:orientation="vertical"
-                android:showDividers="middle" />
+                android:divider="?android:attr/dividerHorizontal"
+                android:showDividers="middle"
+                android:dividerPadding="8dp" />
         </LinearLayout>
     </ScrollView>
 
-    <!-- Floating Create Event Button | FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabCreateEvent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="72dp"
-        android:backgroundTint="#673AB7"
-        android:contentDescription="Create Event"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_add"
-        app:fabSize="normal"
-        app:maxImageSize="36dp"
-        app:tint="#FFF6FC" />
-
-    <!-- Bottom Navigation Bar (same as Admin) -->
+    <!-- Bottom Navigation (unchanged) -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
@@ -277,7 +328,7 @@
                 android:text="ACCOUNT"
                 android:textSize="10sp"
                 android:textColor="#00BCD4"
-                android:layout_marginTop="2dp"/>
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
         <!-- Home -->
@@ -303,7 +354,7 @@
                 android:text="HOME"
                 android:textSize="10sp"
                 android:textColor="#00BCD4"
-                android:layout_marginTop="2dp"/>
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
         <!-- Notifications -->
@@ -326,12 +377,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="MAIL"
+                android:text="INBOX"
                 android:textSize="10sp"
                 android:textColor="#00BCD4"
-                android:layout_marginTop="2dp"/>
+                android:layout_marginTop="2dp" />
         </LinearLayout>
     </LinearLayout>
-
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
