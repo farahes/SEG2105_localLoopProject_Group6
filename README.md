@@ -42,7 +42,7 @@ Blue: #62CDD9\
 Purple Primary: #673AB7\
 Secondary Lighter Purple: #8F50E7\
 Tertiary Grey: #8F50E7\
-Tertiary Black: #373D3F (Used for text)\
+Tertiary Black: #373D3F (Used for text)
 
 ### Figma Wirefranes
 - Used to plan our design.
