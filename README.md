@@ -34,21 +34,21 @@ LocalLoop is a role-based community event management app built in Java for Andro
 
 ### 🛠 Technologies
 1. Android Studio Koala (API 33+)
-2. Java
+2. Java & Kotlin
 3. Firebase Realtime Database
 
 ### Color Scheme Used
-Blue: #62CDD9
-Purple Primary: #673AB7
-Secondary Lighter Purple: #8F50E7
-Tertiary Grey: #8F50E7
-Tertiary Black: #373D3F ( Used for text ) 
+Blue: #62CDD9\
+Purple Primary: #673AB7\
+Secondary Lighter Purple: #8F50E7\
+Tertiary Grey: #8F50E7\
+Tertiary Black: #373D3F (Used for text)\
 
 ### Figma Wirefranes
 - Used to plan our design.
-- Link: 
+- Link: TBD
 
-`Version: 07-03-2025`
+`Version: 07-04-2025`
 
 
 
