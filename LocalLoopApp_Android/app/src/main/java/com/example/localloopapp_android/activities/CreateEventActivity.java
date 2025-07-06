@@ -116,6 +116,7 @@ public class CreateEventActivity extends AppCompatActivity {
                     Toast.makeText(this, "Invalid fee amount", Toast.LENGTH_SHORT).show();
                     return;
                 }
+            }
 
             long start = eventStartCalendar.getTimeInMillis();
             long end = eventEndCalendar.getTimeInMillis();
