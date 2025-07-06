@@ -183,6 +183,13 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 TextView feeView = card.findViewById(R.id.tvEventFee);
                 TextView dateView = card.findViewById(R.id.tvEventDate);
 
+                TextView timeView = card.findViewById(R.id.tvEventTime);
+                long startMillis = event.getEventStart();
+                long endMillis = event.getEventEnd();
+                java.text.SimpleDateFormat timeFormat = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+                String timeStr = timeFormat.format(new java.util.Date(startMillis)) + " - " + timeFormat.format(new java.util.Date(endMillis));
+                timeView.setText(timeStr);
+
                 nameView.setText(blob + " " + event.getName());
                 descView.setText(event.getDescription());
                 if (event.getFee() == 0.0) {
