@@ -229,7 +229,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         calendarView.scrollToMonth(current);
 
         // Configure how each day looks
-        CalendarUtilsKt.setupCalendar(calendarView, eventDateSet);
+        CalendarUtilsKt.setupCalendar(calendarView, eventDateSet, date -> showEventsForDate(date));
 
         // Toggle visibility
         calendarView.setVisibility(View.VISIBLE);
@@ -251,6 +251,44 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             calendarView.scrollToMonth(currentMonth[0]);
             updateMonthHeader(tvMonthTitle, currentMonth[0]);
         });
+    }
+
+
+    private void showEventsForDate(java.time.LocalDate date) {
+        List<Event> allEvents = viewModel.getEventsLiveData().getValue();
+        if (allEvents == null) return;
+
+        List<Event> eventsForDay = allEvents.stream()
+            .filter(event -> {
+                java.time.LocalDate eventDate = java.time.Instant.ofEpochMilli(event.getEventStart())
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toLocalDate();
+                return eventDate.equals(date);
+            })
+            .toList();
+
+        if (eventsForDay.isEmpty()) {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Events")
+                .setMessage("No events for this day.")
+                .setPositiveButton("OK", null)
+                .show();
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Event event : eventsForDay) {
+            sb.append(event.getName())
+            .append(" (")
+            .append(new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(new java.util.Date(event.getEventStart())))
+            .append(")\n");
+        }
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Events on " + date.toString())
+            .setMessage(sb.toString())
+            .setPositiveButton("OK", null)
+            .show();
     }
 
 
