@@ -189,9 +189,14 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                     tvFee.setTextColor(getResources().getColor(android.R.color.black, null));
                     tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
                 }
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-                String dateTime = sdf.format(new Date(event.getEventStart())) + " - " + sdf.format(new Date(event.getEventEnd()));
-                ((TextView) card.findViewById(R.id.tvEventDateTime)).setText(dateTime);
+                // Set date and time separately
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                String dateStr = dateFormat.format(new Date(event.getEventStart()));
+                String timeStr = timeFormat.format(new Date(event.getEventStart())) + " - " + timeFormat.format(new Date(event.getEventEnd()));
+                ((TextView) card.findViewById(R.id.tvEventDate)).setText(dateStr);
+                ((TextView) card.findViewById(R.id.tvEventTime)).setText(timeStr);
+
                 resultsContainer.addView(card);
             }
             if (resultsContainer.getChildCount() == 0) {
