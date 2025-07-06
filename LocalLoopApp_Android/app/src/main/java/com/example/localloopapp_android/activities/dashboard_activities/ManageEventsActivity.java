@@ -29,6 +29,10 @@ import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
 import java.util.Comparator;
 import java.util.List;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Date;
+
 
 public class ManageEventsActivity extends AppCompatActivity {
     private Button btnUpcoming, btnEventHistory;
