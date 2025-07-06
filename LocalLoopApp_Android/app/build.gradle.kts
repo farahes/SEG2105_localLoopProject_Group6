@@ -51,6 +51,9 @@ dependencies {
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-auth:23.2.1")
 
+    // Google Places Autocomplete
+    implementation("com.google.android.libraries.places:places:3.4.0")
+
     dependencies {
         // The view calendar library for Android
         implementation("com.kizitonwose.calendar:view:2.4.0")
