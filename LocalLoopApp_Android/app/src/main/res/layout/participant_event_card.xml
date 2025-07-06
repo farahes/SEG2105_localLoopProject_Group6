@@ -49,5 +49,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="Time"/>
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

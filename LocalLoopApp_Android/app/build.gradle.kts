@@ -43,6 +43,8 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation("com.airbnb.android:lottie:6.1.0")
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+// check latest version
 
     // Firebase BOM for version management
     implementation(platform("com.google.firebase:firebase-bom:32.1.1"))
