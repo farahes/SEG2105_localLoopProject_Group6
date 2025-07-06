@@ -167,6 +167,12 @@ public class ManageEventsActivity extends AppCompatActivity {
                 TextView dateView = card.findViewById(R.id.tvEventDate);
 
                 TextView timeView = card.findViewById(R.id.tvEventTime);
+                long startMillis = e.getEventStart();
+                long endMillis = e.getEventEnd();
+                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                String timeStr = timeFormat.format(new Date(startMillis)) + " - " + timeFormat.format(new Date(endMillis));
+                timeView.setText(timeStr);
+
                 TextView categoryView = card.findViewById(R.id.tvEventCategory);
 
 
