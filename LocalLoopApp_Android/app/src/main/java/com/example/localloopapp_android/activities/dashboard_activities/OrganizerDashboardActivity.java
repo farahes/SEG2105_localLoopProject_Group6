@@ -3,7 +3,6 @@ package com.example.localloopapp_android.activities.dashboard_activities;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -17,7 +16,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.activities.CreateEventActivity;
-import com.example.localloopapp_android.activities.dashboard_activities.ManageEventsActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
@@ -40,6 +38,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.HashSet;
+
+import kotlin.Unit;
 
 public class OrganizerDashboardActivity extends AppCompatActivity {
 
@@ -230,7 +230,6 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
         // Configure how each day looks
         CalendarUtilsKt.setupCalendar(calendarView, eventDateSet, date -> showEventsForDate(date));
-
         // Toggle visibility
         calendarView.setVisibility(View.VISIBLE);
         findViewById(R.id.calendarHeader).setVisibility(View.VISIBLE);
@@ -254,9 +253,9 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     }
 
 
-    private void showEventsForDate(java.time.LocalDate date) {
+    private Unit showEventsForDate(LocalDate date) {
         List<Event> allEvents = viewModel.getEventsLiveData().getValue();
-        if (allEvents == null) return;
+        if (allEvents == null) return null;
 
         List<Event> eventsForDay = allEvents.stream()
             .filter(event -> {
@@ -273,7 +272,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 .setMessage("No events for this day.")
                 .setPositiveButton("OK", null)
                 .show();
-            return;
+            return null;
         }
 
         StringBuilder sb = new StringBuilder();
@@ -289,6 +288,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             .setMessage(sb.toString())
             .setPositiveButton("OK", null)
             .show();
+        return null;
     }
 
 
