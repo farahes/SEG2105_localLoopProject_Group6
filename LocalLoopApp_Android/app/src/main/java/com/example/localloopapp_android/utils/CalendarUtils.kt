@@ -17,7 +17,8 @@ class DayViewContainer(view: View) : ViewContainer(view) {
 
 fun setupCalendar(
     calendarView: CalendarView,
-    eventDates: Set<LocalDate>
+    eventDates: Set<LocalDate>,
+    onDayClicked: ((LocalDate) -> Unit)? = null // <-- add this
 ) {
     // Define how each day should look
     calendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
@@ -43,6 +44,11 @@ fun setupCalendar(
                 container.dotView.visibility = View.GONE
             }
 
+            container.textView.setOnClickListener {
+                if (data.position == com.kizitonwose.calendar.core.DayPosition.MonthDate) {
+                    onDayClicked?.invoke(data.date)
+                }
+            }
         }
     }
 }
