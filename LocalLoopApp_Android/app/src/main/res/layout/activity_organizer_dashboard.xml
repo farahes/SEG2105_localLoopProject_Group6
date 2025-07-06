@@ -66,21 +66,22 @@
                 android:layout_marginBottom="12dp">
 
                 <!-- calendar title -->
+
+                <!-- Calendar Month Navigation Header -->
                 <TextView
                     android:id="@+id/calendarSectionTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="MY CALENDAR"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#673AB7"
+                    android:layout_marginBottom="0dp"
                     android:drawableStart="@drawable/ic_calendar_month"
                     android:drawablePadding="8dp"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:layout_marginBottom="0dp" />
+                    android:text="MY CALENDAR"
+                    android:textColor="#673AB7"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-                <!-- Calendar Month Navigation Header -->
                 <LinearLayout
                     android:id="@+id/calendarHeader"
                     android:layout_width="match_parent"

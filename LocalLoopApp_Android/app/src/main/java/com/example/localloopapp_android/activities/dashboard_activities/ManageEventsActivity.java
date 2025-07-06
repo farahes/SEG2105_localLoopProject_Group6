@@ -29,6 +29,10 @@ import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
 import java.util.Comparator;
 import java.util.List;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Date;
+
 
 public class ManageEventsActivity extends AppCompatActivity {
     private Button btnUpcoming, btnEventHistory;
@@ -167,6 +171,12 @@ public class ManageEventsActivity extends AppCompatActivity {
                 TextView dateView = card.findViewById(R.id.tvEventDate);
 
                 TextView timeView = card.findViewById(R.id.tvEventTime);
+                long startMillis = e.getEventStart();
+                long endMillis = e.getEventEnd();
+                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                String timeStr = timeFormat.format(new Date(startMillis)) + " - " + timeFormat.format(new Date(endMillis));
+                timeView.setText(timeStr);
+
                 TextView categoryView = card.findViewById(R.id.tvEventCategory);
 
 
@@ -181,7 +191,15 @@ public class ManageEventsActivity extends AppCompatActivity {
 
                 // Set event fee
                 TextView tvFee = card.findViewById(R.id.tvEventFee);
-                tvFee.setText("Fee: $" + String.format("%.2f", e.getFee()));
+                if (e.getFee() == 0.0) {
+                    tvFee.setText("Free");
+                    tvFee.setTextColor(ContextCompat.getColor(this, R.color.green));
+                    tvFee.setTypeface(null, android.graphics.Typeface.BOLD);
+                } else {
+                    tvFee.setText("Fee: $" + String.format("%.2f", e.getFee()));
+                    tvFee.setTextColor(ContextCompat.getColor(this, R.color.cat_grey));
+                    tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
+            }
 
                 nameView.setText(e.getName());
                 locationView.setText(e.getLocation());

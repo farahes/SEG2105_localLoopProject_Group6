@@ -1,4 +1,4 @@
-package com.example.localloopapp_android.activities.participant;
+package com.example.localloopapp_android.activities;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
@@ -179,10 +179,24 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 ((TextView) card.findViewById(R.id.tvEventName)).setText(event.getName());
                 ((TextView) card.findViewById(R.id.tvEventDescription)).setText(event.getDescription());
                 ((TextView) card.findViewById(R.id.tvEventCategory)).setText(getCategoryName(event));
-                ((TextView) card.findViewById(R.id.tvEventFee)).setText(event.getFee() == 0 ? "Free" : "$" + event.getFee());
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-                String dateTime = sdf.format(new Date(event.getEventStart())) + " - " + sdf.format(new Date(event.getEventEnd()));
-                ((TextView) card.findViewById(R.id.tvEventDateTime)).setText(dateTime);
+                TextView tvFee = card.findViewById(R.id.tvEventFee);
+                if (event.getFee() == 0.0) {
+                    tvFee.setText("Free");
+                    tvFee.setTextColor(getResources().getColor(R.color.green, null)); // Use ContextCompat if needed
+                    tvFee.setTypeface(null, android.graphics.Typeface.BOLD);
+                } else {
+                    tvFee.setText("$" + event.getFee());
+                    tvFee.setTextColor(getResources().getColor(android.R.color.black, null));
+                    tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
+                }
+                // Set date and time separately
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                String dateStr = dateFormat.format(new Date(event.getEventStart()));
+                String timeStr = timeFormat.format(new Date(event.getEventStart())) + " - " + timeFormat.format(new Date(event.getEventEnd()));
+                ((TextView) card.findViewById(R.id.tvEventDate)).setText(dateStr);
+                ((TextView) card.findViewById(R.id.tvEventTime)).setText(timeStr);
+
                 resultsContainer.addView(card);
             }
             if (resultsContainer.getChildCount() == 0) {

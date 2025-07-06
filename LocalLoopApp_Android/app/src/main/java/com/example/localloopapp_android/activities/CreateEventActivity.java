@@ -103,17 +103,19 @@ public class CreateEventActivity extends AppCompatActivity {
             String location = etLocation.getText().toString().trim();
             String feeStr = etFee.getText().toString().trim();
 
-            if (name.isEmpty() || desc.isEmpty() || location.isEmpty() || feeStr.isEmpty() || selectedCategoryId == null) {
-                Toast.makeText(this, "Please fill all fields including location and select a category", Toast.LENGTH_SHORT).show();
+            if (name.isEmpty() || desc.isEmpty() || location.isEmpty() || selectedCategoryId == null) {
+                Toast.makeText(this, "Please fill all required fields and select a category", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            double fee;
-            try {
-                fee = Double.parseDouble(feeStr);
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Invalid fee amount", Toast.LENGTH_SHORT).show();
-                return;
+            double fee = 0.0;
+            if (!feeStr.isEmpty()) {
+                try {
+                    fee = Double.parseDouble(feeStr);
+                } catch (NumberFormatException e) {
+                    Toast.makeText(this, "Invalid fee amount", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
 
             long start = eventStartCalendar.getTimeInMillis();

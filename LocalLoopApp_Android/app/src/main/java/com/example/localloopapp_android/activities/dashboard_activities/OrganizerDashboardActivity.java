@@ -3,7 +3,6 @@ package com.example.localloopapp_android.activities.dashboard_activities;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -17,7 +16,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.activities.CreateEventActivity;
-import com.example.localloopapp_android.activities.dashboard_activities.ManageEventsActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
@@ -40,6 +38,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.HashSet;
+
+import kotlin.Unit;
 
 public class OrganizerDashboardActivity extends AppCompatActivity {
 
@@ -183,6 +183,13 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 TextView feeView = card.findViewById(R.id.tvEventFee);
                 TextView dateView = card.findViewById(R.id.tvEventDate);
 
+                TextView timeView = card.findViewById(R.id.tvEventTime);
+                long startMillis = event.getEventStart();
+                long endMillis = event.getEventEnd();
+                java.text.SimpleDateFormat timeFormat = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+                String timeStr = timeFormat.format(new java.util.Date(startMillis)) + " - " + timeFormat.format(new java.util.Date(endMillis));
+                timeView.setText(timeStr);
+
                 nameView.setText(blob + " " + event.getName());
                 descView.setText(event.getDescription());
                 if (event.getFee() == 0.0) {
@@ -222,8 +229,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         calendarView.scrollToMonth(current);
 
         // Configure how each day looks
-        CalendarUtilsKt.setupCalendar(calendarView, eventDateSet);
-
+        CalendarUtilsKt.setupCalendar(calendarView, eventDateSet, date -> showEventsForDate(date));
         // Toggle visibility
         calendarView.setVisibility(View.VISIBLE);
         findViewById(R.id.calendarHeader).setVisibility(View.VISIBLE);
@@ -244,6 +250,45 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             calendarView.scrollToMonth(currentMonth[0]);
             updateMonthHeader(tvMonthTitle, currentMonth[0]);
         });
+    }
+
+
+    private Unit showEventsForDate(LocalDate date) {
+        List<Event> allEvents = viewModel.getEventsLiveData().getValue();
+        if (allEvents == null) return null;
+
+        List<Event> eventsForDay = allEvents.stream()
+            .filter(event -> {
+                java.time.LocalDate eventDate = java.time.Instant.ofEpochMilli(event.getEventStart())
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toLocalDate();
+                return eventDate.equals(date);
+            })
+            .toList();
+
+        if (eventsForDay.isEmpty()) {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Events")
+                .setMessage("No events for this day.")
+                .setPositiveButton("OK", null)
+                .show();
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Event event : eventsForDay) {
+            sb.append(event.getName())
+            .append(" (")
+            .append(new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(new java.util.Date(event.getEventStart())))
+            .append(")\n");
+        }
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Events on " + date.toString())
+            .setMessage(sb.toString())
+            .setPositiveButton("OK", null)
+            .show();
+        return null;
     }
 
 
