@@ -64,6 +64,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Location"
+            android:focusable="false"
+            android:clickable="true"
             android:inputType="textPostalAddress"
             android:layout_marginBottom="12dp" />
 
