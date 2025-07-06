@@ -187,7 +187,7 @@ public class ManageEventsActivity extends AppCompatActivity {
                     tvFee.setTypeface(null, android.graphics.Typeface.BOLD);
                 } else {
                     tvFee.setText("Fee: $" + String.format("%.2f", e.getFee()));
-                    tvFee.setTextColor(ContextCompat.getColor(this, R.color.defaultTextColor));
+                    tvFee.setTextColor(ContextCompat.getColor(this, R.color.cat_grey));
                     tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
             }
 
