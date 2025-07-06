@@ -36,10 +36,18 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"/>
         <TextView
-            android:id="@+id/tvEventDateTime"
+            android:id="@+id/tvEventDate"
             android:textSize="14sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp"
+            android:text="Date"/>
+        <TextView
+            android:id="@+id/tvEventTime"
+            android:textSize="14sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Time"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>
