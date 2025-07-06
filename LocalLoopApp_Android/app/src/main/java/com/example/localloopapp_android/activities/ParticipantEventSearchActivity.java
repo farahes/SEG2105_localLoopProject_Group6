@@ -1,4 +1,4 @@
-package com.example.localloopapp_android.activities.participant;
+package com.example.localloopapp_android.activities;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
