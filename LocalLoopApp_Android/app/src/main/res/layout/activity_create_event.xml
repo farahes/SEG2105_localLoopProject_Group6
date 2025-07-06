@@ -79,7 +79,7 @@
             android:id="@+id/etEventFee"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Fee"
+            android:hint="Fee (optional)"
             android:inputType="numberDecimal"
             android:layout_marginTop="8dp" />
 

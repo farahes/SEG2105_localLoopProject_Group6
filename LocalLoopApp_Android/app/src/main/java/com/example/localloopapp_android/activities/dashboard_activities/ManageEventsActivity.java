@@ -181,7 +181,15 @@ public class ManageEventsActivity extends AppCompatActivity {
 
                 // Set event fee
                 TextView tvFee = card.findViewById(R.id.tvEventFee);
-                tvFee.setText("Fee: $" + String.format("%.2f", e.getFee()));
+                if (e.getFee() == 0.0) {
+                    tvFee.setText("Free");
+                    tvFee.setTextColor(ContextCompat.getColor(this, R.color.green));
+                    tvFee.setTypeface(null, android.graphics.Typeface.BOLD);
+                } else {
+                    tvFee.setText("Fee: $" + String.format("%.2f", e.getFee()));
+                    tvFee.setTextColor(ContextCompat.getColor(this, R.color.defaultTextColor));
+                    tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
+            }
 
                 nameView.setText(e.getName());
                 locationView.setText(e.getLocation());

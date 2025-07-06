@@ -179,7 +179,16 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 ((TextView) card.findViewById(R.id.tvEventName)).setText(event.getName());
                 ((TextView) card.findViewById(R.id.tvEventDescription)).setText(event.getDescription());
                 ((TextView) card.findViewById(R.id.tvEventCategory)).setText(getCategoryName(event));
-                ((TextView) card.findViewById(R.id.tvEventFee)).setText(event.getFee() == 0 ? "Free" : "$" + event.getFee());
+                TextView tvFee = card.findViewById(R.id.tvEventFee);
+                if (event.getFee() == 0.0) {
+                    tvFee.setText("Free");
+                    tvFee.setTextColor(getResources().getColor(R.color.green, null)); // Use ContextCompat if needed
+                    tvFee.setTypeface(null, android.graphics.Typeface.BOLD);
+                } else {
+                    tvFee.setText("$" + event.getFee());
+                    tvFee.setTextColor(getResources().getColor(android.R.color.black, null));
+                    tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
+                }
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
                 String dateTime = sdf.format(new Date(event.getEventStart())) + " - " + sdf.format(new Date(event.getEventEnd()));
                 ((TextView) card.findViewById(R.id.tvEventDateTime)).setText(dateTime);
