@@ -180,7 +180,7 @@ public class ManageEventsActivity extends AppCompatActivity {
                 SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
                 String timeStr = timeFormat.format(new Date(startMillis)) + " - " + timeFormat.format(new Date(endMillis));
                 timeView.setText(timeStr);
-                
+
 
                 // Set category name
                 String categoryName = categoryIdToName.get(e.getCategoryId());
