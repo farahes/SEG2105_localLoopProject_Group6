@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -55,7 +56,7 @@ public class ManageEventsActivity extends AppCompatActivity {
 
         applyInitialTabStyle();
 
-        CategoryViewModel categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
+        categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         categoryViewModel.getCategories().observe(this, categories -> {
             categoryIdToName.clear();
             for (Category c : categories) {
@@ -138,7 +139,6 @@ public class ManageEventsActivity extends AppCompatActivity {
     }
 
 
-
     private void showUpcomingEvents() {
         displayFilteredEvents(true);
     }
@@ -148,6 +148,7 @@ public class ManageEventsActivity extends AppCompatActivity {
     }
 
     private void displayFilteredEvents(boolean upcoming) {
+        if (allEvents == null) return; // Prevents NullPointerException
         eventListContainer.removeAllViews();
         long now = System.currentTimeMillis();
 
@@ -165,6 +166,10 @@ public class ManageEventsActivity extends AppCompatActivity {
             for (Event e : filtered) {
                 View card = inflater.inflate(R.layout.item_organizer_event_card, eventListContainer, false);
 
+                // Load and display the event image as a small round avatar
+                ImageView ivEventAvatar = card.findViewById(R.id.ivEventAvatar);
+                com.example.localloopapp_android.activities.ManageEventActivity.loadEventImage(e.getEventId(), ivEventAvatar);
+
                 TextView nameView = card.findViewById(R.id.tvEventName);
                 TextView locationView = card.findViewById(R.id.tvEventLocation);
                 TextView dateView = card.findViewById(R.id.tvEventDate);
@@ -175,9 +180,7 @@ public class ManageEventsActivity extends AppCompatActivity {
                 SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
                 String timeStr = timeFormat.format(new Date(startMillis)) + " - " + timeFormat.format(new Date(endMillis));
                 timeView.setText(timeStr);
-
-                TextView categoryView = card.findViewById(R.id.tvEventCategory);
-
+                
 
                 // Set category name
                 String categoryName = categoryIdToName.get(e.getCategoryId());
@@ -198,7 +201,7 @@ public class ManageEventsActivity extends AppCompatActivity {
                     tvFee.setText("Fee: $" + String.format("%.2f", e.getFee()));
                     tvFee.setTextColor(ContextCompat.getColor(this, R.color.cat_grey));
                     tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
-            }
+                }
 
                 nameView.setText(e.getName());
                 locationView.setText(e.getLocation());
@@ -218,6 +221,7 @@ public class ManageEventsActivity extends AppCompatActivity {
             }
         }
     }
+
     private void applyInitialTabStyle() {
         btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_selected);
         btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
@@ -225,7 +229,6 @@ public class ManageEventsActivity extends AppCompatActivity {
         btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
         btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // Use lighter purple here
     }
-
 
 
 }
