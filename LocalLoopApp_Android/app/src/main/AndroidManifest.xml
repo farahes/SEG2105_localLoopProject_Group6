@@ -20,7 +20,7 @@
             android:value="AIzaSyD-cPvHb7hc9AosWqxRLWlRKu-wtMSxwFo" />
 
         <activity
-            android:name=".activities.CreateEventActivity"
+            android:name=".activities.ManageEventActivity"
             android:exported="false" />
 
         <activity android:name=".activities.dashboard_activities.ManageRegistrationsActivity" />

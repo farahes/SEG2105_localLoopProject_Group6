@@ -15,7 +15,7 @@ import androidx.cardview.widget.CardView;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
-import com.example.localloopapp_android.activities.CreateEventActivity;
+import com.example.localloopapp_android.activities.ManageEventActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
@@ -130,7 +130,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         CardView manageRegistrationCard = findViewById(R.id.btnManageRegistration);
 
         fabCreateEvent.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CreateEventActivity.class);
+            Intent intent = new Intent(this, ManageEventActivity.class);
             intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
             startActivity(intent);
         });
@@ -205,7 +205,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 dateView.setText("📅 " + Constants.formatDate(event.getEventStart()));
 
                 card.setOnClickListener(v -> {
-                    Intent intent = new Intent(this, CreateEventActivity.class);
+                    Intent intent = new Intent(this, ManageEventActivity.class);
                     intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
                     intent.putExtra(Constants.EXTRA_EVENT_OBJECT, event);
                     startActivity(intent);
