@@ -28,7 +28,7 @@ import com.google.android.libraries.places.api.Places;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class CreateEventActivity extends AppCompatActivity {
+public class ManageEventActivity extends AppCompatActivity {
 
     private EditText etName, etDesc, etFee, etLocation, etStartDate, etEndDate;
     private Spinner spinnerCategory;

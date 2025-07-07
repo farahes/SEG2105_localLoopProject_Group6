@@ -8,12 +8,11 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.Observer;
+
 import com.example.localloopapp_android.models.Category;
 import com.example.localloopapp_android.viewmodels.CategoryViewModel;
 
@@ -21,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.example.localloopapp_android.R;
-import com.example.localloopapp_android.activities.CreateEventActivity;
+import com.example.localloopapp_android.activities.ManageEventActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
@@ -208,7 +207,7 @@ public class ManageEventsActivity extends AppCompatActivity {
                 ImageButton btnEdit = card.findViewById(R.id.btnEdit);
 
                 btnEdit.setOnClickListener(v -> {
-                    Intent intent = new Intent(this, CreateEventActivity.class);
+                    Intent intent = new Intent(this, ManageEventActivity.class);
                     intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
                     intent.putExtra(Constants.EXTRA_EVENT_OBJECT, e);
                     startActivity(intent);
