@@ -17,6 +17,15 @@
 https://github.com/farahes/SEG2105_localLoopProject_Group6/tree/main
 
 
+## 🔐 Test Accounts
+
+| Role        | Email / Username | Password  | Comments                                      |
+|-------------|------------------|-----------|-----------------------------------------------|
+| Admin       | XPI76SZUqyCjVxgnUjm0 | *(hidden)* | Admin account                                  |
+| Organizer   | 11111111         | 11111111  | Main organizer account with events added       |
+| Organizer   | organizerTwo     | 11111111  | No events (please **do not** add any events)   |
+| Participant | 11111111         | 11111111  | Regular participant account                    |
+
 
 ## 🔍 Brief Overview:
 
