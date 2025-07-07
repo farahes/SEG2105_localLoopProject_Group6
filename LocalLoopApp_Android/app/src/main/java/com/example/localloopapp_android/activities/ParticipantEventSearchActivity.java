@@ -1,17 +1,19 @@
-package com.example.localloopapp_android.activities.participant;
+package com.example.localloopapp_android.activities;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.*;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+
 import com.example.localloopapp_android.R;
+import com.example.localloopapp_android.activities.ManageEventActivity;
 import com.example.localloopapp_android.models.Category;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.viewmodels.CategoryViewModel;
@@ -28,13 +30,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-
 import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -179,8 +175,9 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                     Calendar eventCal = Calendar.getInstance();
                     eventCal.setTime(new Date(event.getEventStart()));
                     if (eventCal.get(Calendar.YEAR) != selectedDate.get(Calendar.YEAR) ||
-                        eventCal.get(Calendar.MONTH) != selectedDate.get(Calendar.MONTH) ||
-                        eventCal.get(Calendar.DAY_OF_MONTH) != selectedDate.get(Calendar.DAY_OF_MONTH)) continue;
+                            eventCal.get(Calendar.MONTH) != selectedDate.get(Calendar.MONTH) ||
+                            eventCal.get(Calendar.DAY_OF_MONTH) != selectedDate.get(Calendar.DAY_OF_MONTH))
+                        continue;
                     // Time range
                     int eventHour = eventCal.get(Calendar.HOUR_OF_DAY);
                     int eventMinute = eventCal.get(Calendar.MINUTE);
@@ -195,7 +192,11 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                     }
                 }
                 // Add event card
-                View card = getLayoutInflater().inflate(R.layout.participant_event_card, resultsContainer, false);
+                View card = getLayoutInflater().inflate(R.layout.item_participant_event_card, resultsContainer, false);
+
+                // Load and display the event image
+                ImageView ivEventImage = card.findViewById(R.id.ivEventAvatar);
+                ManageEventActivity.loadEventImage(event.getEventId(), ivEventImage);
                 ((TextView) card.findViewById(R.id.tvEventName)).setText(event.getName());
                 ((TextView) card.findViewById(R.id.tvEventDescription)).setText(event.getDescription());
                 ((TextView) card.findViewById(R.id.tvEventCategory)).setText(getCategoryName(event));
@@ -209,6 +210,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                     tvFee.setTextColor(getResources().getColor(android.R.color.black, null));
                     tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
                 }
+
                 // Set date and time separately
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
@@ -226,7 +228,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
                         googleMap.addMarker(new MarkerOptions().position(location).title(event.getLocation()));
                     }
-                    });
+                });
 
                 resultsContainer.addView(card);
             }
@@ -256,6 +258,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             return null;
         }
     }
+
     private String getCategoryName(Event event) {
         String categoryId = event.getCategoryId();
         for (Category category : allCategories) {

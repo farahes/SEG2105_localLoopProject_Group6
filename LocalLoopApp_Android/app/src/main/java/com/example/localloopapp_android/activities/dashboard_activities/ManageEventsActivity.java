@@ -163,7 +163,7 @@ public class ManageEventsActivity extends AppCompatActivity {
             LayoutInflater inflater = LayoutInflater.from(this);
 
             for (Event e : filtered) {
-                View card = inflater.inflate(R.layout.item_event_card, eventListContainer, false);
+                View card = inflater.inflate(R.layout.item_organizer_event_card, eventListContainer, false);
 
                 TextView nameView = card.findViewById(R.id.tvEventName);
                 TextView locationView = card.findViewById(R.id.tvEventLocation);

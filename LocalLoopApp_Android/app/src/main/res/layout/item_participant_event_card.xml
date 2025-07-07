@@ -11,6 +11,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <ImageView
+            android:id="@+id/ivEventAvatar"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Event Image" />
         <TextView
             android:id="@+id/tvEventName"
             android:textStyle="bold"

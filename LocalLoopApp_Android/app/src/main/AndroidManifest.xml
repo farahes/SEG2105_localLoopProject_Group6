@@ -45,7 +45,7 @@
             android:name=".activities.ManageCategoriesActivity"
             android:exported="false" />
         <activity 
-            android:name=".activities.participant.ParticipantEventSearchActivity"
+            android:name=".activities.ParticipantEventSearchActivity"
             android:exported="false"/>
         <activity
             android:name=".activities.MainActivity"

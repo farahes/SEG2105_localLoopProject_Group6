@@ -364,14 +364,15 @@ public class ManageEventActivity extends AppCompatActivity {
                             } catch (Exception ignored) { }
                         }
                         // no image or decode failed
-                        iv.setVisibility(View.GONE);
+                        iv.setImageResource(R.drawable.ic_calendar_purple_dimmed_bg);
+                        iv.setVisibility(View.VISIBLE);
                     }
+
                     @Override
                     public void onCancelled(DatabaseError error) {
-                        iv.setVisibility(View.GONE);
+                        iv.setImageResource(R.drawable.ic_calendar_purple_dimmed_bg);
+                        iv.setVisibility(View.VISIBLE);
                     }
                 });
     }
-
 }
-
