@@ -1,11 +1,15 @@
 package com.example.localloopapp_android.activities.dashboard_activities;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -22,11 +26,16 @@ import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
 import com.example.localloopapp_android.utils.CalendarUtilsKt;
 
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.kizitonwose.calendar.view.CalendarView;
 
 import java.time.DayOfWeek;
 
 import android.content.Intent;
+import android.widget.Toast;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -115,6 +124,8 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                         .toLocalDate());
             }
             setupCalendar();
+            //displayEvents(events, /* showUpcoming= */ true);
+            // TODO by uncommenting the line above, it displays an event on the main screen with bool of image working
         });
 
         viewModel.fetchEventsByOrganizer();
@@ -177,6 +188,9 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
             for (Event event : filteredEvents) {
                 View card = inflater.inflate(R.layout.item_event_card, eventListContainer, false);
+
+                ImageView ivCardBackground = card.findViewById(R.id.ivCardBackground);
+                loadEventImage(event.getEventId(), ivCardBackground);
 
                 TextView nameView = card.findViewById(R.id.tvEventName);
                 TextView descView = card.findViewById(R.id.tvEventDescription);
@@ -297,6 +311,45 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         String formatted = yearMonth.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault())
                 + " " + yearMonth.getYear();
         header.setText(formatted);
+    }
+
+    // Helper duplicate method to load the images
+    /**
+     * Loads the Base64‐encoded image for the given eventId from
+     * /avatars/{eventId} in Realtime Database, decodes it into a Bitmap,
+     * and sets it on iv. On failure, shows a toast.
+     */
+    public void loadEventImage(String eventId, ImageView iv) {
+        FirebaseDatabase.getInstance()
+                .getReference("avatars")
+                .child(eventId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snap) {
+                        Toast.makeText(OrganizerDashboardActivity.this,
+                                "avatar node exists? " + snap.exists(), Toast.LENGTH_SHORT).show();
+                        String b64 = snap.getValue(String.class);
+                        if (b64 != null && !b64.isEmpty()) {
+                            try {
+                                int comma = b64.indexOf(',');
+                                if (comma >= 0) b64 = b64.substring(comma + 1);
+                                byte[] data = Base64.decode(b64, Base64.DEFAULT);
+                                Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+                                if (bmp != null) {
+                                    iv.setImageBitmap(bmp);
+                                    iv.setVisibility(View.VISIBLE);
+                                    return;
+                                }
+                            } catch (Exception ignored) { }
+                        }
+                        // no image or decode failed
+                        iv.setVisibility(View.GONE);
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        iv.setVisibility(View.GONE);
+                    }
+                });
     }
 
 }

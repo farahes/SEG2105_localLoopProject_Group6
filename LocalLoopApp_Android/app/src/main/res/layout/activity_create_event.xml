@@ -59,6 +59,7 @@
 
             android:gravity="top"
             android:layout_marginTop="8dp" />
+
         <EditText
             android:id="@+id/etEventLocation"
             android:layout_width="match_parent"
@@ -67,6 +68,21 @@
             android:inputType="textPostalAddress"
             android:layout_marginBottom="12dp" />
 
+        <Button
+            android:id="@+id/btnSelectImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Image"
+            android:layout_marginTop="8dp" />
+
+        <ImageView
+            android:id="@+id/ivEventImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Selected event image"
+            android:visibility="gone"
+            android:layout_marginTop="8dp" />
 
         <Spinner
             android:id="@+id/spinnerCategory"
