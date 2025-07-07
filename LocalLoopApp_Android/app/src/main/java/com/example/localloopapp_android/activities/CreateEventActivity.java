@@ -1,6 +1,7 @@
 package com.example.localloopapp_android.activities;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
@@ -16,6 +17,13 @@ import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.CategoryViewModel;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
+
+import com.google.android.gms.common.api.Status;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.libraries.places.api.Places;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -43,10 +51,11 @@ public class CreateEventActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event);
 
-        // Initialize Google Places SDK
-        if (!com.google.android.libraries.places.api.Places.isInitialized()) {
-            com.google.android.libraries.places.api.Places.initialize(getApplicationContext(), "AIzaSyD-cPvHb7hc9AosWqxRLWlRKu-wtMSxwFo");
-
+        // Initialize Places SDK if not already initialized
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), "AIzaSyD-cPvHb7hc9AosWqxRLWlRKu-wtMSxwFo");
+        }
+        
         // Get extras
         organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
         eventToEdit = getIntent().getSerializableExtra(Constants.EXTRA_EVENT_OBJECT, Event.class);
@@ -58,17 +67,17 @@ public class CreateEventActivity extends AppCompatActivity {
         etLocation = findViewById(R.id.etEventLocation);
         etLocation.setFocusable(false);
         etLocation.setOnClickListener(v -> {
-        List<com.google.android.libraries.places.api.model.Place.Field> fields = Arrays.asList(
-            com.google.android.libraries.places.api.model.Place.Field.ID,
-            com.google.android.libraries.places.api.model.Place.Field.NAME,
-            com.google.android.libraries.places.api.model.Place.Field.ADDRESS,
-            com.google.android.libraries.places.api.model.Place.Field.LAT_LNG
-        );
-        Intent intent = new com.google.android.libraries.places.widget.Autocomplete.IntentBuilder(
-                com.google.android.libraries.places.widget.model.AutocompleteActivityMode.OVERLAY, fields)
-                .build(this);
-        startActivityForResult(intent, 1001);
-    });
+            List<com.google.android.libraries.places.api.model.Place.Field> fields = Arrays.asList(
+                com.google.android.libraries.places.api.model.Place.Field.ID,
+                com.google.android.libraries.places.api.model.Place.Field.NAME,
+                com.google.android.libraries.places.api.model.Place.Field.ADDRESS,
+                com.google.android.libraries.places.api.model.Place.Field.LAT_LNG
+            );
+            Intent intent = new com.google.android.libraries.places.widget.Autocomplete.IntentBuilder(
+                    com.google.android.libraries.places.widget.model.AutocompleteActivityMode.OVERLAY, fields)
+                    .build(this);
+            startActivityForResult(intent, 1001);
+        });
         etFee = findViewById(R.id.etEventFee);
         etStartDate = findViewById(R.id.etEventStartDate);
         etEndDate = findViewById(R.id.etEventEndDate);
@@ -247,14 +256,13 @@ public class CreateEventActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1001) {
             if (resultCode == RESULT_OK && data != null) {
-                com.google.android.libraries.places.api.model.Place place =
-                    com.google.android.libraries.places.widget.Autocomplete.getPlaceFromIntent(data);
+                Place place = Autocomplete.getPlaceFromIntent(data);
                 etLocation.setText(place.getAddress());
-            } else if (resultCode == com.google.android.libraries.places.widget.AutocompleteActivity.RESULT_ERROR && data != null) {
-                com.google.android.gms.common.api.Status status =
-                    com.google.android.libraries.places.widget.Autocomplete.getStatusFromIntent(data);
-                Toast.makeText(this, "Error: " + status.getStatusMessage(), Toast.LENGTH_SHORT).show();
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR && data != null) {
+                Status status = Autocomplete.getStatusFromIntent(data);
+                Toast.makeText(this, "Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
             }
+            // else if (resultCode == RESULT_CANCELED) { user pressed back—no op }
         }
     }
 }

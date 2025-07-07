@@ -2,6 +2,7 @@ package com.example.localloopapp_android.activities.participant;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -18,6 +19,25 @@ import com.example.localloopapp_android.viewmodels.EventViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import android.location.Address;
+import android.location.Geocoder;
+import android.content.Context;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class ParticipantEventSearchActivity extends AppCompatActivity {
 
@@ -197,6 +217,17 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 ((TextView) card.findViewById(R.id.tvEventDate)).setText(dateStr);
                 ((TextView) card.findViewById(R.id.tvEventTime)).setText(timeStr);
 
+                MapView mapView = card.findViewById(R.id.mapView);
+                mapView.onCreate(null);  // pass Bundle if you have one
+                mapView.getMapAsync(googleMap -> {
+                    // Geocode your address or use LatLng directly
+                    LatLng location = getLocationFromAddress(card.getContext(), event.getLocation());
+                    if (location != null) {
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
+                        googleMap.addMarker(new MarkerOptions().position(location).title(event.getLocation()));
+                    }
+                    });
+
                 resultsContainer.addView(card);
             }
             if (resultsContainer.getChildCount() == 0) {
@@ -208,6 +239,23 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         eventViewModel.fetchEvents();
     }
 
+
+    public LatLng getLocationFromAddress(Context context, String strAddress) {
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        List<Address> addresses;
+
+        try {
+            addresses = geocoder.getFromLocationName(strAddress, 1);
+            if (addresses == null || addresses.isEmpty()) {
+                return null; // No result found
+            }
+            Address location = addresses.get(0);
+            return new LatLng(location.getLatitude(), location.getLongitude());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     private String getCategoryName(Event event) {
         String categoryId = event.getCategoryId();
         for (Category category : allCategories) {
