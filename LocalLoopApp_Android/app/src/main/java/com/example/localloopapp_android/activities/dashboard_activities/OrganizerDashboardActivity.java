@@ -187,7 +187,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             String blob = showUpcoming ? "🟣" : "🔵";
 
             for (Event event : filteredEvents) {
-                View card = inflater.inflate(R.layout.item_event_card, eventListContainer, false);
+                View card = inflater.inflate(R.layout.item_organizer_event_card, eventListContainer, false);
 
                 ImageView ivCardBackground = card.findViewById(R.id.ivCardBackground);
                 loadEventImage(event.getEventId(), ivCardBackground);
