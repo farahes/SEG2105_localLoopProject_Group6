@@ -221,13 +221,12 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 mapView.onCreate(null);  // pass Bundle if you have one
                 mapView.getMapAsync(googleMap -> {
                     // Geocode your address or use LatLng directly
-
-                    LatLng location = getLocationFromAddress(card.getContext(), "159 Henderson Ave");  // example coords
-
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
-
-                    googleMap.addMarker(new MarkerOptions().position(location).title("159 Henderson Ave"));
-                });
+                    LatLng location = getLocationFromAddress(card.getContext(), event.getLocation());
+                    if (location != null) {
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
+                        googleMap.addMarker(new MarkerOptions().position(location).title(event.getLocation()));
+                    }
+                    });
 
                 resultsContainer.addView(card);
             }
