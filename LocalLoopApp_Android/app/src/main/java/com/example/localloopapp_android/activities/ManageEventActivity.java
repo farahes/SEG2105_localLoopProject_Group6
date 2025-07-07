@@ -74,7 +74,7 @@ public class ManageEventActivity extends AppCompatActivity {
         btnSelectImage = findViewById(R.id.btnSelectImage);
         ivEventImage   = findViewById(R.id.ivEventImage);
 
-// 2) Register the activity-result launcher
+        // 2) Register the activity-result launcher
         pickImageLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -89,7 +89,7 @@ public class ManageEventActivity extends AppCompatActivity {
                 }
         );
 
-// 3) Launch it when the button is clicked
+        // 3) Launch it when the button is clicked
         btnSelectImage.setOnClickListener(v -> {
             Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
             pick.setType("image/*");
@@ -342,7 +342,7 @@ public class ManageEventActivity extends AppCompatActivity {
      * /avatars/{eventId} in Realtime Database, decodes it into a Bitmap,
      * and sets it on iv. On failure, shows a toast.
      */
-    public void loadEventImage(String eventId, ImageView iv) {
+    public static void loadEventImage(String eventId, ImageView iv) {
         FirebaseDatabase.getInstance()
                 .getReference("avatars")
                 .child(eventId)

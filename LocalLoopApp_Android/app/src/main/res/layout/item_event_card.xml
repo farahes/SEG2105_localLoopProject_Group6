@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:alpha="0.5"
         android:scaleType="centerCrop"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
     <!-- 2) Card content -->
     <LinearLayout
