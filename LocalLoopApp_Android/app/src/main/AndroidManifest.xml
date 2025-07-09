@@ -57,6 +57,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.dashboard_activities.ManageEventsActivity" />
+        <activity android:name=".activities.dashboard_activities.MyTicketsActivity" />
     </application>
 
 </manifest>

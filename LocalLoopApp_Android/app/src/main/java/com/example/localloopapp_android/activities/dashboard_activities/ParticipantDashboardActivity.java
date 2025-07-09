@@ -1,6 +1,7 @@
 package com.example.localloopapp_android.activities.dashboard_activities;
 
 import android.os.Bundle;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.content.Intent;
 import android.widget.Button;
@@ -38,6 +39,13 @@ public class ParticipantDashboardActivity extends AppCompatActivity {
         Button btnSearchEvents = findViewById(R.id.btnSearchEvents);
         btnSearchEvents.setOnClickListener(v -> {
             Intent intent = new Intent(this, com.example.localloopapp_android.activities.ParticipantEventSearchActivity.class);
+            startActivity(intent);
+        });
+
+        // My Tickets Button
+        ImageButton btnTickets = findViewById(R.id.btnTickets);
+        btnTickets.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MyTicketsActivity.class);
             startActivity(intent);
         });
     }

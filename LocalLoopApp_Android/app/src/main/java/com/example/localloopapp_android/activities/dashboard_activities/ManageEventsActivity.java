@@ -62,7 +62,7 @@ public class ManageEventsActivity extends AppCompatActivity {
             for (Category c : categories) {
                 categoryIdToName.put(c.getCategoryId(), c.getName());
             }
-            // Optionally refresh event list UI here if needed
+            showUpcomingEvents(); // Refresh event list UI after categories are loaded
         });
 
         // Bind views
