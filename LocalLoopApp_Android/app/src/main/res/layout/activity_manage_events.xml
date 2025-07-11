@@ -87,7 +87,7 @@
                             android:layout_width="0dp"
                             android:layout_height="48dp"
                             android:layout_weight="1"
-                            android:background="@drawable/bg_tab_right_unselected"
+                            android:background="@drawable/bg_tab_middle_unselected"
                             android:text="EVENT HISTORY"
                             android:textStyle="bold" />
 
