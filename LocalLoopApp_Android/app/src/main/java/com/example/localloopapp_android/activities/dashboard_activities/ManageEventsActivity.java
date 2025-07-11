@@ -117,51 +117,57 @@ public class ManageEventsActivity extends AppCompatActivity {
             showUpcomingEvents();
             updateTabSelection(btnUpcoming);
         });
+
         btnEventHistory.setOnClickListener(v -> {
-            showEventHistory();
+            showPastEvents();
             updateTabSelection(btnEventHistory);
         });
+
         btnRegistrations.setOnClickListener(v -> {
             showRegistrations();
             updateTabSelection(btnRegistrations);
         });
     }
 
-    private void showRegistrations() {
-        eventListContainer.removeAllViews();
-        noEventsPlaceholder.setVisibility(View.VISIBLE);
-        // TODO: Implement fetching and displaying registration requests.
-    }
-
     private void updateTabSelection(Button selectedButton) {
-        btnUpcoming.setSelected(false);
-        btnEventHistory.setSelected(false);
-        btnRegistrations.setSelected(false);
-        selectedButton.setSelected(true);
-
-        // You might need to adjust drawables or backgrounds here if you have specific styles for selected/unselected tabs.
-        // For simplicity, we're using the selector-based state change.
-        // Example of manual background change:
+        // Reset all buttons to unselected state
         btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_unselected);
-        btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected); // This will need to become a middle tab
-        btnRegistrations.setBackgroundResource(R.drawable.bg_tab_right_unselected);
+        btnUpcoming.setTextColor(ContextCompat.getColor(this, R.color.purple_200));
 
+        btnEventHistory.setBackgroundResource(R.drawable.bg_tab_middle_unselected);
+        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));
+
+        btnRegistrations.setBackgroundResource(R.drawable.bg_tab_right_unselected);
+        btnRegistrations.setTextColor(ContextCompat.getColor(this, R.color.purple_200));
+
+        // Set the selected button's style
         if (selectedButton.getId() == R.id.btnUpcoming) {
             selectedButton.setBackgroundResource(R.drawable.bg_tab_left_selected);
         } else if (selectedButton.getId() == R.id.btnEventHistory) {
-            // This should be a middle tab drawable when selected
-            selectedButton.setBackgroundResource(R.drawable.bg_tab_right_selected); // Placeholder
+            selectedButton.setBackgroundResource(R.drawable.bg_tab_middle_selected);
         } else if (selectedButton.getId() == R.id.btnRegistrations) {
             selectedButton.setBackgroundResource(R.drawable.bg_tab_right_selected);
         }
+        selectedButton.setTextColor(ContextCompat.getColor(this, android.R.color.white));
     }
+
 
     private void showUpcomingEvents() {
         displayFilteredEvents(true);
     }
 
-    private void showEventHistory() {
+    private void showPastEvents() {
         displayFilteredEvents(false);
+    }
+
+    private void showRegistrations() {
+        eventListContainer.removeAllViews();
+        noEventsPlaceholder.setVisibility(View.VISIBLE);
+        // Placeholder for registration content
+        TextView tv = new TextView(this);
+        tv.setText("Registration management coming soon.");
+        tv.setGravity(android.view.Gravity.CENTER);
+        eventListContainer.addView(tv);
     }
 
     private void displayFilteredEvents(boolean upcoming) {
@@ -240,11 +246,7 @@ public class ManageEventsActivity extends AppCompatActivity {
     }
 
     private void applyInitialTabStyle() {
-        btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_selected);
-        btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
-
-        btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
-        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // Use lighter purple here
+        updateTabSelection(btnUpcoming);
     }
 
 
