@@ -35,7 +35,7 @@ import java.util.Date;
 
 
 public class ManageEventsActivity extends AppCompatActivity {
-    private Button btnUpcoming, btnEventHistory;
+    private Button btnUpcoming, btnEventHistory, btnRegistrations;
     private LinearLayout eventListContainer;
     private View noEventsPlaceholder;
     private OrganizerViewModel viewModel;
@@ -68,6 +68,7 @@ public class ManageEventsActivity extends AppCompatActivity {
         // Bind views
         btnUpcoming = findViewById(R.id.btnUpcoming);
         btnEventHistory = findViewById(R.id.btnEventHistory);
+        btnRegistrations = findViewById(R.id.btnRegistrations);
         eventListContainer = findViewById(R.id.eventListContainer);
         noEventsPlaceholder = findViewById(R.id.noEventsPlaceholder);
 
@@ -86,6 +87,7 @@ public class ManageEventsActivity extends AppCompatActivity {
 
         btnUpcoming = findViewById(R.id.btnUpcoming);
         btnEventHistory = findViewById(R.id.btnEventHistory);
+        btnRegistrations = findViewById(R.id.btnRegistrations);
     }
 
     private void setupViewModel() {
@@ -112,38 +114,53 @@ public class ManageEventsActivity extends AppCompatActivity {
 
     private void setupTabs() {
         btnUpcoming.setOnClickListener(v -> {
-            highlightTab(true);
             showUpcomingEvents();
+            updateTabSelection(btnUpcoming);
         });
-
         btnEventHistory.setOnClickListener(v -> {
-            highlightTab(false);
-            showPastEvents();
+            showEventHistory();
+            updateTabSelection(btnEventHistory);
+        });
+        btnRegistrations.setOnClickListener(v -> {
+            showRegistrations();
+            updateTabSelection(btnRegistrations);
         });
     }
 
-    private void highlightTab(boolean isUpcoming) {
-        if (isUpcoming) {
-            btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_selected);
-            btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+    private void showRegistrations() {
+        eventListContainer.removeAllViews();
+        noEventsPlaceholder.setVisibility(View.VISIBLE);
+        // TODO: Implement fetching and displaying registration requests.
+    }
 
-            btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
-            btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // lighter purple here
-        } else {
-            btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_unselected);
-            btnUpcoming.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // lighter purple here
+    private void updateTabSelection(Button selectedButton) {
+        btnUpcoming.setSelected(false);
+        btnEventHistory.setSelected(false);
+        btnRegistrations.setSelected(false);
+        selectedButton.setSelected(true);
 
-            btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_selected);
-            btnEventHistory.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+        // You might need to adjust drawables or backgrounds here if you have specific styles for selected/unselected tabs.
+        // For simplicity, we're using the selector-based state change.
+        // Example of manual background change:
+        btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_unselected);
+        btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected); // This will need to become a middle tab
+        btnRegistrations.setBackgroundResource(R.drawable.bg_tab_right_unselected);
+
+        if (selectedButton.getId() == R.id.btnUpcoming) {
+            selectedButton.setBackgroundResource(R.drawable.bg_tab_left_selected);
+        } else if (selectedButton.getId() == R.id.btnEventHistory) {
+            // This should be a middle tab drawable when selected
+            selectedButton.setBackgroundResource(R.drawable.bg_tab_right_selected); // Placeholder
+        } else if (selectedButton.getId() == R.id.btnRegistrations) {
+            selectedButton.setBackgroundResource(R.drawable.bg_tab_right_selected);
         }
     }
-
 
     private void showUpcomingEvents() {
         displayFilteredEvents(true);
     }
 
-    private void showPastEvents() {
+    private void showEventHistory() {
         displayFilteredEvents(false);
     }
 
