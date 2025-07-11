@@ -229,6 +229,12 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                         googleMap.addMarker(new MarkerOptions().position(location).title(event.getLocation()));
                     }
                 });
+                
+                // Event registration
+                Button btnRegister = card.findViewById(R.id.btnRegisterEvent);
+                btnRegister.setOnClickListener(v -> {
+                    registerForEvent(event);
+                });
 
                 resultsContainer.addView(card);
             }
@@ -241,6 +247,11 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         eventViewModel.fetchEvents();
     }
 
+    private void registerForEvent(Event event) {
+        // For now, just show a toast message
+        Toast.makeText(this, "Registered for " + event.getName(), Toast.LENGTH_SHORT).show();
+        // Add the user to the event's participant list in the database
+    }
 
     public LatLng getLocationFromAddress(Context context, String strAddress) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
