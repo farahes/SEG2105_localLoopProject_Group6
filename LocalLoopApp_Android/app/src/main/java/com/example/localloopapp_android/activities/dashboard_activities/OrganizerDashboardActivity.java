@@ -63,6 +63,10 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     private Set<LocalDate> eventDateSet = new HashSet<>();
     private String organizerId; // Persisted organizer ID
 
+    // Registration pending indicator
+    private ImageView imgPendingRegistration;
+    private com.example.localloopapp_android.viewmodels.RegistrationViewModel registrationViewModel;
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -86,6 +90,22 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         setupUI();
         setupViewModel();
         setupFabButton();
+
+        // RegistrationViewModel for pending indicator
+        registrationViewModel = new androidx.lifecycle.ViewModelProvider(this).get(com.example.localloopapp_android.viewmodels.RegistrationViewModel.class);
+        imgPendingRegistration = findViewById(R.id.imgPendingRegistration);
+        if (organizerId != null) {
+            registrationViewModel.loadPendingRegistrations(organizerId);
+            registrationViewModel.getPendingRegistrations().observe(this, registrations -> {
+                if (registrations != null && !registrations.isEmpty()) {
+                    imgPendingRegistration.setVisibility(View.VISIBLE);
+                } else {
+                    imgPendingRegistration.setVisibility(View.GONE);
+                }
+            });
+        } else {
+            imgPendingRegistration.setVisibility(View.GONE);
+        }
     }
 
 
