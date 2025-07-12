@@ -5,8 +5,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.localloopapp_android.R;
 import com.google.android.gms.maps.MapView;
 
@@ -29,14 +31,14 @@ public class TicketsAdapter extends RecyclerView.Adapter<TicketsAdapter.TicketVi
     @Override
     public void onBindViewHolder(@NonNull TicketViewHolder holder, int position) {
         TicketsListFragment.TicketItem item = ticketList.get(position);
-holder.eventAvatar.setImageResource(item.eventImageResId);
-holder.eventName.setText(item.eventName);
-holder.eventDescription.setText(item.eventDescription);
-holder.eventCategory.setText(item.eventCategory);
-holder.eventFee.setText(item.eventFee);
-holder.eventDate.setText(item.eventDate);
-holder.eventTime.setText(item.eventTime);
-// For mapView and eventLocation, you may want to set up a map marker or show the location string as appropriate.
+        holder.eventAvatar.setImageResource(item.eventImageResId);
+        holder.eventName.setText(item.eventName);
+        holder.eventDescription.setText(item.eventDescription);
+        holder.eventCategory.setText(item.eventCategory);
+        holder.eventFee.setText(item.eventFee);
+        holder.eventDate.setText(item.eventDate);
+        holder.eventTime.setText(item.eventTime);
+        // For mapView and eventLocation, you may want to set up a map marker or show the location string as appropriate.
     }
 
     @Override

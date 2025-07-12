@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
-import com.example.localloopapp_android.activities.ManageEventActivity;
 import com.example.localloopapp_android.models.Category;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.viewmodels.CategoryViewModel;
@@ -35,16 +34,21 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import com.bumptech.glide.Glide;
+
 public class ParticipantEventSearchActivity extends AppCompatActivity {
 
     private EditText etName, etDescription;
     private TextView tvSelectedCategories, tvSelectedDate, tvStartTime, tvEndTime;
     private Button btnSelectCategories, btnSelectDate, btnStartTime, btnEndTime, btnSearch;
+    private ImageView loadingGif; // for loading indicator
     private Spinner feeSpinner;
     private LinearLayout resultsContainer;
+    ArrayAdapter<String> feeAdapter;
 
     private List<Category> allCategories = new ArrayList<>();
     private boolean[] selectedCategories;
+    private boolean hasSearched = false;
     private List<String> selectedCategoryIds = new ArrayList<>();
     private Calendar selectedDate = null;
     private Integer startHour = null, startMinute = null, endHour = null, endMinute = null;
@@ -57,6 +61,25 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_participant_event_search);
 
+        // Initialize UI components
+        setupUI();
+        setupFeeSpinner();
+        setupEventObserver();
+
+        // Load categories
+        categoryViewModel.getCategories().observe(this, categories -> {
+            allCategories = categories;
+            selectedCategories = new boolean[categories.size()];
+        });
+        categoryViewModel.fetchCategories();
+
+        // Set up listeners for buttons
+        setupListeners();
+    }
+
+    // setup methods
+    private void setupUI() {
+        // Set up the UI elements here
         etName = findViewById(R.id.etEventName);
         etDescription = findViewById(R.id.etEventDescription);
         tvSelectedCategories = findViewById(R.id.tvSelectedCategories);
@@ -70,24 +93,23 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         tvEndTime = findViewById(R.id.tvEndTime);
         btnSearch = findViewById(R.id.btnSearchEvents);
         resultsContainer = findViewById(R.id.resultsContainer);
+        // loading gif
+        loadingGif = findViewById(R.id.loadingGif);
+        Glide.with(this).asGif().load(R.drawable.ic_loading_packman).into(loadingGif);
 
         categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
+    }
 
-        // Setup fee spinner
-        ArrayAdapter<String> feeAdapter = new ArrayAdapter<>(this,
+    private void setupFeeSpinner() {
+        feeAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item,
                 new String[]{"Any", "Free", "< $50", "> $50"});
         feeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         feeSpinner.setAdapter(feeAdapter);
+    }
 
-        // Load categories
-        categoryViewModel.getCategories().observe(this, categories -> {
-            allCategories = categories;
-            selectedCategories = new boolean[categories.size()];
-        });
-        categoryViewModel.fetchCategories();
-
+    private void setupListeners() {
         btnSelectCategories.setOnClickListener(v -> showCategoryDialog());
         btnSelectDate.setOnClickListener(v -> showDatePicker());
         btnStartTime.setOnClickListener(v -> showTimePicker(true));
@@ -95,65 +117,22 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         btnSearch.setOnClickListener(v -> searchEvents());
     }
 
-    private void showCategoryDialog() {
-        String[] categoryNames = new String[allCategories.size()];
-        for (int i = 0; i < allCategories.size(); i++) {
-            categoryNames[i] = allCategories.get(i).getName();
-        }
-        new AlertDialog.Builder(this)
-                .setTitle("Select Categories")
-                .setMultiChoiceItems(categoryNames, selectedCategories, (dialog, which, isChecked) -> {
-                    selectedCategories[which] = isChecked;
-                })
-                .setPositiveButton("OK", (dialog, which) -> {
-                    selectedCategoryIds.clear();
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < selectedCategories.length; i++) {
-                        if (selectedCategories[i]) {
-                            selectedCategoryIds.add(allCategories.get(i).getCategoryId());
-                            sb.append(allCategories.get(i).getName()).append(", ");
-                        }
-                    }
-                    if (sb.length() > 0) sb.setLength(sb.length() - 2);
-                    tvSelectedCategories.setText(sb.length() > 0 ? sb.toString() : "None");
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    private void showDatePicker() {
-        final Calendar now = Calendar.getInstance();
-        DatePickerDialog dialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
-            selectedDate = Calendar.getInstance();
-            selectedDate.set(year, month, dayOfMonth);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            tvSelectedDate.setText(sdf.format(selectedDate.getTime()));
-        }, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
-        dialog.show();
-    }
-
-    private void showTimePicker(boolean isStart) {
-        final Calendar now = Calendar.getInstance();
-        TimePickerDialog dialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
-            if (isStart) {
-                startHour = hourOfDay;
-                startMinute = minute;
-                tvStartTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
-            } else {
-                endHour = hourOfDay;
-                endMinute = minute;
-                tvEndTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
-            }
-        }, now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE), true);
-        dialog.show();
-    }
-
-    private void searchEvents() {
+    private void setupEventObserver(){
         String nameQuery = etName.getText().toString().trim().toLowerCase();
         String descQuery = etDescription.getText().toString().trim().toLowerCase();
         String feeOption = (String) feeSpinner.getSelectedItem();
 
         eventViewModel.getEvents().observe(this, events -> {
+            if (!hasSearched) {
+                resultsContainer.removeAllViews();
+                loadingGif.setVisibility(View.GONE);
+                resultsContainer.setVisibility(View.VISIBLE);
+                return; // Don't show anything until searched
+            }
+            loadingGif.setVisibility(View.GONE);
+            resultsContainer.setVisibility(View.VISIBLE);
+            resultsContainer.removeAllViews();
+
             resultsContainer.removeAllViews();
             for (Event event : events) {
                 // Name similarity
@@ -229,7 +208,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                         googleMap.addMarker(new MarkerOptions().position(location).title(event.getLocation()));
                     }
                 });
-                
+
                 // Event registration
                 Button btnRegister = card.findViewById(R.id.btnRegisterEvent);
                 btnRegister.setOnClickListener(v -> {
@@ -244,15 +223,74 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 resultsContainer.addView(tv);
             }
         });
+    }
+
+    // Dialogs and pickers
+    private void showCategoryDialog() {
+        String[] categoryNames = new String[allCategories.size()];
+        for (int i = 0; i < allCategories.size(); i++) {
+            categoryNames[i] = allCategories.get(i).getName();
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Select Categories")
+                .setMultiChoiceItems(categoryNames, selectedCategories, (dialog, which, isChecked) -> {
+                    selectedCategories[which] = isChecked;
+                })
+                .setPositiveButton("OK", (dialog, which) -> {
+                    selectedCategoryIds.clear();
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < selectedCategories.length; i++) {
+                        if (selectedCategories[i]) {
+                            selectedCategoryIds.add(allCategories.get(i).getCategoryId());
+                            sb.append(allCategories.get(i).getName()).append(", ");
+                        }
+                    }
+                    if (sb.length() > 0) sb.setLength(sb.length() - 2);
+                    tvSelectedCategories.setText(sb.length() > 0 ? sb.toString() : "None");
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showDatePicker() {
+        final Calendar now = Calendar.getInstance();
+        DatePickerDialog dialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+            selectedDate = Calendar.getInstance();
+            selectedDate.set(year, month, dayOfMonth);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            tvSelectedDate.setText(sdf.format(selectedDate.getTime()));
+        }, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
+        dialog.show();
+    }
+
+    private void showTimePicker(boolean isStart) {
+        final Calendar now = Calendar.getInstance();
+        TimePickerDialog dialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
+            if (isStart) {
+                startHour = hourOfDay;
+                startMinute = minute;
+                tvStartTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
+            } else {
+                endHour = hourOfDay;
+                endMinute = minute;
+                tvEndTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
+            }
+        }, now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE), true);
+        dialog.show();
+    }
+
+    // Search events
+    private void searchEvents() {
+        hasSearched = true;
+        //loading gif
+        loadingGif.setVisibility(View.VISIBLE);
+        resultsContainer.setVisibility(View.GONE);
+
         eventViewModel.fetchEvents();
+
     }
 
-    private void registerForEvent(Event event) {
-        // For now, just show a toast message
-        Toast.makeText(this, "Registered for " + event.getName(), Toast.LENGTH_SHORT).show();
-        // Add the user to the event's participant list in the database
-    }
-
+    // Helper methods
     public LatLng getLocationFromAddress(Context context, String strAddress) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         List<Address> addresses;
@@ -278,5 +316,12 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             }
         }
         return "Unknown";
+    }
+
+    // Event registration
+    private void registerForEvent(Event event) {
+        // For now, just show a toast message
+        Toast.makeText(this, "Registered for " + event.getName(), Toast.LENGTH_SHORT).show();
+        // Add the user to the event's participant list in the database
     }
 }
