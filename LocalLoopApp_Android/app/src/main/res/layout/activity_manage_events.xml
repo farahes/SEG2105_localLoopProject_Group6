@@ -98,32 +98,34 @@
                             android:layout_weight="1"
                             android:background="@drawable/bg_tab_right_unselected"
                             android:text="REGISTRATIONS"
-                            android:textColor="@color/white"
                             android:textStyle="bold" />
                     </LinearLayout>
 
-
-                    <!-- 📅 No Events Placeholder -->
-                    <FrameLayout
-                        android:id="@+id/noEventsPlaceholder"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:gravity="center"
-                        android:visibility="gone">
-
-                        <include layout="@layout/no_events_placeholder" />
-                    </FrameLayout>
-
-                    <!-- 📋 Event List Inside the Card -->
+                    <!-- Event List or Placeholder -->
                     <LinearLayout
-                        android:id="@+id/eventListContainer"
+                        android:id="@+id/contentContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:divider="?android:attr/dividerHorizontal"
-                        android:dividerPadding="8dp"
-                        android:orientation="vertical"
-                        android:showDividers="middle" />
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:id="@+id/eventListContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:visibility="visible" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/registrationsRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone" />
+
+                        <include
+                            android:id="@+id/noEventsPlaceholder"
+                            layout="@layout/no_events_placeholder"
+                            android:visibility="gone" />
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>

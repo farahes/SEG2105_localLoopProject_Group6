@@ -13,10 +13,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
+import com.example.localloopapp_android.activities.ManageEventActivity;
 import com.example.localloopapp_android.models.Category;
 import com.example.localloopapp_android.models.Event;
+import com.example.localloopapp_android.models.Registration;
 import com.example.localloopapp_android.viewmodels.CategoryViewModel;
 import com.example.localloopapp_android.viewmodels.EventViewModel;
+import com.example.localloopapp_android.viewmodels.RegistrationViewModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -55,6 +61,8 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
 
     private CategoryViewModel categoryViewModel;
     private EventViewModel eventViewModel;
+    private RegistrationViewModel registrationViewModel;
+    private Map<String, String> registrationStatusMap = new HashMap<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +73,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         setupUI();
         setupFeeSpinner();
         setupEventObserver();
+        setupRegistrationObserver();
 
         // Load categories
         categoryViewModel.getCategories().observe(this, categories -> {
@@ -99,6 +108,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
 
         categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
+        registrationViewModel = new ViewModelProvider(this).get(RegistrationViewModel.class);
     }
 
     private void setupFeeSpinner() {
@@ -115,6 +125,21 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         btnStartTime.setOnClickListener(v -> showTimePicker(true));
         btnEndTime.setOnClickListener(v -> showTimePicker(false));
         btnSearch.setOnClickListener(v -> searchEvents());
+    }
+
+    private void setupRegistrationObserver() {
+        String participantId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        registrationViewModel.loadParticipantRegistrations(participantId);
+        registrationViewModel.getParticipantRegistrations().observe(this, registrations -> {
+            registrationStatusMap.clear();
+            for (Registration r : registrations) {
+                registrationStatusMap.put(r.getEventId(), r.getStatus());
+            }
+            // Re-filter or re-display events to update button states
+            if (hasSearched) {
+                eventViewModel.fetchEvents();
+            }
+        });
     }
 
     private void setupEventObserver(){
@@ -211,9 +236,18 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
 
                 // Event registration
                 Button btnRegister = card.findViewById(R.id.btnRegisterEvent);
-                btnRegister.setOnClickListener(v -> {
-                    registerForEvent(event);
-                });
+                String status = registrationStatusMap.get(event.getEventId());
+
+                if (status != null) {
+                    btnRegister.setText(status);
+                    btnRegister.setEnabled(false); // Optionally disable
+                } else {
+                    btnRegister.setText("Register");
+                    btnRegister.setEnabled(true);
+                    btnRegister.setOnClickListener(v -> {
+                        registerForEvent(event);
+                    });
+                }
 
                 resultsContainer.addView(card);
             }
@@ -291,6 +325,39 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
     }
 
     // Helper methods
+    private void registerForEvent(Event event) {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        String registrationId = databaseReference.child("registrations").push().getKey();
+        String participantId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        // Check if already registered
+        if (registrationStatusMap.containsKey(event.getEventId())) {
+            Toast.makeText(this, "You have already registered for this event.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Registration registration = new Registration(
+                registrationId,
+                event.getEventId(),
+                participantId,
+                "pending",
+                System.currentTimeMillis()
+        );
+        registration.setOrganizerId(event.getOrganizerId());
+
+        if (registrationId != null) {
+            databaseReference.child("registrations").child(registrationId).setValue(registration)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(ParticipantEventSearchActivity.this, "Registration request sent.", Toast.LENGTH_SHORT).show();
+                        // Update local status
+                        registrationStatusMap.put(event.getEventId(), "pending");
+                        // Visually update the button
+                        setupEventObserver(); // Re-run to update UI
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(ParticipantEventSearchActivity.this, "Failed to send registration request.", Toast.LENGTH_SHORT).show());
+        }
+    }
+
     public LatLng getLocationFromAddress(Context context, String strAddress) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         List<Address> addresses;
@@ -316,12 +383,5 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             }
         }
         return "Unknown";
-    }
-
-    // Event registration
-    private void registerForEvent(Event event) {
-        // For now, just show a toast message
-        Toast.makeText(this, "Registered for " + event.getName(), Toast.LENGTH_SHORT).show();
-        // Add the user to the event's participant list in the database
     }
 }

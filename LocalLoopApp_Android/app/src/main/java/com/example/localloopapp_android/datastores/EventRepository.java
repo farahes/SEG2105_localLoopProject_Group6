@@ -71,6 +71,25 @@ public class EventRepository {
         myEvents.remove(e);
     }
 
+    public void getEvent(String eventId, EventCallback callback) {
+        dbRef.child(eventId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                Event event = snapshot.getValue(Event.class);
+                if (event != null) {
+                    callback.onSuccess(Collections.singletonList(event));
+                } else {
+                    callback.onFailure(new Exception("Event not found"));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onFailure(error.toException());
+            }
+        });
+    }
+
     /**
      * Returns unmodifiable list of cached events.
      */
