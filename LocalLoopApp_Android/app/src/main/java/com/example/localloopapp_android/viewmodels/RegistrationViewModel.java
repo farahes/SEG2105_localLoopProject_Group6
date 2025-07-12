@@ -10,6 +10,7 @@ public class RegistrationViewModel extends ViewModel {
 
     private RegistrationRepository repository;
     private LiveData<List<Registration>> pendingRegistrations;
+    private LiveData<List<Registration>> participantRegistrations;
 
     public RegistrationViewModel() {
         repository = new RegistrationRepository();
@@ -29,5 +30,13 @@ public class RegistrationViewModel extends ViewModel {
 
     public void rejectRegistration(String registrationId) {
         repository.updateRegistrationStatus(registrationId, "rejected");
+    }
+
+    public void loadParticipantRegistrations(String participantId) {
+        participantRegistrations = repository.getRegistrationsForParticipant(participantId);
+    }
+
+    public LiveData<List<Registration>> getParticipantRegistrations() {
+        return participantRegistrations;
     }
 }

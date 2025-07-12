@@ -46,4 +46,28 @@ public class RegistrationRepository {
     public void updateRegistrationStatus(String registrationId, String newStatus) {
         databaseReference.child(registrationId).child("status").setValue(newStatus);
     }
+
+    public LiveData<List<Registration>> getRegistrationsForParticipant(String participantId) {
+        MutableLiveData<List<Registration>> liveData = new MutableLiveData<>();
+        databaseReference.orderByChild("participantId").equalTo(participantId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        List<Registration> registrations = new ArrayList<>();
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            Registration registration = snapshot.getValue(Registration.class);
+                            if (registration != null) {
+                                registrations.add(registration);
+                            }
+                        }
+                        liveData.setValue(registrations);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        // Handle error
+                    }
+                });
+        return liveData;
+    }
 }
