@@ -17,9 +17,9 @@
         <activity
             android:name=".activities.ManageEventActivity"
             android:exported="false" />
-        <activity
-            android:name=".activities.ManageEventsActivity"
-            android:exported="false" />
+
+        <activity android:name=".activities.dashboard_activities.ManageRegistrationsActivity" />
+
         <activity
             android:name=".activities.dashboard_activities.OrganizerDashboardActivity"
             android:exported="false" />
@@ -29,9 +29,7 @@
         <activity
             android:name=".activities.dashboard_activities.AdminDashboardActivity"
             android:exported="false" />
-        <activity
-            android:name=".xbombgame.GameActivity"
-            android:exported="false" />
+
         <activity
             android:name=".activities.CreateAccountActivity"
             android:exported="false" />
@@ -41,6 +39,9 @@
         <activity
             android:name=".activities.ManageCategoriesActivity"
             android:exported="false" />
+        <activity 
+            android:name=".activities.ParticipantEventSearchActivity"
+            android:exported="false"/>
         <activity
             android:name=".activities.MainActivity"
             android:exported="true">
@@ -50,6 +51,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activities.dashboard_activities.ManageEventsActivity" />
+        <activity android:name=".activities.dashboard_activities.MyTicketsActivity" />
     </application>
 
 </manifest>

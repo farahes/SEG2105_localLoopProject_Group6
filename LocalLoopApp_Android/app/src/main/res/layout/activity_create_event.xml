@@ -38,10 +38,10 @@
                 android:id="@+id/btnDelete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_delete"
+                android:src="@drawable/deletebutton"
                 android:contentDescription="Delete"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@android:color/holo_red_dark" />
+                 />
         </LinearLayout>
 
         <EditText
@@ -60,6 +60,32 @@
             android:gravity="top"
             android:layout_marginTop="8dp" />
 
+        <EditText
+            android:id="@+id/etEventLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Location"
+            android:focusable="false"
+            android:clickable="true"
+            android:inputType="textPostalAddress"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnSelectImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Image"
+            android:layout_marginTop="8dp" />
+
+        <ImageView
+            android:id="@+id/ivEventImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Selected event image"
+            android:visibility="gone"
+            android:layout_marginTop="8dp" />
+
         <Spinner
             android:id="@+id/spinnerCategory"
             android:layout_width="match_parent"
@@ -71,7 +97,7 @@
             android:id="@+id/etEventFee"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Fee"
+            android:hint="Fee (optional)"
             android:inputType="numberDecimal"
             android:layout_marginTop="8dp" />
 

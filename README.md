@@ -17,6 +17,15 @@
 https://github.com/farahes/SEG2105_localLoopProject_Group6/tree/main
 
 
+## 🔐 Test Accounts
+
+| Role        | Email / Username | Password  | Comments                                      |
+|-------------|------------------|-----------|-----------------------------------------------|
+| Admin       | admin            | XPI76SZUqyCjVxgnUjm0 | Admin account                       |
+| Organizer   | organizer        | 11111111  | Main organizer account with events added       |
+| Organizer   | organizerTwo     | 11111111  | No events (please **do not** add any events)   |
+| Participant | participant      | 11111111  | Regular participant account                    |
+
 
 ## 🔍 Brief Overview:
 
@@ -34,10 +43,21 @@ LocalLoop is a role-based community event management app built in Java for Andro
 
 ### 🛠 Technologies
 1. Android Studio Koala (API 33+)
-2. Java
+2. Java & Kotlin
 3. Firebase Realtime Database
 
-`Version: 06-09-2025`
+### Color Scheme Used
+Blue: #62CDD9\
+Purple Primary: #673AB7\
+Secondary Lighter Purple: #8F50E7\
+Tertiary Grey: #8F50E7\
+Tertiary Black: #373D3F (Used for text)
+
+### Figma Wirefranes
+- Used to plan our design.
+- Link: TBD
+
+`Version: 07-04-2025`
 
 
 

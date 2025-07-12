@@ -1,21 +1,21 @@
 package com.example.localloopapp_android.activities.dashboard_activities;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.cardview.widget.CardView;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
@@ -25,12 +25,17 @@ import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
 import com.example.localloopapp_android.utils.CalendarUtilsKt;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.kizitonwose.calendar.view.CalendarView;
 
 import java.time.DayOfWeek;
 
 import android.content.Intent;
+import android.widget.Toast;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -39,16 +44,18 @@ import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
 import java.util.HashSet;
+
+import kotlin.Unit;
 
 public class OrganizerDashboardActivity extends AppCompatActivity {
 
     private TextView tvPastEvents, tvUpcomingEvents, tvMonthTitle;
     private AppCompatButton btnToggleCalendar;
     private ImageButton btnPrevMonth, btnNextMonth;
+    private View noEventsPlaceholder; // Placeholder for no events
     CalendarView calendarView;
     private OrganizerViewModel viewModel;
     private LinearLayout eventListContainer;
@@ -69,17 +76,14 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         extractIntentExtras();
         setupUI();
         setupViewModel();
-        setupCalendar();
         setupFabButton();
     }
-
 
 
     //-------------------------Supporting-Methods---------------------------------
 
     /**
      * Extracts intent extras and initializes the ViewModel.
-     * Sets the welcome message based on the first name provided in the intent.
      */
     private void extractIntentExtras() {
         String organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
@@ -88,26 +92,22 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
         viewModel.setOrganizerId(organizerId);
 
-        TextView welcomeText = findViewById(R.id.tvWelcomeMessage);
-        welcomeText.setText(firstName != null
-                ? "Welcome " + firstName + "! You are logged in as Organizer."
-                : "Welcome, Organizer!");
     }
 
     /**
      * Sets up the UI components and binds them to their respective views.
      */
     private void setupUI() {
-        tvUpcomingEvents = findViewById(R.id.tvUpcomingEvents);
-        tvPastEvents = findViewById(R.id.tvPastEvents);
+
         eventListContainer = findViewById(R.id.eventListContainer);
 
         // Bind the calendar view and navigation buttons
-        btnToggleCalendar = findViewById(R.id.btnToggleCalendar);
         tvMonthTitle = findViewById(R.id.tvMonthTitle);
         btnPrevMonth = findViewById(R.id.btnPrevMonth);
         btnNextMonth = findViewById(R.id.btnNextMonth);
         calendarView = findViewById(R.id.calendarView);
+
+        noEventsPlaceholder = findViewById(R.id.noEventsPlaceholder);
     }
 
     /**
@@ -123,9 +123,9 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate());
             }
-
-            setupEventFilterSpinner(events);
-            displayStats(events);
+            setupCalendar();
+            //displayEvents(events, /* showUpcoming= */ true);
+            // TODO by uncommenting the line above, it displays an event on the main screen with bool of image working
         });
 
         viewModel.fetchEventsByOrganizer();
@@ -136,10 +136,24 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
      * When clicked, it starts the ManageEventActivity with the organizer ID.
      */
     private void setupFabButton() {
-        FloatingActionButton fabCreateEvent = findViewById(R.id.fabCreateEvent);
+        CardView fabCreateEvent = findViewById(R.id.fabCreateEvent);
+        CardView manageEventsCard = findViewById(R.id.btnManageEvents);
+        CardView manageRegistrationCard = findViewById(R.id.btnManageRegistration);
+
         fabCreateEvent.setOnClickListener(v -> {
             Intent intent = new Intent(this, ManageEventActivity.class);
             intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
+            startActivity(intent);
+        });
+
+        manageEventsCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ManageEventsActivity.class);
+            intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
+            startActivity(intent);
+        });
+
+        manageRegistrationCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ManageRegistrationsActivity.class);
             startActivity(intent);
         });
     }
@@ -163,96 +177,60 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 .sorted(Comparator.comparingLong(Event::getEventStart))
                 .toList();
 
-        // Choose color
-        String blob = showUpcoming ? "🟣" : "🔵";
+        if (filteredEvents.isEmpty()) {
+            noEventsPlaceholder.setVisibility(View.VISIBLE);
+        } else {
+            noEventsPlaceholder.setVisibility(View.GONE);
+            // render event cards
 
-        for (Event event : filteredEvents) {
-            View card = inflater.inflate(R.layout.item_event_card, eventListContainer, false);
+            // Choose color
+            String blob = showUpcoming ? "🟣" : "🔵";
 
-            TextView nameView = card.findViewById(R.id.tvEventName);
-            TextView descView = card.findViewById(R.id.tvEventDescription);
-            TextView feeView = card.findViewById(R.id.tvEventFee);
-            TextView dateView = card.findViewById(R.id.tvEventTime);
+            for (Event event : filteredEvents) {
+                View card = inflater.inflate(R.layout.item_organizer_event_card, eventListContainer, false);
 
-            nameView.setText(blob + " " + event.getName());
-            descView.setText(event.getDescription());
-            if (event.getFee() == 0.0) {
-                feeView.setText("Free");
-                feeView.setTextColor(Color.parseColor("#4CAF50")); // Material green
-                feeView.setTypeface(null, Typeface.BOLD);
-            } else {
-                feeView.setText("Fee: $" + event.getFee());
-                feeView.setTextColor(Color.BLACK); // to the normal color
-                feeView.setTypeface(null, Typeface.NORMAL);
+                ImageView ivCardBackground = card.findViewById(R.id.ivCardBackground);
+                loadEventImage(event.getEventId(), ivCardBackground);
+
+                TextView nameView = card.findViewById(R.id.tvEventName);
+                TextView descView = card.findViewById(R.id.tvEventDescription);
+                TextView feeView = card.findViewById(R.id.tvEventFee);
+                TextView dateView = card.findViewById(R.id.tvEventDate);
+
+                TextView timeView = card.findViewById(R.id.tvEventTime);
+                long startMillis = event.getEventStart();
+                long endMillis = event.getEventEnd();
+                java.text.SimpleDateFormat timeFormat = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+                String timeStr = timeFormat.format(new java.util.Date(startMillis)) + " - " + timeFormat.format(new java.util.Date(endMillis));
+                timeView.setText(timeStr);
+
+                nameView.setText(blob + " " + event.getName());
+                descView.setText(event.getDescription());
+                if (event.getFee() == 0.0) {
+                    feeView.setText("Free");
+                    feeView.setTextColor(Color.parseColor("#4CAF50")); // Material green
+                    feeView.setTypeface(null, Typeface.BOLD);
+                } else {
+                    feeView.setText("Fee: $" + event.getFee());
+                    feeView.setTextColor(Color.BLACK); // to the normal color
+                    feeView.setTypeface(null, Typeface.NORMAL);
+                }
+
+                dateView.setText("📅 " + Constants.formatDate(event.getEventStart()));
+
+                card.setOnClickListener(v -> {
+                    Intent intent = new Intent(this, ManageEventActivity.class);
+                    intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
+                    intent.putExtra(Constants.EXTRA_EVENT_OBJECT, event);
+                    startActivity(intent);
+                });
+
+                eventListContainer.addView(card);
             }
 
-            dateView.setText("📅 " + Constants.formatDate(event.getEventStart()));
-
-            card.setOnClickListener(v -> {
-                Intent intent = new Intent(this, ManageEventActivity.class);
-                intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
-                intent.putExtra(Constants.EXTRA_EVENT_OBJECT, event);
-                startActivity(intent);
-            });
-
-            eventListContainer.addView(card);
         }
     }
 
-    /**
-     * Displays the statistics of past and upcoming events.
-     *
-     * @param events
-     */
-    private void displayStats(List<Event> events) {
-        int pastCount = 0;
-        int upcomingCount = 0;
-        long now = System.currentTimeMillis();
-        for (Event e : events) {
-            if (e.getEventStart() > now) {
-                upcomingCount++;
-            } else {
-                pastCount++;
-            }
-        }
-
-        tvPastEvents.setText("Past Events: " + pastCount);
-        tvUpcomingEvents.setText("Upcoming: " + upcomingCount);
-    }
-
-    /**
-     * Sets up the spinner to filter events by past and upcoming.
-     *
-     * @param events The list of events to filter.
-     */
-    private void setupEventFilterSpinner(List<Event> events) {
-        Spinner spinner = findViewById(R.id.eventFilterSpinner);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                this,
-                R.layout.custom_spinner_button, // custom layout for each item
-                Arrays.asList("Upcoming Events", "Past Events")
-        );
-
-        // Optional: for dropdown items we can use a simpler style
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        spinner.setAdapter(adapter);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (events == null) return;
-
-                displayEvents(events, position == 0); // 0 = upcoming, 1 = past
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
-    }
 
     /**
      * Sets up the calendar view with the current month and navigation buttons.
@@ -265,15 +243,11 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         calendarView.scrollToMonth(current);
 
         // Configure how each day looks
-        CalendarUtilsKt.setupCalendar(calendarView, eventDateSet);
-
+        CalendarUtilsKt.setupCalendar(calendarView, eventDateSet, date -> showEventsForDate(date));
         // Toggle visibility
-        btnToggleCalendar.setOnClickListener(v -> {
-            boolean show = calendarView.getVisibility() != View.VISIBLE;
-            calendarView.setVisibility(show ? View.VISIBLE : View.GONE);
-            findViewById(R.id.calendarHeader).setVisibility(show ? View.VISIBLE : View.GONE);
-            btnToggleCalendar.setSelected(show);
-        });
+        calendarView.setVisibility(View.VISIBLE);
+        findViewById(R.id.calendarHeader).setVisibility(View.VISIBLE);
+
 
         // Month name and navigation
         final YearMonth[] currentMonth = {current};
@@ -292,10 +266,45 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         });
     }
 
-    // helper method to check if there is an event on a specific date
-    private boolean hasEventOnDate(LocalDate date) {
-        return eventDateSet.contains(date);
+
+    private Unit showEventsForDate(LocalDate date) {
+        List<Event> allEvents = viewModel.getEventsLiveData().getValue();
+        if (allEvents == null) return null;
+
+        List<Event> eventsForDay = allEvents.stream()
+            .filter(event -> {
+                java.time.LocalDate eventDate = java.time.Instant.ofEpochMilli(event.getEventStart())
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toLocalDate();
+                return eventDate.equals(date);
+            })
+            .toList();
+
+        if (eventsForDay.isEmpty()) {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Events")
+                .setMessage("No events for this day.")
+                .setPositiveButton("OK", null)
+                .show();
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Event event : eventsForDay) {
+            sb.append(event.getName())
+            .append(" (")
+            .append(new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(new java.util.Date(event.getEventStart())))
+            .append(")\n");
+        }
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Events on " + date.toString())
+            .setMessage(sb.toString())
+            .setPositiveButton("OK", null)
+            .show();
+        return null;
     }
+
 
     // Helper method to update the month header in the calendar view
     private void updateMonthHeader(TextView header, YearMonth yearMonth) {
@@ -304,4 +313,44 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         header.setText(formatted);
     }
 
+    // Helper duplicate method to load the images
+    /**
+     * Loads the Base64‐encoded image for the given eventId from
+     * /avatars/{eventId} in Realtime Database, decodes it into a Bitmap,
+     * and sets it on iv. On failure, shows a toast.
+     */
+    public void loadEventImage(String eventId, ImageView iv) {
+        FirebaseDatabase.getInstance()
+                .getReference("avatars")
+                .child(eventId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snap) {
+                        Toast.makeText(OrganizerDashboardActivity.this,
+                                "avatar node exists? " + snap.exists(), Toast.LENGTH_SHORT).show();
+                        String b64 = snap.getValue(String.class);
+                        if (b64 != null && !b64.isEmpty()) {
+                            try {
+                                int comma = b64.indexOf(',');
+                                if (comma >= 0) b64 = b64.substring(comma + 1);
+                                byte[] data = Base64.decode(b64, Base64.DEFAULT);
+                                Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+                                if (bmp != null) {
+                                    iv.setImageBitmap(bmp);
+                                    iv.setVisibility(View.VISIBLE);
+                                    return;
+                                }
+                            } catch (Exception ignored) { }
+                        }
+                        // no image or decode failed
+                        iv.setVisibility(View.GONE);
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        iv.setVisibility(View.GONE);
+                    }
+                });
+    }
+
 }
+
