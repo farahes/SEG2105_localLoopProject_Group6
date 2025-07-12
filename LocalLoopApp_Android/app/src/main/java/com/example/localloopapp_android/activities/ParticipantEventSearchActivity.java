@@ -13,10 +13,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
+import com.example.localloopapp_android.activities.ManageEventActivity;
 import com.example.localloopapp_android.models.Category;
 import com.example.localloopapp_android.models.Event;
+import com.example.localloopapp_android.models.Registration;
 import com.example.localloopapp_android.viewmodels.CategoryViewModel;
 import com.example.localloopapp_android.viewmodels.EventViewModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -291,6 +296,27 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
     }
 
     // Helper methods
+    private void registerForEvent(Event event) {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        String registrationId = databaseReference.child("registrations").push().getKey();
+        String participantId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        Registration registration = new Registration(
+                registrationId,
+                event.getEventId(),
+                participantId,
+                "pending",
+                System.currentTimeMillis()
+        );
+        registration.setOrganizerId(event.getOrganizerId());
+
+        if (registrationId != null) {
+            databaseReference.child("registrations").child(registrationId).setValue(registration)
+                    .addOnSuccessListener(aVoid -> Toast.makeText(ParticipantEventSearchActivity.this, "Registration request sent.", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(ParticipantEventSearchActivity.this, "Failed to send registration request.", Toast.LENGTH_SHORT).show());
+        }
+    }
+
     public LatLng getLocationFromAddress(Context context, String strAddress) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         List<Address> addresses;
@@ -316,12 +342,5 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             }
         }
         return "Unknown";
-    }
-
-    // Event registration
-    private void registerForEvent(Event event) {
-        // For now, just show a toast message
-        Toast.makeText(this, "Registered for " + event.getName(), Toast.LENGTH_SHORT).show();
-        // Add the user to the event's participant list in the database
     }
 }

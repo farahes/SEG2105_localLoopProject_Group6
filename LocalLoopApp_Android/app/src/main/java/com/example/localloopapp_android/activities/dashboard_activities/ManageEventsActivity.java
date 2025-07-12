@@ -13,32 +13,37 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
-
-import com.example.localloopapp_android.models.Category;
-import com.example.localloopapp_android.viewmodels.CategoryViewModel;
-
-import java.util.HashMap;
-import java.util.Map;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.activities.ManageEventActivity;
+import com.example.localloopapp_android.features.organization.adapters.RegistrationAdapter;
+import com.example.localloopapp_android.models.Category;
 import com.example.localloopapp_android.models.Event;
+import com.example.localloopapp_android.models.Registration;
 import com.example.localloopapp_android.utils.Constants;
+import com.example.localloopapp_android.viewmodels.CategoryViewModel;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
-
-import java.util.Comparator;
-import java.util.List;
+import com.example.localloopapp_android.viewmodels.RegistrationViewModel;
 
 import java.text.SimpleDateFormat;
-import java.util.Locale;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 
-public class ManageEventsActivity extends AppCompatActivity {
+public class ManageEventsActivity extends AppCompatActivity implements RegistrationAdapter.OnRegistrationActionListener {
     private Button btnUpcoming, btnEventHistory, btnRegistrations;
     private LinearLayout eventListContainer;
+    private RecyclerView registrationsRecyclerView;
+    private RegistrationAdapter registrationAdapter;
     private View noEventsPlaceholder;
     private OrganizerViewModel viewModel;
+    private RegistrationViewModel registrationViewModel;
 
     private List<Event> allEvents;
 
@@ -70,6 +75,7 @@ public class ManageEventsActivity extends AppCompatActivity {
         btnEventHistory = findViewById(R.id.btnEventHistory);
         btnRegistrations = findViewById(R.id.btnRegistrations);
         eventListContainer = findViewById(R.id.eventListContainer);
+        registrationsRecyclerView = findViewById(R.id.registrationsRecyclerView);
         noEventsPlaceholder = findViewById(R.id.noEventsPlaceholder);
 
 
@@ -88,10 +94,14 @@ public class ManageEventsActivity extends AppCompatActivity {
         btnUpcoming = findViewById(R.id.btnUpcoming);
         btnEventHistory = findViewById(R.id.btnEventHistory);
         btnRegistrations = findViewById(R.id.btnRegistrations);
+
+        registrationsRecyclerView = findViewById(R.id.registrationsRecyclerView);
+        registrationsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
+        registrationViewModel = new ViewModelProvider(this).get(RegistrationViewModel.class);
         categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
 
         String organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
@@ -102,6 +112,7 @@ public class ManageEventsActivity extends AppCompatActivity {
         });
 
         viewModel.fetchEventsByOrganizer();
+        registrationViewModel.loadPendingRegistrations(organizerId);
 
         // Observe categories
         categoryViewModel.getCategories().observe(this, categories -> {
@@ -153,21 +164,40 @@ public class ManageEventsActivity extends AppCompatActivity {
 
 
     private void showUpcomingEvents() {
+        eventListContainer.setVisibility(View.VISIBLE);
+        registrationsRecyclerView.setVisibility(View.GONE);
         displayFilteredEvents(true);
     }
 
     private void showPastEvents() {
+        eventListContainer.setVisibility(View.VISIBLE);
+        registrationsRecyclerView.setVisibility(View.GONE);
         displayFilteredEvents(false);
     }
 
     private void showRegistrations() {
-        eventListContainer.removeAllViews();
-        noEventsPlaceholder.setVisibility(View.VISIBLE);
-        // Placeholder for registration content
-        TextView tv = new TextView(this);
-        tv.setText("Registration management coming soon.");
-        tv.setGravity(android.view.Gravity.CENTER);
-        eventListContainer.addView(tv);
+        eventListContainer.setVisibility(View.GONE);
+        registrationsRecyclerView.setVisibility(View.VISIBLE);
+
+        registrationViewModel.getPendingRegistrations().observe(this, registrations -> {
+            if (registrations == null || registrations.isEmpty()) {
+                noEventsPlaceholder.setVisibility(View.VISIBLE);
+                registrationsRecyclerView.setVisibility(View.GONE);
+                TextView noEventsText = noEventsPlaceholder.findViewById(R.id.no_events_text);
+                if (noEventsText != null) {
+                    noEventsText.setText("No pending registrations.");
+                }
+            } else {
+                noEventsPlaceholder.setVisibility(View.GONE);
+                registrationsRecyclerView.setVisibility(View.VISIBLE);
+                if (registrationAdapter == null) {
+                    registrationAdapter = new RegistrationAdapter(registrations, this);
+                    registrationsRecyclerView.setAdapter(registrationAdapter);
+                } else {
+                    registrationAdapter.updateRegistrations(registrations);
+                }
+            }
+        });
     }
 
     private void displayFilteredEvents(boolean upcoming) {
@@ -249,5 +279,13 @@ public class ManageEventsActivity extends AppCompatActivity {
         updateTabSelection(btnUpcoming);
     }
 
+    @Override
+    public void onAccept(Registration registration) {
+        registrationViewModel.approveRegistration(registration.getRegistrationId());
+    }
 
+    @Override
+    public void onReject(Registration registration) {
+        registrationViewModel.rejectRegistration(registration.getRegistrationId());
+    }
 }
