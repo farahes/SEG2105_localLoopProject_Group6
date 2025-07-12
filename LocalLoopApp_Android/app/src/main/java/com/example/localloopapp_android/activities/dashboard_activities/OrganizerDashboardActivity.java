@@ -167,9 +167,16 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // FIX: Use ViewModel's organizerId instead of SharedPreferences
         manageRegistrationCard.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ManageRegistrationsActivity.class);
-            startActivity(intent);
+            String organizerId = viewModel.getOrganizerId();
+            if (organizerId != null) {
+                Intent intent = new Intent(this, ManageRegistrationsActivity.class);
+                intent.putExtra(Constants.EXTRA_USER_ID, organizerId);
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Organizer ID not found", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

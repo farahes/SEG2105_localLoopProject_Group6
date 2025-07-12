@@ -11,6 +11,8 @@ public class Constants {
     public static final String EXTRA_FIRST_NAME = "firstName";
     public static final String EXTRA_LAST_NAME = "lastName";
 
+
+
     //event management extras
     public static final String EXTRA_EVENT_OBJECT = "event";
 

@@ -35,26 +35,23 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Main Content: Placeholder for now -->
-    <LinearLayout
+    <!-- Scrollable dynamic content container -->
+    <ScrollView
         android:id="@+id/contentLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
+        android:layout_marginTop="?attr/actionBarSize"
         android:padding="16dp"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:fillViewport="true">
 
-        <TextView
-            android:id="@+id/tvPlaceholder"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/eventContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Manage Registrations Content Here"
-            android:textSize="16sp"
-            android:textColor="#333" />
-    </LinearLayout>
+            android:orientation="vertical" />
+    </ScrollView>
 
-    <!-- Bottom Navigation (reuse your existing bar) -->
+    <!-- Bottom Navigation -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
