@@ -35,7 +35,7 @@ import java.util.Date;
 
 
 public class ManageEventsActivity extends AppCompatActivity {
-    private Button btnUpcoming, btnEventHistory;
+    private Button btnUpcoming, btnEventHistory, btnRegistrations;
     private LinearLayout eventListContainer;
     private View noEventsPlaceholder;
     private OrganizerViewModel viewModel;
@@ -68,6 +68,7 @@ public class ManageEventsActivity extends AppCompatActivity {
         // Bind views
         btnUpcoming = findViewById(R.id.btnUpcoming);
         btnEventHistory = findViewById(R.id.btnEventHistory);
+        btnRegistrations = findViewById(R.id.btnRegistrations);
         eventListContainer = findViewById(R.id.eventListContainer);
         noEventsPlaceholder = findViewById(R.id.noEventsPlaceholder);
 
@@ -86,6 +87,7 @@ public class ManageEventsActivity extends AppCompatActivity {
 
         btnUpcoming = findViewById(R.id.btnUpcoming);
         btnEventHistory = findViewById(R.id.btnEventHistory);
+        btnRegistrations = findViewById(R.id.btnRegistrations);
     }
 
     private void setupViewModel() {
@@ -112,30 +114,41 @@ public class ManageEventsActivity extends AppCompatActivity {
 
     private void setupTabs() {
         btnUpcoming.setOnClickListener(v -> {
-            highlightTab(true);
             showUpcomingEvents();
+            updateTabSelection(btnUpcoming);
         });
 
         btnEventHistory.setOnClickListener(v -> {
-            highlightTab(false);
             showPastEvents();
+            updateTabSelection(btnEventHistory);
+        });
+
+        btnRegistrations.setOnClickListener(v -> {
+            showRegistrations();
+            updateTabSelection(btnRegistrations);
         });
     }
 
-    private void highlightTab(boolean isUpcoming) {
-        if (isUpcoming) {
-            btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_selected);
-            btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+    private void updateTabSelection(Button selectedButton) {
+        // Reset all buttons to unselected state
+        btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_unselected);
+        btnUpcoming.setTextColor(ContextCompat.getColor(this, R.color.purple_200));
 
-            btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
-            btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // lighter purple here
-        } else {
-            btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_unselected);
-            btnUpcoming.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // lighter purple here
+        btnEventHistory.setBackgroundResource(R.drawable.bg_tab_middle_unselected);
+        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));
 
-            btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_selected);
-            btnEventHistory.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+        btnRegistrations.setBackgroundResource(R.drawable.bg_tab_right_unselected);
+        btnRegistrations.setTextColor(ContextCompat.getColor(this, R.color.purple_200));
+
+        // Set the selected button's style
+        if (selectedButton.getId() == R.id.btnUpcoming) {
+            selectedButton.setBackgroundResource(R.drawable.bg_tab_left_selected);
+        } else if (selectedButton.getId() == R.id.btnEventHistory) {
+            selectedButton.setBackgroundResource(R.drawable.bg_tab_middle_selected);
+        } else if (selectedButton.getId() == R.id.btnRegistrations) {
+            selectedButton.setBackgroundResource(R.drawable.bg_tab_right_selected);
         }
+        selectedButton.setTextColor(ContextCompat.getColor(this, android.R.color.white));
     }
 
 
@@ -145,6 +158,16 @@ public class ManageEventsActivity extends AppCompatActivity {
 
     private void showPastEvents() {
         displayFilteredEvents(false);
+    }
+
+    private void showRegistrations() {
+        eventListContainer.removeAllViews();
+        noEventsPlaceholder.setVisibility(View.VISIBLE);
+        // Placeholder for registration content
+        TextView tv = new TextView(this);
+        tv.setText("Registration management coming soon.");
+        tv.setGravity(android.view.Gravity.CENTER);
+        eventListContainer.addView(tv);
     }
 
     private void displayFilteredEvents(boolean upcoming) {
@@ -223,11 +246,7 @@ public class ManageEventsActivity extends AppCompatActivity {
     }
 
     private void applyInitialTabStyle() {
-        btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_selected);
-        btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
-
-        btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
-        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // Use lighter purple here
+        updateTabSelection(btnUpcoming);
     }
 
 
