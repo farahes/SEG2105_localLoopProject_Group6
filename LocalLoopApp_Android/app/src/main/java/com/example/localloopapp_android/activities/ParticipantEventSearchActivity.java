@@ -6,6 +6,12 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -384,4 +390,59 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         }
         return "Unknown";
     }
+<<<<<<< HEAD
 }
+=======
+
+    // Event registration
+    private void registerForEvent(Event event) {
+        String userId = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                .getString("userId", null);
+
+        if (userId == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    Toast.makeText(ParticipantEventSearchActivity.this, "User profile missing", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String name = snapshot.child("name").getValue(String.class);
+                String email = snapshot.child("email").getValue(String.class);
+
+                // Create registration map
+                Map<String, Object> registration = new HashMap<>();
+                registration.put("participantId", userId);
+                registration.put("eventId", event.getEventId());
+                registration.put("status", "pending");
+                registration.put("organizerId", event.getOrganizerId()); // Needed to query later
+                registration.put("name", name != null ? name : "");
+                registration.put("email", email != null ? email : "");
+
+                DatabaseReference regRef = FirebaseDatabase.getInstance()
+                        .getReference("registrations")
+                        .push();
+
+                regRef.setValue(registration)
+                        .addOnSuccessListener(v -> Toast.makeText(ParticipantEventSearchActivity.this,
+                                "Registration request sent", Toast.LENGTH_SHORT).show())
+                        .addOnFailureListener(e -> Toast.makeText(ParticipantEventSearchActivity.this,
+                                "Failed to register: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Toast.makeText(ParticipantEventSearchActivity.this,
+                        "User fetch failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+}
+>>>>>>> Farah
