@@ -91,14 +91,7 @@
                             android:text="EVENT HISTORY"
                             android:textStyle="bold" />
 
-                        <Button
-                            android:id="@+id/btnRegistrations"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_tab_right_unselected"
-                            android:text="REGISTRATIONS"
-                            android:textStyle="bold" />
+                        
                     </LinearLayout>
 
                     <!-- Event List or Placeholder -->
@@ -115,11 +108,7 @@
                             android:orientation="vertical"
                             android:visibility="visible" />
 
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/registrationsRecyclerView"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:visibility="gone" />
+                        
 
                         <include
                             android:id="@+id/noEventsPlaceholder"

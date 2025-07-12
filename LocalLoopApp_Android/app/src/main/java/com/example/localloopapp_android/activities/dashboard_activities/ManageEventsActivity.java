@@ -37,9 +37,8 @@ import java.util.Map;
 
 
 public class ManageEventsActivity extends AppCompatActivity implements RegistrationAdapter.OnRegistrationActionListener {
-    private Button btnUpcoming, btnEventHistory, btnRegistrations;
+    private Button btnUpcoming, btnEventHistory;
     private LinearLayout eventListContainer;
-    private RecyclerView registrationsRecyclerView;
     private RegistrationAdapter registrationAdapter;
     private View noEventsPlaceholder;
     private OrganizerViewModel viewModel;
@@ -73,9 +72,7 @@ public class ManageEventsActivity extends AppCompatActivity implements Registrat
         // Bind views
         btnUpcoming = findViewById(R.id.btnUpcoming);
         btnEventHistory = findViewById(R.id.btnEventHistory);
-        btnRegistrations = findViewById(R.id.btnRegistrations);
         eventListContainer = findViewById(R.id.eventListContainer);
-        registrationsRecyclerView = findViewById(R.id.registrationsRecyclerView);
         noEventsPlaceholder = findViewById(R.id.noEventsPlaceholder);
 
 
@@ -93,10 +90,6 @@ public class ManageEventsActivity extends AppCompatActivity implements Registrat
 
         btnUpcoming = findViewById(R.id.btnUpcoming);
         btnEventHistory = findViewById(R.id.btnEventHistory);
-        btnRegistrations = findViewById(R.id.btnRegistrations);
-
-        registrationsRecyclerView = findViewById(R.id.registrationsRecyclerView);
-        registrationsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void setupViewModel() {
@@ -133,11 +126,6 @@ public class ManageEventsActivity extends AppCompatActivity implements Registrat
             showPastEvents();
             updateTabSelection(btnEventHistory);
         });
-
-        btnRegistrations.setOnClickListener(v -> {
-            showRegistrations();
-            updateTabSelection(btnRegistrations);
-        });
     }
 
     private void updateTabSelection(Button selectedButton) {
@@ -148,16 +136,14 @@ public class ManageEventsActivity extends AppCompatActivity implements Registrat
         btnEventHistory.setBackgroundResource(R.drawable.bg_tab_middle_unselected);
         btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));
 
-        btnRegistrations.setBackgroundResource(R.drawable.bg_tab_right_unselected);
-        btnRegistrations.setTextColor(ContextCompat.getColor(this, R.color.purple_200));
+
 
         // Set the selected button's style
         if (selectedButton.getId() == R.id.btnUpcoming) {
             selectedButton.setBackgroundResource(R.drawable.bg_tab_left_selected);
         } else if (selectedButton.getId() == R.id.btnEventHistory) {
             selectedButton.setBackgroundResource(R.drawable.bg_tab_middle_selected);
-        } else if (selectedButton.getId() == R.id.btnRegistrations) {
-            selectedButton.setBackgroundResource(R.drawable.bg_tab_right_selected);
+
         }
         selectedButton.setTextColor(ContextCompat.getColor(this, android.R.color.white));
     }
@@ -165,16 +151,17 @@ public class ManageEventsActivity extends AppCompatActivity implements Registrat
 
     private void showUpcomingEvents() {
         eventListContainer.setVisibility(View.VISIBLE);
-        registrationsRecyclerView.setVisibility(View.GONE);
+        //registrationsRecyclerView.setVisibility(View.GONE);
         displayFilteredEvents(true);
     }
 
     private void showPastEvents() {
         eventListContainer.setVisibility(View.VISIBLE);
-        registrationsRecyclerView.setVisibility(View.GONE);
+        //registrationsRecyclerView.setVisibility(View.GONE);
         displayFilteredEvents(false);
     }
 
+    /*
     private void showRegistrations() {
         eventListContainer.setVisibility(View.GONE);
         registrationsRecyclerView.setVisibility(View.VISIBLE);
@@ -199,7 +186,7 @@ public class ManageEventsActivity extends AppCompatActivity implements Registrat
             }
         });
     }
-
+*/
     private void displayFilteredEvents(boolean upcoming) {
         if (allEvents == null) return; // Prevents NullPointerException
         eventListContainer.removeAllViews();
