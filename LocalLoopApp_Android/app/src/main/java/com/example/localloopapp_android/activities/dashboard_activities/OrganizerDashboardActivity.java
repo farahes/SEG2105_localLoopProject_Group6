@@ -108,6 +108,21 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         calendarView = findViewById(R.id.calendarView);
 
         noEventsPlaceholder = findViewById(R.id.noEventsPlaceholder);
+
+        // --- Bottom navigation logic for account/profile button ---
+        ImageButton btnProfile = findViewById(R.id.btnProfile);
+        btnProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ManageAccountOrganizer.class);
+            startActivity(intent);
+        });
+        // need to add similar logic for btnHome and btnNotifications
+
+        ImageButton btnNotifications = findViewById(R.id.btnNotifications);
+        btnNotifications.setOnClickListener(v -> {
+            Intent intent = new Intent(this, OrganizerInbox.class);
+            startActivity(intent);
+        });
+
     }
 
     /**
@@ -353,4 +368,3 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     }
 
 }
-

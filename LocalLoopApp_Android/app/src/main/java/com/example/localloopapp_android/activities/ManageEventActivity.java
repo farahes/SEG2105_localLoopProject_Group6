@@ -225,6 +225,7 @@ public class ManageEventActivity extends AppCompatActivity {
             categoryList = categories;
 
             List<String> names = new ArrayList<>();
+            names.add("Choose a Category"); // Default prompt
             for (Category c : categories) {
                 names.add(c.getName());
             }
@@ -237,17 +238,24 @@ public class ManageEventActivity extends AppCompatActivity {
             if (isEditMode) {
                 for (int i = 0; i < categoryList.size(); i++) {
                     if (categoryList.get(i).getCategoryId().equals(eventToEdit.getCategoryId())) {
-                        spinnerCategory.setSelection(i);
+                        spinnerCategory.setSelection(i + 1); // +1 because of "Category" prompt
                         selectedCategoryId = categoryList.get(i).getCategoryId();
                         break;
                     }
                 }
+            } else {
+                spinnerCategory.setSelection(0); // Show "Category" by default
+                selectedCategoryId = null;
             }
         });
 
         spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedCategoryId = categoryList.get(position).getCategoryId();
+                if (position == 0) {
+                    selectedCategoryId = null; // "Category" prompt selected
+                } else {
+                    selectedCategoryId = categoryList.get(position - 1).getCategoryId();
+                }
             }
 
             @Override public void onNothingSelected(AdapterView<?> parent) {

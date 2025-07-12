@@ -58,6 +58,10 @@
         </activity>
         <activity android:name=".activities.dashboard_activities.ManageEventsActivity" />
         <activity android:name=".activities.dashboard_activities.MyTicketsActivity" />
+        <activity
+            android:name=".activities.dashboard_activities.ManageAccountOrganizer"
+            android:exported="false" />
+        <activity android:name=".activities.dashboard_activities.OrganizerInbox" />
     </application>
 
 </manifest>
