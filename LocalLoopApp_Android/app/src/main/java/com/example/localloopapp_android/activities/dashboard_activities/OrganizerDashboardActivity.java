@@ -1,5 +1,6 @@
 package com.example.localloopapp_android.activities.dashboard_activities;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -60,12 +61,16 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     private OrganizerViewModel viewModel;
     private LinearLayout eventListContainer;
     private Set<LocalDate> eventDateSet = new HashSet<>();
+    private String organizerId; // Persisted organizer ID
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh events when returning to this activity
-        viewModel.fetchEventsByOrganizer();
+        // Ensure ViewModel has the correct organizerId
+        if (viewModel != null && organizerId != null) {
+            viewModel.setOrganizerId(organizerId);
+            viewModel.fetchEventsByOrganizer();
+        }
     }
 
     @Override
@@ -73,7 +78,11 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_organizer_dashboard);
 
-        extractIntentExtras();
+        if (savedInstanceState != null) {
+            organizerId = savedInstanceState.getString("organizerId");
+        } else {
+            extractIntentExtras();
+        }
         setupUI();
         setupViewModel();
         setupFabButton();
@@ -86,12 +95,20 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
      * Extracts intent extras and initializes the ViewModel.
      */
     private void extractIntentExtras() {
-        String organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
+        organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
+        if (organizerId == null) {
+            // Try to get from SharedPreferences
+            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            organizerId = prefs.getString("organizerId", null);
+        } else {
+            // Save to SharedPreferences for future retrieval
+            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            prefs.edit().putString("organizerId", organizerId).apply();
+        }
         String firstName = getIntent().getStringExtra(Constants.EXTRA_FIRST_NAME);
 
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
         viewModel.setOrganizerId(organizerId);
-
     }
 
     /**
