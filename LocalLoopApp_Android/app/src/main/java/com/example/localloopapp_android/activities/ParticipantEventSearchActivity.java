@@ -74,7 +74,6 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_participant_event_search);
 
         setupUI();
-        setupFeeSpinner();
         setupEventObserver();
         setupRegistrationObserver();
 
