@@ -99,7 +99,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             resultsContainer.removeAllViews();
             for (int i = 0; i < Math.min(5, upcoming.size()); i++) {
                 Event event = upcoming.get(i);
-                View card = getLayoutInflater().inflate(R.layout.participant_event_card, resultsContainer, false);
+                View card = getLayoutInflater().inflate(R.layout.item_participant_event_card, resultsContainer, false);
                 populateEventCard(card, event);
                 resultsContainer.addView(card);
             }
@@ -213,7 +213,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                     }
                 }
 
-                View card = getLayoutInflater().inflate(R.layout.participant_event_card, resultsContainer, false);
+                View card = getLayoutInflater().inflate(R.layout.item_participant_event_card, resultsContainer, false);
                 populateEventCard(card, event);
                 resultsContainer.addView(card);
             }
@@ -363,18 +363,21 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             .show();
     }
 
-    // Recent queries logic
     private void loadRecentQueries() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid).child("recentSearches");
-        ref.limitToLast(5).addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                List<String> queries = new ArrayList<>();
+                LinkedHashSet<String> uniqueQueries = new LinkedHashSet<>();
                 for (DataSnapshot child : snapshot.getChildren()) {
-                    queries.add(child.getValue(String.class));
+                    String query = child.getValue(String.class);
+                    if (!TextUtils.isEmpty(query)) {
+                        uniqueQueries.add(query.trim());
+                    }
+                    if (uniqueQueries.size() == 5) break;
                 }
-                displayRecentQueries(queries);
+                displayRecentQueries(new ArrayList<>(uniqueQueries));
             }
             @Override
             public void onCancelled(DatabaseError error) {}
