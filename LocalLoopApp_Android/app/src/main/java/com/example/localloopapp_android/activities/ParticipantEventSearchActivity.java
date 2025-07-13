@@ -88,6 +88,27 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         });
         categoryViewModel.fetchCategories();
 
+        eventViewModel.getEvents().observe(this, events -> {
+            List<Event> upcoming = new ArrayList<>();
+            long now = System.currentTimeMillis();
+            for (Event event : events) {
+                if (event.isEventActive() && event.getEventStart() >= now) {
+                    upcoming.add(event);
+                }
+            }
+            // Sort by soonest
+            upcoming.sort(Comparator.comparingLong(Event::getEventStart));
+            // Show top 5
+            resultsContainer.removeAllViews();
+            for (int i = 0; i < Math.min(5, upcoming.size()); i++) {
+                Event event = upcoming.get(i);
+                View card = getLayoutInflater().inflate(R.layout.participant_event_card, resultsContainer, false);
+                // ...populate card...
+                resultsContainer.addView(card);
+            }
+        });
+        eventViewModel.fetchEvents();
+
         // Set up listeners for buttons
         setupListeners();
     }
