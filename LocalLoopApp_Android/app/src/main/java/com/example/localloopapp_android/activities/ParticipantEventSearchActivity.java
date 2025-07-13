@@ -62,6 +62,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
     private List<String> selectedCategoryIds = new ArrayList<>();
     private Calendar selectedDate = null;
     private Integer startHour = null, startMinute = null;
+    private String selectedFeeOption = "Any";
 
     private CategoryViewModel categoryViewModel;
     private EventViewModel eventViewModel;
@@ -122,14 +123,6 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         registrationViewModel = new ViewModelProvider(this).get(RegistrationViewModel.class);
     }
 
-    private void setupFeeSpinner() {
-        feeAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item,
-                new String[]{"Any", "Free", "< $50", "> $50"});
-        feeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        feeSpinner.setAdapter(feeAdapter);
-    }
-
     private void setupListeners() {
         btnSearch.setOnClickListener(v -> searchEvents());
         btnFilters.setOnClickListener(v -> showFiltersDialog());
@@ -166,7 +159,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             resultsContainer.removeAllViews();
 
             String searchQuery = etSearchBar.getText().toString().trim().toLowerCase();
-            String feeOption = (String) feeSpinner.getSelectedItem();
+            String feeOption = selectedFeeOption;
 
             for (Event event : events) {
                 // Search bar similarity (name or description)
@@ -320,7 +313,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         // Fee spinner
         Spinner dialogFeeSpinner = dialogView.findViewById(R.id.dialogFeeSpinner);
         dialogFeeSpinner.setAdapter(feeAdapter);
-        dialogFeeSpinner.setSelection(feeSpinner.getSelectedItemPosition());
+        selectedFeeOption = (String) dialogFeeSpinner.getSelectedItem();
 
         // Date picker
         Button btnDialogDate = dialogView.findViewById(R.id.btnDialogDate);
