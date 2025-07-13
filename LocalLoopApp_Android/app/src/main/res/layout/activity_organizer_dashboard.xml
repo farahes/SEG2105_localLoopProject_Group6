@@ -51,26 +51,12 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Welcome Message -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/welcomeStatsCardContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:elevation="2dp"
-                app:cardCornerRadius="12dp"
-                app:cardBackgroundColor="#F2E7FB">
+            <!-- Welcome Message got kicked out -->
 
-                <TextView
-                    android:id="@+id/tvWelcomeMessage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Welcome! You are logged in as Organizer."
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:padding="16dp"
-                    android:gravity="center" />
-            </androidx.cardview.widget.CardView>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#CCCCCC" />
 
             <!-- Calendar Toggle + Header + View -->
             <LinearLayout
@@ -80,21 +66,22 @@
                 android:layout_marginBottom="12dp">
 
                 <!-- calendar title -->
+
+                <!-- Calendar Month Navigation Header -->
                 <TextView
                     android:id="@+id/calendarSectionTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="MY CALENDAR"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#673AB7"
+                    android:layout_marginBottom="0dp"
                     android:drawableStart="@drawable/ic_calendar_month"
                     android:drawablePadding="8dp"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:layout_marginBottom="0dp" />
+                    android:text="MY CALENDAR"
+                    android:textColor="#673AB7"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-                <!-- Calendar Month Navigation Header -->
                 <LinearLayout
                     android:id="@+id/calendarHeader"
                     android:layout_width="match_parent"
@@ -141,6 +128,10 @@
                     android:visibility="gone" />
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#CCCCCC" />
 
             <!-- Action Buttons -->
             <LinearLayout
@@ -262,6 +253,17 @@
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="#000000" />
+
+                        <ImageView
+                            android:id="@+id/imgPendingRegistration"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical|end"
+                            android:layout_marginStart="8dp"
+                            android:src="@drawable/ic_exclamation_red"
+                            android:contentDescription="Pending Registrations"
+                            android:visibility="gone"
+                            app:tint="#FF0000"/>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
