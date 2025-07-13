@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".activities.dashboard_activities.OrganizerDashboardActivity">
 
     <!-- Top Bar -->
     <LinearLayout
@@ -16,42 +19,100 @@
         android:paddingStart="12dp"
         android:paddingEnd="12dp">
 
-        <ImageButton
-            android:id="@+id/btnBack"
+        <ImageView
+            android:id="@+id/logoIcon"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/backbutton"
-            android:contentDescription="Back" />
+            android:layout_marginEnd="8dp"
+            android:contentDescription="LocalLoop Logo"
+            android:src="@drawable/locallooplogo" />
 
         <TextView
-            android:id="@+id/toolbarTitle"
+            android:id="@+id/organizerToolbarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:text="Manage Registrations"
+            android:text="Account Profile"
             android:textColor="#FFFFFF"
-            android:textSize="20sp"
+            android:textSize="25sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Scrollable dynamic content container -->
-    <ScrollView
-        android:id="@+id/contentLayout"
+    <!-- Profile Info Section -->
+    <LinearLayout
+        android:id="@+id/profileContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:padding="16dp"
-        android:fillViewport="true">
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center"
+        android:layout_marginTop="60dp">
 
-        <LinearLayout
-            android:id="@+id/eventContainer"
-            android:layout_width="match_parent"
+        <!-- ADD Avatar added when registered -->
+        <ImageView
+            android:id="@+id/profileImage"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/profilebutton"
+            android:contentDescription="Profile Picture"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Name -->
+        <TextView
+            android:id="@+id/profileName"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </ScrollView>
+            android:text="Name: John Doe"
+            android:textSize="18sp"
+            android:layout_marginBottom="12dp" />
 
-    <!-- Bottom Navigation -->
+        <!-- Username -->
+        <TextView
+            android:id="@+id/profileUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Username: johndoe"
+            android:textSize="18sp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Email -->
+        <TextView
+            android:id="@+id/profileEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email: john.doe@example.com"
+            android:textSize="18sp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Edit Button -->
+        <Button
+            android:id="@+id/btnEditProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit Profile"
+            android:layout_marginBottom="12dp" />
+        <!-- Logout Button -->
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logout"
+            android:layout_marginTop="0dp"
+            android:backgroundTint="#9E9E9E"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Delete Button -->
+        <Button
+            android:id="@+id/btnDeleteAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete Account"
+            android:backgroundTint="#F44336"
+            android:textColor="#FFFFFF" />
+
+    </LinearLayout>
+
+    <!-- Bottom Navigation (unchanged) -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
@@ -63,7 +124,7 @@
         android:paddingVertical="4dp"
         android:weightSum="3">
 
-        <!-- Account -->
+        <!-- Profile -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -115,7 +176,7 @@
                 android:layout_marginTop="2dp" />
         </LinearLayout>
 
-        <!-- Inbox -->
+        <!-- Notifications -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -141,4 +202,5 @@
                 android:layout_marginTop="2dp" />
         </LinearLayout>
     </LinearLayout>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

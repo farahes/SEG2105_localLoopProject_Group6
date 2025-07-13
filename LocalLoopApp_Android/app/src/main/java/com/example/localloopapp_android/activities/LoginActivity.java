@@ -94,6 +94,12 @@ public class LoginActivity extends AppCompatActivity {
      * @param user The logged-in user account containing role and personal details.
      */
     private void navigateToDashboard(UserAccount user) {
+        // Save userId to SharedPreferences
+        getSharedPreferences("user_prefs", MODE_PRIVATE)
+                .edit()
+                .putString("userId", user.getUserID())
+                .apply();
+
         Intent intent;
 
         switch (UserRole.fromString(user.getRole())) {

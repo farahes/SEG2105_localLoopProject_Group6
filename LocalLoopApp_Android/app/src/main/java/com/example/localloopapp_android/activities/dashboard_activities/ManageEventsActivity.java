@@ -6,39 +6,43 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.Observer;
-import com.example.localloopapp_android.models.Category;
-import com.example.localloopapp_android.viewmodels.CategoryViewModel;
-
-import java.util.HashMap;
-import java.util.Map;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.localloopapp_android.R;
-import com.example.localloopapp_android.activities.CreateEventActivity;
+import com.example.localloopapp_android.activities.ManageEventActivity;
+import com.example.localloopapp_android.features.organization.adapters.RegistrationAdapter;
+import com.example.localloopapp_android.models.Category;
 import com.example.localloopapp_android.models.Event;
+import com.example.localloopapp_android.models.Registration;
 import com.example.localloopapp_android.utils.Constants;
+import com.example.localloopapp_android.viewmodels.CategoryViewModel;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
-
-import java.util.Comparator;
-import java.util.List;
+import com.example.localloopapp_android.viewmodels.RegistrationViewModel;
 
 import java.text.SimpleDateFormat;
-import java.util.Locale;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 
-public class ManageEventsActivity extends AppCompatActivity {
+public class ManageEventsActivity extends AppCompatActivity implements RegistrationAdapter.OnRegistrationActionListener {
     private Button btnUpcoming, btnEventHistory;
     private LinearLayout eventListContainer;
+    private RegistrationAdapter registrationAdapter;
     private View noEventsPlaceholder;
     private OrganizerViewModel viewModel;
+    private RegistrationViewModel registrationViewModel;
 
     private List<Event> allEvents;
 
@@ -56,13 +60,13 @@ public class ManageEventsActivity extends AppCompatActivity {
 
         applyInitialTabStyle();
 
-        CategoryViewModel categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
+        categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         categoryViewModel.getCategories().observe(this, categories -> {
             categoryIdToName.clear();
             for (Category c : categories) {
                 categoryIdToName.put(c.getCategoryId(), c.getName());
             }
-            // Optionally refresh event list UI here if needed
+            showUpcomingEvents(); // Refresh event list UI after categories are loaded
         });
 
         // Bind views
@@ -90,6 +94,7 @@ public class ManageEventsActivity extends AppCompatActivity {
 
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
+        registrationViewModel = new ViewModelProvider(this).get(RegistrationViewModel.class);
         categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
 
         String organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
@@ -100,6 +105,7 @@ public class ManageEventsActivity extends AppCompatActivity {
         });
 
         viewModel.fetchEventsByOrganizer();
+        registrationViewModel.loadPendingRegistrations(organizerId);
 
         // Observe categories
         categoryViewModel.getCategories().observe(this, categories -> {
@@ -112,43 +118,77 @@ public class ManageEventsActivity extends AppCompatActivity {
 
     private void setupTabs() {
         btnUpcoming.setOnClickListener(v -> {
-            highlightTab(true);
             showUpcomingEvents();
+            updateTabSelection(btnUpcoming);
         });
 
         btnEventHistory.setOnClickListener(v -> {
-            highlightTab(false);
             showPastEvents();
+            updateTabSelection(btnEventHistory);
         });
     }
 
-    private void highlightTab(boolean isUpcoming) {
-        if (isUpcoming) {
-            btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_selected);
-            btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+    private void updateTabSelection(Button selectedButton) {
+        // Reset all buttons to unselected state
+        btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_unselected);
+        btnUpcoming.setTextColor(ContextCompat.getColor(this, R.color.purple_200));
 
-            btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
-            btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // lighter purple here
-        } else {
-            btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_unselected);
-            btnUpcoming.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // lighter purple here
+        btnEventHistory.setBackgroundResource(R.drawable.bg_tab_middle_unselected);
+        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));
 
-            btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_selected);
-            btnEventHistory.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+
+
+        // Set the selected button's style
+        if (selectedButton.getId() == R.id.btnUpcoming) {
+            selectedButton.setBackgroundResource(R.drawable.bg_tab_left_selected);
+        } else if (selectedButton.getId() == R.id.btnEventHistory) {
+            selectedButton.setBackgroundResource(R.drawable.bg_tab_middle_selected);
+
         }
+        selectedButton.setTextColor(ContextCompat.getColor(this, android.R.color.white));
     }
 
 
-
     private void showUpcomingEvents() {
+        eventListContainer.setVisibility(View.VISIBLE);
+        //registrationsRecyclerView.setVisibility(View.GONE);
         displayFilteredEvents(true);
     }
 
     private void showPastEvents() {
+        eventListContainer.setVisibility(View.VISIBLE);
+        //registrationsRecyclerView.setVisibility(View.GONE);
         displayFilteredEvents(false);
     }
 
+    /*
+    private void showRegistrations() {
+        eventListContainer.setVisibility(View.GONE);
+        registrationsRecyclerView.setVisibility(View.VISIBLE);
+
+        registrationViewModel.getPendingRegistrations().observe(this, registrations -> {
+            if (registrations == null || registrations.isEmpty()) {
+                noEventsPlaceholder.setVisibility(View.VISIBLE);
+                registrationsRecyclerView.setVisibility(View.GONE);
+                TextView noEventsText = noEventsPlaceholder.findViewById(R.id.no_events_text);
+                if (noEventsText != null) {
+                    noEventsText.setText("No pending registrations.");
+                }
+            } else {
+                noEventsPlaceholder.setVisibility(View.GONE);
+                registrationsRecyclerView.setVisibility(View.VISIBLE);
+                if (registrationAdapter == null) {
+                    registrationAdapter = new RegistrationAdapter(registrations, this);
+                    registrationsRecyclerView.setAdapter(registrationAdapter);
+                } else {
+                    registrationAdapter.updateRegistrations(registrations);
+                }
+            }
+        });
+    }
+*/
     private void displayFilteredEvents(boolean upcoming) {
+        if (allEvents == null) return; // Prevents NullPointerException
         eventListContainer.removeAllViews();
         long now = System.currentTimeMillis();
 
@@ -164,7 +204,11 @@ public class ManageEventsActivity extends AppCompatActivity {
             LayoutInflater inflater = LayoutInflater.from(this);
 
             for (Event e : filtered) {
-                View card = inflater.inflate(R.layout.item_event_card, eventListContainer, false);
+                View card = inflater.inflate(R.layout.item_organizer_event_card, eventListContainer, false);
+
+                // Load and display the event image as a small round avatar
+                ImageView ivEventAvatar = card.findViewById(R.id.ivEventAvatar);
+                com.example.localloopapp_android.activities.ManageEventActivity.loadEventImage(e.getEventId(), ivEventAvatar);
 
                 TextView nameView = card.findViewById(R.id.tvEventName);
                 TextView locationView = card.findViewById(R.id.tvEventLocation);
@@ -176,8 +220,6 @@ public class ManageEventsActivity extends AppCompatActivity {
                 SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
                 String timeStr = timeFormat.format(new Date(startMillis)) + " - " + timeFormat.format(new Date(endMillis));
                 timeView.setText(timeStr);
-
-                TextView categoryView = card.findViewById(R.id.tvEventCategory);
 
 
                 // Set category name
@@ -199,7 +241,7 @@ public class ManageEventsActivity extends AppCompatActivity {
                     tvFee.setText("Fee: $" + String.format("%.2f", e.getFee()));
                     tvFee.setTextColor(ContextCompat.getColor(this, R.color.cat_grey));
                     tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
-            }
+                }
 
                 nameView.setText(e.getName());
                 locationView.setText(e.getLocation());
@@ -208,7 +250,7 @@ public class ManageEventsActivity extends AppCompatActivity {
                 ImageButton btnEdit = card.findViewById(R.id.btnEdit);
 
                 btnEdit.setOnClickListener(v -> {
-                    Intent intent = new Intent(this, CreateEventActivity.class);
+                    Intent intent = new Intent(this, ManageEventActivity.class);
                     intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
                     intent.putExtra(Constants.EXTRA_EVENT_OBJECT, e);
                     startActivity(intent);
@@ -219,14 +261,18 @@ public class ManageEventsActivity extends AppCompatActivity {
             }
         }
     }
-    private void applyInitialTabStyle() {
-        btnUpcoming.setBackgroundResource(R.drawable.bg_tab_left_selected);
-        btnUpcoming.setTextColor(ContextCompat.getColor(this, android.R.color.white));
 
-        btnEventHistory.setBackgroundResource(R.drawable.bg_tab_right_unselected);
-        btnEventHistory.setTextColor(ContextCompat.getColor(this, R.color.purple_200));  // Use lighter purple here
+    private void applyInitialTabStyle() {
+        updateTabSelection(btnUpcoming);
     }
 
+    @Override
+    public void onAccept(Registration registration) {
+        registrationViewModel.approveRegistration(registration.getRegistrationId());
+    }
 
-
+    @Override
+    public void onReject(Registration registration) {
+        registrationViewModel.rejectRegistration(registration.getRegistrationId());
+    }
 }

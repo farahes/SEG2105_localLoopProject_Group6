@@ -20,7 +20,7 @@
             android:value="AIzaSyD-cPvHb7hc9AosWqxRLWlRKu-wtMSxwFo" />
 
         <activity
-            android:name=".activities.CreateEventActivity"
+            android:name=".activities.ManageEventActivity"
             android:exported="false" />
 
         <activity android:name=".activities.dashboard_activities.ManageRegistrationsActivity" />
@@ -45,7 +45,7 @@
             android:name=".activities.ManageCategoriesActivity"
             android:exported="false" />
         <activity 
-            android:name=".activities.participant.ParticipantEventSearchActivity"
+            android:name=".activities.ParticipantEventSearchActivity"
             android:exported="false"/>
         <activity
             android:name=".activities.MainActivity"
@@ -57,6 +57,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.dashboard_activities.ManageEventsActivity" />
+        <activity android:name=".activities.dashboard_activities.MyTicketsActivity" />
+        <activity
+            android:name=".activities.dashboard_activities.ManageAccountOrganizer"
+            android:exported="false" />
+        <activity android:name=".activities.dashboard_activities.OrganizerInbox" />
     </application>
 
 </manifest>

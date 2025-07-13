@@ -1,11 +1,16 @@
 package com.example.localloopapp_android.activities.dashboard_activities;
 
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -15,18 +20,23 @@ import androidx.cardview.widget.CardView;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.localloopapp_android.R;
-import com.example.localloopapp_android.activities.CreateEventActivity;
+import com.example.localloopapp_android.activities.ManageEventActivity;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.utils.Constants;
 import com.example.localloopapp_android.viewmodels.OrganizerViewModel;
 import com.example.localloopapp_android.utils.CalendarUtilsKt;
 
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.kizitonwose.calendar.view.CalendarView;
 
 import java.time.DayOfWeek;
 
 import android.content.Intent;
+import android.widget.Toast;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -51,12 +61,20 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     private OrganizerViewModel viewModel;
     private LinearLayout eventListContainer;
     private Set<LocalDate> eventDateSet = new HashSet<>();
+    private String organizerId; // Persisted organizer ID
+
+    // Registration pending indicator
+    private ImageView imgPendingRegistration;
+    private com.example.localloopapp_android.viewmodels.RegistrationViewModel registrationViewModel;
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh events when returning to this activity
-        viewModel.fetchEventsByOrganizer();
+        // Ensure ViewModel has the correct organizerId
+        if (viewModel != null && organizerId != null) {
+            viewModel.setOrganizerId(organizerId);
+            viewModel.fetchEventsByOrganizer();
+        }
     }
 
     @Override
@@ -64,10 +82,30 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_organizer_dashboard);
 
-        extractIntentExtras();
+        if (savedInstanceState != null) {
+            organizerId = savedInstanceState.getString("organizerId");
+        } else {
+            extractIntentExtras();
+        }
         setupUI();
         setupViewModel();
         setupFabButton();
+
+        // RegistrationViewModel for pending indicator
+        registrationViewModel = new androidx.lifecycle.ViewModelProvider(this).get(com.example.localloopapp_android.viewmodels.RegistrationViewModel.class);
+        imgPendingRegistration = findViewById(R.id.imgPendingRegistration);
+        if (organizerId != null) {
+            registrationViewModel.loadPendingRegistrations(organizerId);
+            registrationViewModel.getPendingRegistrations().observe(this, registrations -> {
+                if (registrations != null && !registrations.isEmpty()) {
+                    imgPendingRegistration.setVisibility(View.VISIBLE);
+                } else {
+                    imgPendingRegistration.setVisibility(View.GONE);
+                }
+            });
+        } else {
+            imgPendingRegistration.setVisibility(View.GONE);
+        }
     }
 
 
@@ -77,12 +115,20 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
      * Extracts intent extras and initializes the ViewModel.
      */
     private void extractIntentExtras() {
-        String organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
+        organizerId = getIntent().getStringExtra(Constants.EXTRA_USER_ID);
+        if (organizerId == null) {
+            // Try to get from SharedPreferences
+            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            organizerId = prefs.getString("organizerId", null);
+        } else {
+            // Save to SharedPreferences for future retrieval
+            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            prefs.edit().putString("organizerId", organizerId).apply();
+        }
         String firstName = getIntent().getStringExtra(Constants.EXTRA_FIRST_NAME);
 
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
         viewModel.setOrganizerId(organizerId);
-
     }
 
     /**
@@ -99,6 +145,21 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         calendarView = findViewById(R.id.calendarView);
 
         noEventsPlaceholder = findViewById(R.id.noEventsPlaceholder);
+
+        // --- Bottom navigation logic for account/profile button ---
+        ImageButton btnProfile = findViewById(R.id.btnProfile);
+        btnProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ManageAccountOrganizer.class);
+            startActivity(intent);
+        });
+        // need to add similar logic for btnHome and btnNotifications
+
+        ImageButton btnNotifications = findViewById(R.id.btnNotifications);
+        btnNotifications.setOnClickListener(v -> {
+            Intent intent = new Intent(this, OrganizerInbox.class);
+            startActivity(intent);
+        });
+
     }
 
     /**
@@ -115,6 +176,8 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                         .toLocalDate());
             }
             setupCalendar();
+            //displayEvents(events, /* showUpcoming= */ true);
+            // TODO by uncommenting the line above, it displays an event on the main screen with bool of image working
         });
 
         viewModel.fetchEventsByOrganizer();
@@ -130,7 +193,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         CardView manageRegistrationCard = findViewById(R.id.btnManageRegistration);
 
         fabCreateEvent.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CreateEventActivity.class);
+            Intent intent = new Intent(this, ManageEventActivity.class);
             intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
             startActivity(intent);
         });
@@ -141,9 +204,16 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // FIX: Use ViewModel's organizerId instead of SharedPreferences
         manageRegistrationCard.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ManageRegistrationsActivity.class);
-            startActivity(intent);
+            String organizerId = viewModel.getOrganizerId();
+            if (organizerId != null) {
+                Intent intent = new Intent(this, ManageRegistrationsActivity.class);
+                intent.putExtra(Constants.EXTRA_USER_ID, organizerId);
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Organizer ID not found", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -176,7 +246,10 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             String blob = showUpcoming ? "🟣" : "🔵";
 
             for (Event event : filteredEvents) {
-                View card = inflater.inflate(R.layout.item_event_card, eventListContainer, false);
+                View card = inflater.inflate(R.layout.item_organizer_event_card, eventListContainer, false);
+
+                ImageView ivCardBackground = card.findViewById(R.id.ivCardBackground);
+                loadEventImage(event.getEventId(), ivCardBackground);
 
                 TextView nameView = card.findViewById(R.id.tvEventName);
                 TextView descView = card.findViewById(R.id.tvEventDescription);
@@ -205,7 +278,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 dateView.setText("📅 " + Constants.formatDate(event.getEventStart()));
 
                 card.setOnClickListener(v -> {
-                    Intent intent = new Intent(this, CreateEventActivity.class);
+                    Intent intent = new Intent(this, ManageEventActivity.class);
                     intent.putExtra(Constants.EXTRA_USER_ID, viewModel.getOrganizerId());
                     intent.putExtra(Constants.EXTRA_EVENT_OBJECT, event);
                     startActivity(intent);
@@ -299,5 +372,43 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         header.setText(formatted);
     }
 
-}
+    // Helper duplicate method to load the images
+    /**
+     * Loads the Base64‐encoded image for the given eventId from
+     * /avatars/{eventId} in Realtime Database, decodes it into a Bitmap,
+     * and sets it on iv. On failure, shows a toast.
+     */
+    public void loadEventImage(String eventId, ImageView iv) {
+        FirebaseDatabase.getInstance()
+                .getReference("avatars")
+                .child(eventId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snap) {
+                        Toast.makeText(OrganizerDashboardActivity.this,
+                                "avatar node exists? " + snap.exists(), Toast.LENGTH_SHORT).show();
+                        String b64 = snap.getValue(String.class);
+                        if (b64 != null && !b64.isEmpty()) {
+                            try {
+                                int comma = b64.indexOf(',');
+                                if (comma >= 0) b64 = b64.substring(comma + 1);
+                                byte[] data = Base64.decode(b64, Base64.DEFAULT);
+                                Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+                                if (bmp != null) {
+                                    iv.setImageBitmap(bmp);
+                                    iv.setVisibility(View.VISIBLE);
+                                    return;
+                                }
+                            } catch (Exception ignored) { }
+                        }
+                        // no image or decode failed
+                        iv.setVisibility(View.GONE);
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        iv.setVisibility(View.GONE);
+                    }
+                });
+    }
 
+}

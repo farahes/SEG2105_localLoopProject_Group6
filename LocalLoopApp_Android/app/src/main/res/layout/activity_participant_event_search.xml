@@ -94,6 +94,15 @@
             android:text="Search Events"
             android:layout_marginBottom="16dp"/>
 
+        <ImageView
+            android:id="@+id/loadingGif"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:contentDescription="Loading..."
+            />
+
         <LinearLayout
             android:id="@+id/resultsContainer"
             android:orientation="vertical"

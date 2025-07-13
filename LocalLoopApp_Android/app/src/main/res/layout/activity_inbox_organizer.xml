@@ -29,29 +29,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:text="Manage Registrations"
+            android:text="Notification Center"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Scrollable dynamic content container -->
-    <ScrollView
+    <!-- Main Content: Placeholder for now -->
+    <LinearLayout
         android:id="@+id/contentLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
+        android:orientation="vertical"
+        android:gravity="center"
         android:padding="16dp"
-        android:fillViewport="true">
+        android:layout_marginTop="?attr/actionBarSize">
 
-        <LinearLayout
-            android:id="@+id/eventContainer"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvPlaceholder"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </ScrollView>
+            android:text="Organizer Notifications Content Here"
+            android:textSize="16sp"
+            android:textColor="#333" />
+    </LinearLayout>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation (reuse your existing bar) -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"

@@ -10,7 +10,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
         <!-- Top bar with Close and Delete -->
         <LinearLayout
@@ -40,15 +41,26 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/deletebutton"
                 android:contentDescription="Delete"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                 />
+                android:background="?attr/selectableItemBackgroundBorderless" />
         </LinearLayout>
 
+        <!-- Title: Event Information -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event Information"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Text fields grouped with labels -->
         <EditText
             android:id="@+id/etEventName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Event Name" />
+            android:hint="Event Name"
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/etEventDesc"
@@ -56,24 +68,43 @@
             android:layout_height="wrap_content"
             android:hint="Event Description"
             android:inputType="textMultiLine"
-
             android:gravity="top"
-            android:layout_marginTop="8dp" />
+            android:layout_marginBottom="8dp" />
+
         <EditText
             android:id="@+id/etEventLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Location"
+            android:hint="Add Location"
             android:inputType="textPostalAddress"
             android:layout_marginBottom="12dp" />
 
+        <!-- Image Select -->
+        <Button
+            android:id="@+id/btnSelectImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Banner Image"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="#FFFFFF"
+            android:textColor="@color/purple_700"
+            android:background="@drawable/outlined_button_bg"/>
 
+        <ImageView
+            android:id="@+id/ivEventImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Selected event image"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Category Spinner -->
         <Spinner
             android:id="@+id/spinnerCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
-
+            android:layout_marginBottom="12dp" />
 
         <EditText
             android:id="@+id/etEventFee"
@@ -81,30 +112,59 @@
             android:layout_height="wrap_content"
             android:hint="Fee (optional)"
             android:inputType="numberDecimal"
-            android:layout_marginTop="8dp" />
+            android:layout_marginBottom="8dp" />
 
-        <EditText
-            android:id="@+id/etEventStartDate"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Start Date"
-            android:focusable="false"
-            android:layout_marginTop="8dp" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp"
+            android:weightSum="2">
+
+            <EditText
+                android:id="@+id/etEventStartDate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Start Date"
+                android:focusable="false"
+                android:layout_marginEnd="8dp" />
+
+            <EditText
+                android:id="@+id/etEventEndDate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="End Date"
+                android:focusable="false"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
 
         <EditText
-            android:id="@+id/etEventEndDate"
+            android:id="@+id/etEventStartTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="End Date"
+            android:hint="Start Time (e.g. 14:30)"
             android:focusable="false"
-            android:layout_marginTop="8dp" />
+            android:layout_marginBottom="8dp" />
 
+        <EditText
+            android:id="@+id/etMaxParticipants"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Max Participants"
+            android:inputType="number"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Create Event Button -->
         <Button
             android:id="@+id/btnCreateEvent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create Event"
-            android:layout_marginTop="16dp" />
-
+            android:text="CREATE EVENT"
+            android:backgroundTint="@color/purple_700"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
     </LinearLayout>
 </ScrollView>

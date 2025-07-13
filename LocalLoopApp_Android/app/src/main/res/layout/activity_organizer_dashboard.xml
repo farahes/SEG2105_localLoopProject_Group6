@@ -253,6 +253,17 @@
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="#000000" />
+
+                        <ImageView
+                            android:id="@+id/imgPendingRegistration"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical|end"
+                            android:layout_marginStart="8dp"
+                            android:src="@drawable/ic_exclamation_red"
+                            android:contentDescription="Pending Registrations"
+                            android:visibility="gone"
+                            app:tint="#FF0000"/>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
