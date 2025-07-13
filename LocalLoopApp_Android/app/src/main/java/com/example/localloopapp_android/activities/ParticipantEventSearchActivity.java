@@ -112,13 +112,6 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
     private void setupUI() {
         etSearchBar = findViewById(R.id.etSearchBar);
         recentQueriesContainer = findViewById(R.id.recentQueriesContainer);
-        tvSelectedCategories = findViewById(R.id.tvSelectedCategories);
-        btnSelectCategories = findViewById(R.id.btnSelectCategories);
-        feeSpinner = findViewById(R.id.spinnerFee);
-        btnSelectDate = findViewById(R.id.btnSelectDate);
-        tvSelectedDate = findViewById(R.id.tvSelectedDate);
-        btnStartTime = findViewById(R.id.btnStartTime);
-        tvStartTime = findViewById(R.id.tvStartTime);
         btnSearch = findViewById(R.id.btnSearchEvents);
         btnFilters = findViewById(R.id.btnFilters);
         resultsContainer = findViewById(R.id.resultsContainer);
