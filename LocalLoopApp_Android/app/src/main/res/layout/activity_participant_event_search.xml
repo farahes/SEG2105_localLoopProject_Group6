@@ -10,83 +10,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Search bar -->
         <EditText
-            android:id="@+id/etEventName"
+            android:id="@+id/etSearchBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Event Name"/>
-
-        <EditText
-            android:id="@+id/etEventDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Event Description"
-            android:layout_marginTop="8dp"/>
-
-        <Button
-            android:id="@+id/btnSelectCategories"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select Categories"
-            android:layout_marginTop="8dp"/>
-        <TextView
-            android:id="@+id/tvSelectedCategories"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="None"
+            android:hint="Search events..."
+            android:inputType="text"
             android:layout_marginBottom="8dp"/>
 
-        <Spinner
-            android:id="@+id/spinnerFee"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"/>
-
-        <Button
-            android:id="@+id/btnSelectDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select Date"/>
-        <TextView
-            android:id="@+id/tvSelectedDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Any"
-            android:layout_marginBottom="8dp"/>
-
+        <!-- Recent queries container -->
         <LinearLayout
-            android:orientation="horizontal"
+            android:id="@+id/recentQueriesContainer"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp">
+            android:visibility="gone"
+            android:layout_marginBottom="8dp"/>
 
-            <Button
-                android:id="@+id/btnStartTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Start Time"/>
-            <TextView
-                android:id="@+id/tvStartTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Any"
-                android:layout_marginStart="8dp"
-                android:layout_gravity="center_vertical"/>
-            <Button
-                android:id="@+id/btnEndTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="End Time"
-                android:layout_marginStart="16dp"/>
-            <TextView
-                android:id="@+id/tvEndTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Any"
-                android:layout_marginStart="8dp"
-                android:layout_gravity="center_vertical"/>
-        </LinearLayout>
+        <!-- Filters button -->
+        <Button
+            android:id="@+id/btnFilters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filters"
+            android:layout_marginBottom="8dp"/>
 
+        <!-- Search button -->
         <Button
             android:id="@+id/btnSearchEvents"
             android:layout_width="match_parent"
@@ -94,19 +44,23 @@
             android:text="Search Events"
             android:layout_marginBottom="16dp"/>
 
+        <!-- Loading GIF -->
         <ImageView
             android:id="@+id/loadingGif"
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_gravity="center_horizontal"
             android:visibility="gone"
-            android:contentDescription="Loading..."
-            />
+            android:contentDescription="Loading..."/>
 
+        <!-- Results container (only one, no duplicate IDs!) -->
         <LinearLayout
             android:id="@+id/resultsContainer"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
+            <!-- Event cards are added here dynamically -->
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>
