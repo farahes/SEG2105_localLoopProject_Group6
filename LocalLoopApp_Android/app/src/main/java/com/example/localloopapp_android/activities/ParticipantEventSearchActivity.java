@@ -118,6 +118,11 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         loadingGif = findViewById(R.id.loadingGif);
         Glide.with(this).asGif().load(R.drawable.ic_loading_packman).into(loadingGif);
 
+        feeAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item,
+                new String[]{"Any", "Free", "< $50", "> $50"});
+        feeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         eventViewModel = new ViewModelProvider(this).get(EventViewModel.class);
         registrationViewModel = new ViewModelProvider(this).get(RegistrationViewModel.class);
@@ -276,29 +281,32 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showDatePicker() {
+    private void showDatePicker(@Nullable TextView targetView) {
         final Calendar now = Calendar.getInstance();
         DatePickerDialog dialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
             selectedDate = Calendar.getInstance();
             selectedDate.set(year, month, dayOfMonth);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            tvSelectedDate.setText(sdf.format(selectedDate.getTime()));
+            if (targetView != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                targetView.setText(sdf.format(selectedDate.getTime()));
+            }
         }, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
         dialog.show();
     }
 
-    private void showTimePicker() {
+    private void showTimePicker(@Nullable TextView targetView) {
         final Calendar now = Calendar.getInstance();
         TimePickerDialog dialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
             startHour = hourOfDay;
             startMinute = minute;
-            tvStartTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
+            if (targetView != null) {
+                targetView.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
+            }
         }, now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE), true);
         dialog.show();
     }
 
     private void showFiltersDialog() {
-        // Create a custom dialog view
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_event_filters, null);
 
         // Category multi-select
@@ -309,17 +317,26 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         // Fee spinner
         Spinner dialogFeeSpinner = dialogView.findViewById(R.id.dialogFeeSpinner);
         dialogFeeSpinner.setAdapter(feeAdapter);
-        selectedFeeOption = (String) dialogFeeSpinner.getSelectedItem();
+
+        // Set spinner selection to current filter value
+        int feeIndex = 0;
+        for (int i = 0; i < feeAdapter.getCount(); i++) {
+            if (feeAdapter.getItem(i).equals(selectedFeeOption)) {
+                feeIndex = i;
+                break;
+            }
+        }
+        dialogFeeSpinner.setSelection(feeIndex);
 
         // Date picker
         Button btnDialogDate = dialogView.findViewById(R.id.btnDialogDate);
         TextView tvDialogSelectedDate = dialogView.findViewById(R.id.tvDialogSelectedDate);
-        btnDialogDate.setOnClickListener(v -> showDatePicker());
+        btnDialogDate.setOnClickListener(v -> showDatePicker(tvDialogSelectedDate));
 
         // Start time picker
         Button btnDialogStartTime = dialogView.findViewById(R.id.btnDialogStartTime);
         TextView tvDialogStartTime = dialogView.findViewById(R.id.tvDialogStartTime);
-        btnDialogStartTime.setOnClickListener(v -> showTimePicker());
+        btnDialogStartTime.setOnClickListener(v -> showTimePicker(tvDialogStartTime));
 
         // Set current filter values in dialog
         tvDialogSelectedCategories.setText(getSelectedCategoriesText());
