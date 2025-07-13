@@ -326,19 +326,17 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         btnDialogStartTime.setOnClickListener(v -> showTimePicker());
 
         // Set current filter values in dialog
-        tvDialogSelectedCategories.setText(tvSelectedCategories.getText());
-        tvDialogSelectedDate.setText(tvSelectedDate.getText());
-        tvDialogStartTime.setText(tvStartTime.getText());
+        tvDialogSelectedCategories.setText(getSelectedCategoriesText());
+        tvDialogSelectedDate.setText(selectedDate != null ?
+            new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.getTime()) : "Any");
+        tvDialogStartTime.setText(startHour != null && startMinute != null ?
+            String.format(Locale.getDefault(), "%02d:%02d", startHour, startMinute) : "Any");
 
         new AlertDialog.Builder(this)
             .setTitle("Filters")
             .setView(dialogView)
             .setPositiveButton("Apply", (dialog, which) -> {
-                // Apply selected filters to main UI
-                feeSpinner.setSelection(dialogFeeSpinner.getSelectedItemPosition());
-                tvSelectedCategories.setText(tvDialogSelectedCategories.getText());
-                tvSelectedDate.setText(tvDialogSelectedDate.getText());
-                tvStartTime.setText(tvDialogStartTime.getText());
+                selectedFeeOption = (String) dialogFeeSpinner.getSelectedItem();
                 searchEvents();
             })
             .setNegativeButton("Cancel", null)
@@ -454,4 +452,19 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         }
         return "Unknown";
     }
+
+    private String getSelectedCategoriesText() {
+        if (selectedCategoryIds.isEmpty() || allCategories.isEmpty()) return "None";
+        StringBuilder sb = new StringBuilder();
+        for (String id : selectedCategoryIds) {
+            for (Category cat : allCategories) {
+                if (cat.getCategoryId().equals(id)) {
+                    sb.append(cat.getName()).append(", ");
+                    break;
+                }
+            }
+        }
+        if (sb.length() > 0) sb.setLength(sb.length() - 2);
+        return sb.toString();
+}
 }
