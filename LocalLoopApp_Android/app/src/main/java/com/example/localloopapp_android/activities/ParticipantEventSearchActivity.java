@@ -2,6 +2,7 @@ package com.example.localloopapp_android.activities;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -47,6 +48,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 public class ParticipantEventSearchActivity extends AppCompatActivity {
 
@@ -209,7 +211,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 ManageEventActivity.loadEventImage(event.getEventId(), ivEventImage);
                 ((TextView) card.findViewById(R.id.tvEventName)).setText(event.getName());
                 ((TextView) card.findViewById(R.id.tvEventDescription)).setText(event.getDescription());
-                ((TextView) card.findViewById(R.id.tvEventCategory)).setText(getCategoryName(event));
+                setCategoryName((TextView) card.findViewById(R.id.tvEventCategory), event.getCategoryId());
                 TextView tvFee = card.findViewById(R.id.tvEventFee);
                 if (event.getFee() == 0.0) {
                     tvFee.setText("Free");
@@ -244,16 +246,23 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 Button btnRegister = card.findViewById(R.id.btnRegisterEvent);
                 String status = registrationStatusMap.get(event.getEventId());
 
-                if (status != null) {
-                    btnRegister.setText(status);
-                    btnRegister.setEnabled(false); // Optionally disable
+                if ("registered".equals(status)) {
+                    btnRegister.setText("Registered");
+                    btnRegister.setEnabled(false);
                 } else {
-                    btnRegister.setText("Register");
+                    // Default to Register
+                    btnRegister.setText(event.getFee() == 0.0 ? "Register (Free)" : "Register ($" + event.getFee() + ")");
                     btnRegister.setEnabled(true);
                     btnRegister.setOnClickListener(v -> {
                         registerForEvent(event);
                     });
                 }
+
+                // Overlay button to open detailed event view
+                Button btnCardOverlay = card.findViewById(R.id.btnCardOverlay);
+                btnCardOverlay.setOnClickListener(v -> {
+                    showEventCardPopup(event);
+                });
 
                 resultsContainer.addView(card);
             }
@@ -381,16 +390,106 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         }
     }
 
-    // Keep only one version of getCategoryName, ensure it always returns a value
-    private String getCategoryName(Event event) {
-        String categoryId = event.getCategoryId();
-        for (Category category : allCategories) {
-            if (category.getCategoryId().equals(categoryId)) {
-                return category.getName();
-            }
+    private void setCategoryName(TextView categoryView, String categoryId) {
+        FirebaseDatabase.getInstance().getReference("categories").child(categoryId).child("name")
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    String name = snapshot.getValue(String.class);
+                    if (name != null && !name.isEmpty()) {
+                        categoryView.setText(name);
+                    } else {
+                        categoryView.setText("Unknown");
+                    }
+                }
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    categoryView.setText("Unknown");
+                }
+            });
+    }
+
+    private void showEventCardPopup(Event event) {
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View popupView = getLayoutInflater().inflate(R.layout.item_participant_event_card, null);
+
+        // Set up views in the popup
+        ImageView ivEventImage = popupView.findViewById(R.id.ivEventAvatar);
+        ManageEventActivity.loadEventImage(event.getEventId(), ivEventImage);
+
+        ((TextView) popupView.findViewById(R.id.tvEventName)).setText(event.getName());
+        ((TextView) popupView.findViewById(R.id.tvEventDescription)).setText(event.getDescription());
+        setCategoryName((TextView) popupView.findViewById(R.id.tvEventCategory), event.getCategoryId());
+
+        TextView tvFee = popupView.findViewById(R.id.tvEventFee);
+        if (event.getFee() == 0.0) {
+            tvFee.setText("Free");
+            tvFee.setTextColor(getResources().getColor(R.color.green, null));
+            tvFee.setTypeface(null, android.graphics.Typeface.BOLD);
+        } else {
+            tvFee.setText("$" + event.getFee());
+            tvFee.setTextColor(getResources().getColor(android.R.color.black, null));
+            tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
-        return "Unknown";
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        String dateStr = dateFormat.format(new Date(event.getEventStart()));
+        String startTime = timeFormat.format(new Date(event.getEventStart()));
+        String endTime = timeFormat.format(new Date(event.getEventEnd()));
+        ((TextView) popupView.findViewById(R.id.tvEventDate)).setText(dateStr);
+        ((TextView) popupView.findViewById(R.id.tvEventTime)).setText(
+            startTime.equals(endTime) ? startTime : (startTime + " - " + endTime)
+        );
+
+        MapView mapView = popupView.findViewById(R.id.mapView);
+        mapView.onCreate(null);
+        mapView.getMapAsync(googleMap -> {
+            LatLng location = getLocationFromAddress(popupView.getContext(), event.getLocation());
+            if (location != null) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
+                googleMap.addMarker(new MarkerOptions().position(location).title(event.getLocation()));
+            }
+        });
+
+        // Hosted By
+        TextView hostedByView = popupView.findViewById(R.id.tvHostedBy);
+        fetchOrganizerInfo(event.getOrganizerId(), hostedByView);
+
+        // Register button with toast
+        Button btnRegister = popupView.findViewById(R.id.btnRegisterEvent);
+        btnRegister.setText(event.getFee() == 0.0 ? "Register (Free)" : "Register ($" + event.getFee() + ")");
+        btnRegister.setOnClickListener(v -> {
+            Toast.makeText(this, "TODO: hook up to registration logic", Toast.LENGTH_SHORT).show();
+        });
+
+        // Hide overlay button in popup
+        Button btnCardOverlay = popupView.findViewById(R.id.btnCardOverlay);
+        btnCardOverlay.setVisibility(View.GONE);
+
+        dialog.setContentView(popupView);
+        dialog.show();
+    }
+
+    // Copy fetchOrganizerInfo from ParticipantEventActivity for use here
+    private void fetchOrganizerInfo(String organizerId, TextView hostedByView) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(organizerId);
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snap) {
+                String firstName = snap.child("firstName").getValue(String.class);
+                String lastName = snap.child("lastName").getValue(String.class);
+                String company = snap.child("companyName").getValue(String.class);
+                String name = ((firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "")).trim();
+                if (name.isEmpty()) name = "Unknown";
+                if (company == null || company.isEmpty()) company = "Unknown";
+                hostedByView.setText("Hosted By: " + name + " on behalf of " + company);
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {
+                hostedByView.setText("Hosted By: Unknown");
+            }
+        });
     }
 
 }
-

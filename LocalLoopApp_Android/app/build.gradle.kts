@@ -63,6 +63,7 @@ dependencies {
 
     // Glide dependency. GIF support
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.google.firebase:firebase-storage:21.0.2")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     testImplementation(libs.junit)

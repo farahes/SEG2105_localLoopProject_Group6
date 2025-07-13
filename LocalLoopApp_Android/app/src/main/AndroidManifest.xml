@@ -48,6 +48,9 @@
             android:name=".activities.ParticipantEventSearchActivity"
             android:exported="false"/>
         <activity
+            android:name=".activities.ParticipantEventActivity"
+            android:exported="false"/>
+        <activity
             android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
