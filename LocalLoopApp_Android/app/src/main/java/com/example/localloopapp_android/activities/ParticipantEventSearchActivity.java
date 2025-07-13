@@ -266,15 +266,11 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 })
                 .setPositiveButton("OK", (dialog, which) -> {
                     selectedCategoryIds.clear();
-                    StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < selectedCategories.length; i++) {
                         if (selectedCategories[i]) {
                             selectedCategoryIds.add(allCategories.get(i).getCategoryId());
-                            sb.append(allCategories.get(i).getName()).append(", ");
                         }
                     }
-                    if (sb.length() > 0) sb.setLength(sb.length() - 2);
-                    tvSelectedCategories.setText(sb.length() > 0 ? sb.toString() : "None");
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
