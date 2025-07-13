@@ -131,9 +131,6 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        btnSelectCategories.setOnClickListener(v -> showCategoryDialog());
-        btnSelectDate.setOnClickListener(v -> showDatePicker());
-        btnStartTime.setOnClickListener(v -> showTimePicker());
         btnSearch.setOnClickListener(v -> searchEvents());
         btnFilters.setOnClickListener(v -> showFiltersDialog());
 
