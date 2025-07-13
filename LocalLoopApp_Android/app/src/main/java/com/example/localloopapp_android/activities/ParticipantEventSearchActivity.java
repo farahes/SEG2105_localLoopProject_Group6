@@ -223,7 +223,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             tvFee.setTextColor(getResources().getColor(R.color.green, null));
             tvFee.setTypeface(null, android.graphics.Typeface.BOLD);
         } else {
-            tvFee.setText("$" + event.getFee());
+            tvFee.setText(String.format(Locale.getDefault(), "$%.2f", event.getFee()));
             tvFee.setTextColor(getResources().getColor(android.R.color.black, null));
             tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
@@ -257,7 +257,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         } else {
             btnRegister.setText(event.getFee() == 0.0
                     ? "Register (Free)"
-                    : "Register ($" + event.getFee() + ")");
+                    : String.format(Locale.getDefault(), "Register ($%.2f)", event.getFee()));
             btnRegister.setEnabled(true);
             btnRegister.setOnClickListener(v -> registerForEvent(event));
         }
@@ -502,7 +502,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             tvFee.setTextColor(getResources().getColor(R.color.green, null));
             tvFee.setTypeface(null, android.graphics.Typeface.BOLD);
         } else {
-            tvFee.setText("$" + event.getFee());
+            tvFee.setText(String.format(Locale.getDefault(), "$%.2f", event.getFee()));
             tvFee.setTextColor(getResources().getColor(android.R.color.black, null));
             tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
@@ -531,10 +531,46 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         fetchOrganizerInfo(event.getOrganizerId(), hostedByView);
 
         Button btnRegister = popup.findViewById(R.id.btnRegisterEvent);
-        btnRegister.setText(event.getFee() == 0.0 ? "Register (Free)" : "Register ($" + event.getFee() + ")");
-        btnRegister.setOnClickListener(v ->
-                Toast.makeText(this, "TODO: hook up to registration logic", Toast.LENGTH_SHORT).show()
-        );
+        // 1) set initial label based on fee
+        if (event.getFee() == 0.0) {
+            btnRegister.setText("Register (Free)");
+        } else {
+            btnRegister.setText(String.format(Locale.getDefault(), "Register ($%.2f)", event.getFee()));
+        }
+        btnRegister.setEnabled(true);
+
+        // 2) single, well-scoped click-listener
+        btnRegister.setOnClickListener(v -> {
+            String evtId = event.getEventId();
+
+            // a) if already registered → only that toast
+            if (registrationStatusMap.containsKey(evtId)) {
+                Toast.makeText(
+                        ParticipantEventSearchActivity.this,
+                        "You have already registered for this event.",
+                        Toast.LENGTH_SHORT
+                ).show();
+                return;
+            }
+
+            // b) otherwise kick off registration
+            registerForEvent(event);
+
+            // c) flip the button into a “pending” state
+            if (event.getFee() == 0.0) {
+                btnRegister.setText("Pending (Free)");
+            } else {
+                btnRegister.setText(String.format(
+                        Locale.getDefault(),
+                        "Pending ($%.2f)",
+                        event.getFee()
+                ));
+            }
+            btnRegister.setEnabled(false);
+
+            // d) close the sheet
+            dialog.dismiss();
+        });
 
         Button btnOverlay = popup.findViewById(R.id.btnCardOverlay);
         btnOverlay.setVisibility(View.GONE);
