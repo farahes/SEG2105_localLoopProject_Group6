@@ -103,16 +103,10 @@
             android:contentDescription="Loading..."
             />
 
-        <ScrollView
+        <LinearLayout
+            android:id="@+id/resultsContainer"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <LinearLayout
-                android:id="@+id/resultsContainer"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <!-- Event cards are added here dynamically -->
-            </LinearLayout>
-        </ScrollView>
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 </ScrollView>
