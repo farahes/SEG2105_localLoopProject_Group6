@@ -12,7 +12,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,8 +26,6 @@ import com.example.localloopapp_android.viewmodels.CategoryViewModel;
 import com.example.localloopapp_android.viewmodels.EventViewModel;
 import com.example.localloopapp_android.viewmodels.RegistrationViewModel;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -50,10 +47,11 @@ import com.bumptech.glide.Glide;
 
 public class ParticipantEventSearchActivity extends AppCompatActivity {
 
-    private EditText etName, etDescription;
-    private TextView tvSelectedCategories, tvSelectedDate, tvStartTime, tvEndTime;
-    private Button btnSelectCategories, btnSelectDate, btnStartTime, btnEndTime, btnSearch;
-    private ImageView loadingGif; // for loading indicator
+    private EditText etSearchBar;
+    private LinearLayout recentQueriesContainer;
+    private TextView tvSelectedCategories, tvSelectedDate, tvStartTime;
+    private Button btnSelectCategories, btnSelectDate, btnStartTime, btnSearch, btnFilters;
+    private ImageView loadingGif;
     private Spinner feeSpinner;
     private LinearLayout resultsContainer;
     ArrayAdapter<String> feeAdapter;
@@ -63,7 +61,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
     private boolean hasSearched = false;
     private List<String> selectedCategoryIds = new ArrayList<>();
     private Calendar selectedDate = null;
-    private Integer startHour = null, startMinute = null, endHour = null, endMinute = null;
+    private Integer startHour = null, startMinute = null;
 
     private CategoryViewModel categoryViewModel;
     private EventViewModel eventViewModel;
@@ -75,7 +73,6 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_participant_event_search);
 
-        // Initialize UI components
         setupUI();
         setupFeeSpinner();
         setupEventObserver();
@@ -88,7 +85,9 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         });
         categoryViewModel.fetchCategories();
 
+        // Show 5 upcoming events by default
         eventViewModel.getEvents().observe(this, events -> {
+            if (hasSearched) return; // Don't show default if searching
             List<Event> upcoming = new ArrayList<>();
             long now = System.currentTimeMillis();
             for (Event event : events) {
@@ -96,40 +95,33 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                     upcoming.add(event);
                 }
             }
-            // Sort by soonest
             upcoming.sort(Comparator.comparingLong(Event::getEventStart));
-            // Show top 5
             resultsContainer.removeAllViews();
             for (int i = 0; i < Math.min(5, upcoming.size()); i++) {
                 Event event = upcoming.get(i);
                 View card = getLayoutInflater().inflate(R.layout.participant_event_card, resultsContainer, false);
-                // ...populate card...
+                populateEventCard(card, event);
                 resultsContainer.addView(card);
             }
         });
         eventViewModel.fetchEvents();
 
-        // Set up listeners for buttons
         setupListeners();
     }
 
-    // setup methods
     private void setupUI() {
-        // Set up the UI elements here
-        etName = findViewById(R.id.etEventName);
-        etDescription = findViewById(R.id.etEventDescription);
+        etSearchBar = findViewById(R.id.etSearchBar);
+        recentQueriesContainer = findViewById(R.id.recentQueriesContainer);
         tvSelectedCategories = findViewById(R.id.tvSelectedCategories);
         btnSelectCategories = findViewById(R.id.btnSelectCategories);
         feeSpinner = findViewById(R.id.spinnerFee);
         btnSelectDate = findViewById(R.id.btnSelectDate);
         tvSelectedDate = findViewById(R.id.tvSelectedDate);
         btnStartTime = findViewById(R.id.btnStartTime);
-        btnEndTime = findViewById(R.id.btnEndTime);
         tvStartTime = findViewById(R.id.tvStartTime);
-        tvEndTime = findViewById(R.id.tvEndTime);
         btnSearch = findViewById(R.id.btnSearchEvents);
+        btnFilters = findViewById(R.id.btnFilters);
         resultsContainer = findViewById(R.id.resultsContainer);
-        // loading gif
         loadingGif = findViewById(R.id.loadingGif);
         Glide.with(this).asGif().load(R.drawable.ic_loading_packman).into(loadingGif);
 
@@ -149,9 +141,13 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
     private void setupListeners() {
         btnSelectCategories.setOnClickListener(v -> showCategoryDialog());
         btnSelectDate.setOnClickListener(v -> showDatePicker());
-        btnStartTime.setOnClickListener(v -> showTimePicker(true));
-        btnEndTime.setOnClickListener(v -> showTimePicker(false));
+        btnStartTime.setOnClickListener(v -> showTimePicker());
         btnSearch.setOnClickListener(v -> searchEvents());
+        btnFilters.setOnClickListener(v -> showFiltersDialog());
+
+        etSearchBar.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) loadRecentQueries();
+        });
     }
 
     private void setupRegistrationObserver() {
@@ -162,46 +158,45 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             for (Registration r : registrations) {
                 registrationStatusMap.put(r.getEventId(), r.getStatus());
             }
-            // Re-filter or re-display events to update button states
             if (hasSearched) {
                 eventViewModel.fetchEvents();
             }
         });
     }
 
-    private void setupEventObserver(){
-        String nameQuery = etName.getText().toString().trim().toLowerCase();
-        String descQuery = etDescription.getText().toString().trim().toLowerCase();
-        String feeOption = (String) feeSpinner.getSelectedItem();
-
+    private void setupEventObserver() {
         eventViewModel.getEvents().observe(this, events -> {
             if (!hasSearched) {
                 resultsContainer.removeAllViews();
                 loadingGif.setVisibility(View.GONE);
                 resultsContainer.setVisibility(View.VISIBLE);
-                return; // Don't show anything until searched
+                return;
             }
             loadingGif.setVisibility(View.GONE);
             resultsContainer.setVisibility(View.VISIBLE);
             resultsContainer.removeAllViews();
 
-            resultsContainer.removeAllViews();
+            String searchQuery = etSearchBar.getText().toString().trim().toLowerCase();
+            String feeOption = (String) feeSpinner.getSelectedItem();
+
             for (Event event : events) {
-                // Name similarity
-                if (!TextUtils.isEmpty(nameQuery) && (event.getName() == null ||
-                        !event.getName().toLowerCase().contains(nameQuery))) continue;
-                // Description similarity
-                if (!TextUtils.isEmpty(descQuery) && (event.getDescription() == null ||
-                        !event.getDescription().toLowerCase().contains(descQuery))) continue;
+                // Search bar similarity (name or description)
+                boolean matchesQuery = TextUtils.isEmpty(searchQuery)
+                        || (event.getName() != null && event.getName().toLowerCase().contains(searchQuery))
+                        || (event.getDescription() != null && event.getDescription().toLowerCase().contains(searchQuery));
+                if (!matchesQuery) continue;
+
                 // Category filter
                 if (!selectedCategoryIds.isEmpty() && (event.getCategoryId() == null ||
                         !selectedCategoryIds.contains(event.getCategoryId()))) continue;
+
                 // Fee filter
                 double fee = event.getFee();
                 if ("Free".equals(feeOption) && fee != 0) continue;
                 if ("< $50".equals(feeOption) && !(fee > 0 && fee < 50)) continue;
                 if ("> $50".equals(feeOption) && !(fee > 50)) continue;
-                // Date and time filter
+
+                // Date and start time filter
                 if (selectedDate != null) {
                     Calendar eventCal = Calendar.getInstance();
                     eventCal.setTime(new Date(event.getEventStart()));
@@ -209,7 +204,6 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                             eventCal.get(Calendar.MONTH) != selectedDate.get(Calendar.MONTH) ||
                             eventCal.get(Calendar.DAY_OF_MONTH) != selectedDate.get(Calendar.DAY_OF_MONTH))
                         continue;
-                    // Time range
                     int eventHour = eventCal.get(Calendar.HOUR_OF_DAY);
                     int eventMinute = eventCal.get(Calendar.MINUTE);
                     int eventTime = eventHour * 60 + eventMinute;
@@ -217,65 +211,10 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                         int startTime = startHour * 60 + startMinute;
                         if (eventTime < startTime) continue;
                     }
-                    if (endHour != null && endMinute != null) {
-                        int endTime = endHour * 60 + endMinute;
-                        if (eventTime > endTime) continue;
-                    }
-                }
-                // Add event card
-                View card = getLayoutInflater().inflate(R.layout.item_participant_event_card, resultsContainer, false);
-
-                // Load and display the event image
-                ImageView ivEventImage = card.findViewById(R.id.ivEventAvatar);
-                ManageEventActivity.loadEventImage(event.getEventId(), ivEventImage);
-                ((TextView) card.findViewById(R.id.tvEventName)).setText(event.getName());
-                ((TextView) card.findViewById(R.id.tvEventDescription)).setText(event.getDescription());
-                ((TextView) card.findViewById(R.id.tvEventCategory)).setText(getCategoryName(event));
-                TextView tvFee = card.findViewById(R.id.tvEventFee);
-                if (event.getFee() == 0.0) {
-                    tvFee.setText("Free");
-                    tvFee.setTextColor(getResources().getColor(R.color.green, null)); // Use ContextCompat if needed
-                    tvFee.setTypeface(null, android.graphics.Typeface.BOLD);
-                } else {
-                    tvFee.setText("$" + event.getFee());
-                    tvFee.setTextColor(getResources().getColor(android.R.color.black, null));
-                    tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
                 }
 
-                // Set date and time separately
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                String dateStr = dateFormat.format(new Date(event.getEventStart()));
-                String timeStr = timeFormat.format(new Date(event.getEventStart())) + " - " + timeFormat.format(new Date(event.getEventEnd()));
-                ((TextView) card.findViewById(R.id.tvEventDate)).setText(dateStr);
-                ((TextView) card.findViewById(R.id.tvEventTime)).setText(timeStr);
-
-                MapView mapView = card.findViewById(R.id.mapView);
-                mapView.onCreate(null);  // pass Bundle if you have one
-                mapView.getMapAsync(googleMap -> {
-                    // Geocode your address or use LatLng directly
-                    LatLng location = getLocationFromAddress(card.getContext(), event.getLocation());
-                    if (location != null) {
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
-                        googleMap.addMarker(new MarkerOptions().position(location).title(event.getLocation()));
-                    }
-                });
-
-                // Event registration
-                Button btnRegister = card.findViewById(R.id.btnRegisterEvent);
-                String status = registrationStatusMap.get(event.getEventId());
-
-                if (status != null) {
-                    btnRegister.setText(status);
-                    btnRegister.setEnabled(false); // Optionally disable
-                } else {
-                    btnRegister.setText("Register");
-                    btnRegister.setEnabled(true);
-                    btnRegister.setOnClickListener(v -> {
-                        registerForEvent(event);
-                    });
-                }
-
+                View card = getLayoutInflater().inflate(R.layout.participant_event_card, resultsContainer, false);
+                populateEventCard(card, event);
                 resultsContainer.addView(card);
             }
             if (resultsContainer.getChildCount() == 0) {
@@ -284,6 +223,52 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
                 resultsContainer.addView(tv);
             }
         });
+    }
+
+    private void populateEventCard(View card, Event event) {
+        ImageView ivEventImage = card.findViewById(R.id.ivEventAvatar);
+        ManageEventActivity.loadEventImage(event.getEventId(), ivEventImage);
+        ((TextView) card.findViewById(R.id.tvEventName)).setText(event.getName());
+        ((TextView) card.findViewById(R.id.tvEventDescription)).setText(event.getDescription());
+        ((TextView) card.findViewById(R.id.tvEventCategory)).setText(getCategoryName(event));
+        TextView tvFee = card.findViewById(R.id.tvEventFee);
+        if (event.getFee() == 0.0) {
+            tvFee.setText("Free");
+            tvFee.setTextColor(getResources().getColor(R.color.green, null));
+            tvFee.setTypeface(null, android.graphics.Typeface.BOLD);
+        } else {
+            tvFee.setText("$" + event.getFee());
+            tvFee.setTextColor(getResources().getColor(android.R.color.black, null));
+            tvFee.setTypeface(null, android.graphics.Typeface.NORMAL);
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        String dateStr = dateFormat.format(new Date(event.getEventStart()));
+        String timeStr = timeFormat.format(new Date(event.getEventStart())) + " - " + timeFormat.format(new Date(event.getEventEnd()));
+        ((TextView) card.findViewById(R.id.tvEventDate)).setText(dateStr);
+        ((TextView) card.findViewById(R.id.tvEventTime)).setText(timeStr);
+
+        MapView mapView = card.findViewById(R.id.mapView);
+        mapView.onCreate(null);
+        mapView.getMapAsync(googleMap -> {
+            LatLng location = getLocationFromAddress(card.getContext(), event.getLocation());
+            if (location != null) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
+                googleMap.addMarker(new MarkerOptions().position(location).title(event.getLocation()));
+            }
+        });
+
+        Button btnRegister = card.findViewById(R.id.btnRegisterEvent);
+        String status = registrationStatusMap.get(event.getEventId());
+        if (status != null) {
+            btnRegister.setText(status);
+            btnRegister.setEnabled(false);
+        } else {
+            btnRegister.setText("Register");
+            btnRegister.setEnabled(true);
+            btnRegister.setOnClickListener(v -> registerForEvent(event));
+        }
     }
 
     // Dialogs and pickers
@@ -324,31 +309,108 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void showTimePicker(boolean isStart) {
+    private void showTimePicker() {
         final Calendar now = Calendar.getInstance();
         TimePickerDialog dialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
-            if (isStart) {
-                startHour = hourOfDay;
-                startMinute = minute;
-                tvStartTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
-            } else {
-                endHour = hourOfDay;
-                endMinute = minute;
-                tvEndTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
-            }
+            startHour = hourOfDay;
+            startMinute = minute;
+            tvStartTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
         }, now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE), true);
         dialog.show();
+    }
+
+    private void showFiltersDialog() {
+        // Create a custom dialog view
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_event_filters, null);
+
+        // Category multi-select
+        Button btnDialogCategories = dialogView.findViewById(R.id.btnDialogCategories);
+        TextView tvDialogSelectedCategories = dialogView.findViewById(R.id.tvDialogSelectedCategories);
+        btnDialogCategories.setOnClickListener(v -> showCategoryDialog());
+
+        // Fee spinner
+        Spinner dialogFeeSpinner = dialogView.findViewById(R.id.dialogFeeSpinner);
+        dialogFeeSpinner.setAdapter(feeAdapter);
+        dialogFeeSpinner.setSelection(feeSpinner.getSelectedItemPosition());
+
+        // Date picker
+        Button btnDialogDate = dialogView.findViewById(R.id.btnDialogDate);
+        TextView tvDialogSelectedDate = dialogView.findViewById(R.id.tvDialogSelectedDate);
+        btnDialogDate.setOnClickListener(v -> showDatePicker());
+
+        // Start time picker
+        Button btnDialogStartTime = dialogView.findViewById(R.id.btnDialogStartTime);
+        TextView tvDialogStartTime = dialogView.findViewById(R.id.tvDialogStartTime);
+        btnDialogStartTime.setOnClickListener(v -> showTimePicker());
+
+        // Set current filter values in dialog
+        tvDialogSelectedCategories.setText(tvSelectedCategories.getText());
+        tvDialogSelectedDate.setText(tvSelectedDate.getText());
+        tvDialogStartTime.setText(tvStartTime.getText());
+
+        new AlertDialog.Builder(this)
+            .setTitle("Filters")
+            .setView(dialogView)
+            .setPositiveButton("Apply", (dialog, which) -> {
+                // Apply selected filters to main UI
+                feeSpinner.setSelection(dialogFeeSpinner.getSelectedItemPosition());
+                tvSelectedCategories.setText(tvDialogSelectedCategories.getText());
+                tvSelectedDate.setText(tvDialogSelectedDate.getText());
+                tvStartTime.setText(tvDialogStartTime.getText());
+                searchEvents();
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    // Recent queries logic
+    private void loadRecentQueries() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid).child("recentSearches");
+        ref.limitToLast(5).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                List<String> queries = new ArrayList<>();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    queries.add(child.getValue(String.class));
+                }
+                displayRecentQueries(queries);
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {}
+        });
+    }
+
+    private void displayRecentQueries(List<String> queries) {
+        recentQueriesContainer.removeAllViews();
+        if (queries.isEmpty()) {
+            recentQueriesContainer.setVisibility(View.GONE);
+            return;
+        }
+        recentQueriesContainer.setVisibility(View.VISIBLE);
+        for (String query : queries) {
+            TextView tv = new TextView(this);
+            tv.setText(query);
+            tv.setPadding(8, 8, 8, 8);
+            tv.setOnClickListener(v -> etSearchBar.setText(query));
+            recentQueriesContainer.addView(tv);
+        }
+    }
+
+    private void saveRecentQuery(String query) {
+        if (TextUtils.isEmpty(query)) return;
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid).child("recentSearches");
+        ref.push().setValue(query);
     }
 
     // Search events
     private void searchEvents() {
         hasSearched = true;
-        //loading gif
         loadingGif.setVisibility(View.VISIBLE);
         resultsContainer.setVisibility(View.GONE);
-
+        saveRecentQuery(etSearchBar.getText().toString().trim());
         eventViewModel.fetchEvents();
-
     }
 
     // Helper methods
@@ -357,7 +419,6 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         String registrationId = databaseReference.child("registrations").push().getKey();
         String participantId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        // Check if already registered
         if (registrationStatusMap.containsKey(event.getEventId())) {
             Toast.makeText(this, "You have already registered for this event.", Toast.LENGTH_SHORT).show();
             return;
@@ -376,23 +437,20 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             databaseReference.child("registrations").child(registrationId).setValue(registration)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(ParticipantEventSearchActivity.this, "Registration request sent.", Toast.LENGTH_SHORT).show();
-                        // Update local status
                         registrationStatusMap.put(event.getEventId(), "pending");
-                        // Visually update the button
-                        setupEventObserver(); // Re-run to update UI
+                        setupEventObserver();
                     })
                     .addOnFailureListener(e -> Toast.makeText(ParticipantEventSearchActivity.this, "Failed to send registration request.", Toast.LENGTH_SHORT).show());
         }
     }
 
-    // Keep only one version of getLocationFromAddress
     public LatLng getLocationFromAddress(Context context, String strAddress) {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         List<Address> addresses;
         try {
             addresses = geocoder.getFromLocationName(strAddress, 1);
             if (addresses == null || addresses.isEmpty()) {
-                return null; // No result found
+                return null;
             }
             Address location = addresses.get(0);
             return new LatLng(location.getLatitude(), location.getLongitude());
@@ -402,7 +460,6 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         }
     }
 
-    // Keep only one version of getCategoryName, ensure it always returns a value
     private String getCategoryName(Event event) {
         String categoryId = event.getCategoryId();
         for (Category category : allCategories) {
@@ -412,6 +469,4 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         }
         return "Unknown";
     }
-
 }
-
