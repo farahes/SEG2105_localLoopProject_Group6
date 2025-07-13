@@ -5,7 +5,56 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <!-- ...existing content... -->
+    <!-- Category filter -->
+    <Button
+        android:id="@+id/btnDialogCategories"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Categories" />
+
+    <TextView
+        android:id="@+id/tvDialogSelectedCategories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="None"
+        android:layout_marginBottom="12dp"
+        android:textSize="14sp" />
+
+    <!-- Fee filter -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Participation Fee"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp" />
+
+    <Spinner
+        android:id="@+id/dialogFeeSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Date filter -->
+    <Button
+        android:id="@+id/btnDialogDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Date" />
+
+    <TextView
+        android:id="@+id/tvDialogSelectedDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Any"
+        android:layout_marginBottom="12dp"
+        android:textSize="14sp" />
+
+    <!-- Start time filter -->
+    <Button
+        android:id="@+id/btnDialogStartTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Start Time" />
 
     <TextView
         android:id="@+id/tvDialogStartTime"
