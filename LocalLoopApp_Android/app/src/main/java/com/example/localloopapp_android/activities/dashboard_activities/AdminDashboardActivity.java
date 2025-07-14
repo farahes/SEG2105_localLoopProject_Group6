@@ -11,6 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageButton;
+
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
@@ -73,6 +75,14 @@ public class AdminDashboardActivity extends AppCompatActivity {
         observeUserList();
         adminViewModel.fetchAllUsers(); // triggers loading
         setupManageCategoriesButton();
+
+        ImageButton btnProfile = findViewById(R.id.btnProfile);
+        if (btnProfile != null) {
+            btnProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(this, AdminAccountActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     /**

@@ -34,6 +34,7 @@
         <activity
             android:name=".activities.dashboard_activities.AdminDashboardActivity"
             android:exported="false" />
+        <activity android:name=".activities.dashboard_activities.AdminAccountActivity" />
 
         <activity
             android:name=".activities.CreateAccountActivity"
