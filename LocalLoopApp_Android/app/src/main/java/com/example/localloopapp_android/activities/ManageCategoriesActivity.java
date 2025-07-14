@@ -9,8 +9,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.localloopapp_android.R;
+import com.example.localloopapp_android.activities.dashboard_activities.AdminDashboardActivity;
 import com.example.localloopapp_android.models.Category;
 import com.example.localloopapp_android.viewmodels.CategoryViewModel;
+
+import android.content.Intent;
+import android.widget.ImageButton;
 
 import java.util.List;
 
@@ -43,6 +47,17 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         categoryViewModel.getCategories().observe(this, this::displayCategories);
 
         categoryViewModel.fetchCategories();
+
+        // Move btnBack initialization here
+        ImageButton btnBack = findViewById(R.id.btnBack);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> {
+                // Navigate back to AdminDashboardActivity
+                Intent intent = new Intent(this, AdminDashboardActivity.class);
+                startActivity(intent);
+                finish();
+            });
+        }
     }
 
     /**
