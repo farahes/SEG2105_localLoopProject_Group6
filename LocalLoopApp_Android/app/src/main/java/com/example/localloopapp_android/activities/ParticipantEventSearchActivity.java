@@ -3,6 +3,7 @@ package com.example.localloopapp_android.activities;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -155,54 +156,69 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             resultsContainer.setVisibility(View.VISIBLE);
             resultsContainer.removeAllViews();
 
-            String searchQuery = etSearchBar.getText().toString().trim().toLowerCase();
+            // Move filtering to background thread to avoid ANR
+            new AsyncTask<List<Event>, Void, List<Event>>() {
+                @Override
+                protected List<Event> doInBackground(List<Event>... params) {
+                    List<Event> filtered = new ArrayList<>();
+                    String searchQuery = etSearchBar.getText().toString().trim().toLowerCase();
 
-            for (Event event : events) {
-                // 1) Query match
-                boolean matchesQuery = TextUtils.isEmpty(searchQuery)
-                        || (event.getName() != null && event.getName().toLowerCase().contains(searchQuery))
-                        || (event.getDescription() != null && event.getDescription().toLowerCase().contains(searchQuery));
-                if (!matchesQuery) continue;
+                    for (Event event : params[0]) {
+                        // 1) Query match
+                        boolean matchesQuery = TextUtils.isEmpty(searchQuery)
+                                || (event.getName() != null && event.getName().toLowerCase().contains(searchQuery))
+                                || (event.getDescription() != null && event.getDescription().toLowerCase().contains(searchQuery));
+                        if (!matchesQuery) continue;
 
-                // 2) Category filter
-                if (!selectedCategoryIds.isEmpty()
-                        && (event.getCategoryId() == null || !selectedCategoryIds.contains(event.getCategoryId()))) {
-                    continue;
+                        // 2) Category filter
+                        if (!selectedCategoryIds.isEmpty()
+                                && (event.getCategoryId() == null || !selectedCategoryIds.contains(event.getCategoryId()))) {
+                            continue;
+                        }
+
+                        // 3) Fee filter
+                        double fee = event.getFee();
+                        if ("Free".equals(selectedFeeOption) && fee != 0) continue;
+                        if ("< $50".equals(selectedFeeOption) && !(fee > 0 && fee < 50)) continue;
+                        if ("> $50".equals(selectedFeeOption) && !(fee > 50)) continue;
+
+                        // 4) Date & time filter
+                        if (selectedDate != null) {
+                            Calendar eventCal = Calendar.getInstance();
+                            eventCal.setTime(new Date(event.getEventStart()));
+                            if (eventCal.get(Calendar.YEAR) != selectedDate.get(Calendar.YEAR)
+                                    || eventCal.get(Calendar.MONTH) != selectedDate.get(Calendar.MONTH)
+                                    || eventCal.get(Calendar.DAY_OF_MONTH) != selectedDate.get(Calendar.DAY_OF_MONTH)) {
+                                continue;
+                            }
+                            if (startHour != null && startMinute != null) {
+                                int eventMinutes = eventCal.get(Calendar.HOUR_OF_DAY) * 60 + eventCal.get(Calendar.MINUTE);
+                                int startMinutes = startHour * 60 + startMinute;
+                                if (eventMinutes < startMinutes) continue;
+                            }
+                        }
+
+                        filtered.add(event);
+                    }
+                    return filtered;
                 }
 
-                // 3) Fee filter
-                double fee = event.getFee();
-                if ("Free".equals(selectedFeeOption) && fee != 0) continue;
-                if ("< $50".equals(selectedFeeOption) && !(fee > 0 && fee < 50)) continue;
-                if ("> $50".equals(selectedFeeOption) && !(fee > 50)) continue;
-
-                // 4) Date & time filter
-                if (selectedDate != null) {
-                    Calendar eventCal = Calendar.getInstance();
-                    eventCal.setTime(new Date(event.getEventStart()));
-                    if (eventCal.get(Calendar.YEAR) != selectedDate.get(Calendar.YEAR)
-                            || eventCal.get(Calendar.MONTH) != selectedDate.get(Calendar.MONTH)
-                            || eventCal.get(Calendar.DAY_OF_MONTH) != selectedDate.get(Calendar.DAY_OF_MONTH)) {
-                        continue;
+                @Override
+                protected void onPostExecute(List<Event> filtered) {
+                    resultsContainer.removeAllViews();
+                    for (Event event : filtered) {
+                        View card = getLayoutInflater()
+                                .inflate(R.layout.item_participant_event_card, resultsContainer, false);
+                        populateEventCard(card, event);
+                        resultsContainer.addView(card);
                     }
-                    if (startHour != null && startMinute != null) {
-                        int eventMinutes = eventCal.get(Calendar.HOUR_OF_DAY) * 60 + eventCal.get(Calendar.MINUTE);
-                        int startMinutes = startHour * 60 + startMinute;
-                        if (eventMinutes < startMinutes) continue;
+                    if (resultsContainer.getChildCount() == 0) {
+                        TextView tv = new TextView(ParticipantEventSearchActivity.this);
+                        tv.setText("No events found.");
+                        resultsContainer.addView(tv);
                     }
                 }
-
-                View card = getLayoutInflater()
-                        .inflate(R.layout.item_participant_event_card, resultsContainer, false);
-                populateEventCard(card, event);
-                resultsContainer.addView(card);
-            }
-
-            if (resultsContainer.getChildCount() == 0) {
-                TextView tv = new TextView(this);
-                tv.setText("No events found.");
-                resultsContainer.addView(tv);
-            }
+            }.execute(events);
         });
     }
 
@@ -240,13 +256,23 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         // Map
         MapView mapView = card.findViewById(R.id.mapView);
         mapView.onCreate(null);
-        mapView.getMapAsync(googleMap -> {
-            LatLng loc = getLocationFromAddress(card.getContext(), event.getLocation());
-            if (loc != null) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 15));
-                googleMap.addMarker(new MarkerOptions().position(loc).title(event.getLocation()));
+
+        // Run geocoding in background to avoid UI block
+        new AsyncTask<Void, Void, LatLng>() {
+            @Override
+            protected LatLng doInBackground(Void... voids) {
+                return getLocationFromAddress(card.getContext(), event.getLocation());
             }
-        });
+            @Override
+            protected void onPostExecute(LatLng loc) {
+                if (loc != null) {
+                    mapView.getMapAsync(googleMap -> {
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 15));
+                        googleMap.addMarker(new MarkerOptions().position(loc).title(event.getLocation()));
+                    });
+                }
+            }
+        }.execute();
 
         // Registration button
         Button btnRegister = card.findViewById(R.id.btnRegisterEvent);
@@ -625,3 +651,4 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         return "Unknown";
     }
 }
+
