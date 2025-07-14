@@ -92,6 +92,16 @@
             android:layout_height="150dp"
             android:layout_marginBottom="12dp" />
 
+        <!-- Static Map Icon Placeholder -->
+        <ImageView
+            android:id="@+id/staticMapIcon"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_map_placeholder"
+            android:contentDescription="Map preview"
+            android:visibility="gone" />
+
         <!-- Register Button at the bottom -->
         <Button
             android:id="@+id/btnRegisterEvent"

@@ -3,46 +3,64 @@ package com.example.localloopapp_android.activities;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+
 import com.bumptech.glide.Glide;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.*;
 import com.example.localloopapp_android.R;
-import com.example.localloopapp_android.activities.ManageEventActivity;
 import com.example.localloopapp_android.models.Category;
 import com.example.localloopapp_android.models.Event;
 import com.example.localloopapp_android.models.Registration;
 import com.example.localloopapp_android.viewmodels.CategoryViewModel;
 import com.example.localloopapp_android.viewmodels.EventViewModel;
 import com.example.localloopapp_android.viewmodels.RegistrationViewModel;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import android.location.Address;
-import android.location.Geocoder;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class ParticipantEventSearchActivity extends AppCompatActivity {
 
     private EditText etSearchBar;
     private LinearLayout recentQueriesContainer;
-    private TextView tvSelectedCategories, tvSelectedDate, tvStartTime;
-    private Button btnSelectCategories, btnSelectDate, btnStartTime, btnSearch, btnFilters;
+    private Button btnSearch, btnFilters;
     private ImageView loadingGif;
-    private Spinner feeSpinner;
     private LinearLayout resultsContainer;
     private ArrayAdapter<String> feeAdapter;
 
@@ -58,6 +76,10 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
     private EventViewModel eventViewModel;
     private RegistrationViewModel registrationViewModel;
     private Map<String, String> registrationStatusMap = new HashMap<>();
+
+    private static final int EVENTS_PER_PAGE = 5;
+    private int currentPage = 0;
+    private List<Event> lastFilteredEvents = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -205,21 +227,56 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
 
                 @Override
                 protected void onPostExecute(List<Event> filtered) {
-                    resultsContainer.removeAllViews();
-                    for (Event event : filtered) {
-                        View card = getLayoutInflater()
-                                .inflate(R.layout.item_participant_event_card, resultsContainer, false);
-                        populateEventCard(card, event);
-                        resultsContainer.addView(card);
-                    }
-                    if (resultsContainer.getChildCount() == 0) {
-                        TextView tv = new TextView(ParticipantEventSearchActivity.this);
-                        tv.setText("No events found.");
-                        resultsContainer.addView(tv);
-                    }
+                    lastFilteredEvents = filtered;
+                    currentPage = 0;
+                    showCurrentPage();
                 }
             }.execute(events);
         });
+    }
+
+    private void showCurrentPage() {
+        resultsContainer.removeAllViews();
+        int start = currentPage * EVENTS_PER_PAGE;
+        int end = Math.min(start + EVENTS_PER_PAGE, lastFilteredEvents.size());
+        for (int i = start; i < end; i++) {
+            Event event = lastFilteredEvents.get(i);
+            View card = getLayoutInflater().inflate(R.layout.item_participant_event_card, resultsContainer, false);
+            populateEventCard(card, event);
+            resultsContainer.addView(card);
+        }
+        // Pagination controls
+        if (lastFilteredEvents.size() > EVENTS_PER_PAGE) {
+            LinearLayout paginationLayout = new LinearLayout(this);
+            paginationLayout.setOrientation(LinearLayout.HORIZONTAL);
+            paginationLayout.setGravity(android.view.Gravity.CENTER);
+            Button prevBtn = new Button(this);
+            prevBtn.setText("Previous");
+            prevBtn.setEnabled(currentPage > 0);
+            prevBtn.setOnClickListener(v -> {
+                if (currentPage > 0) {
+                    currentPage--;
+                    showCurrentPage();
+                }
+            });
+            Button nextBtn = new Button(this);
+            nextBtn.setText("Next");
+            nextBtn.setEnabled((currentPage + 1) * EVENTS_PER_PAGE < lastFilteredEvents.size());
+            nextBtn.setOnClickListener(v -> {
+                if ((currentPage + 1) * EVENTS_PER_PAGE < lastFilteredEvents.size()) {
+                    currentPage++;
+                    showCurrentPage();
+                }
+            });
+            paginationLayout.addView(prevBtn);
+            paginationLayout.addView(nextBtn);
+            resultsContainer.addView(paginationLayout);
+        }
+        if (resultsContainer.getChildCount() == 0) {
+            TextView tv = new TextView(this);
+            tv.setText("No events found.");
+            resultsContainer.addView(tv);
+        }
     }
 
     private void populateEventCard(View card, Event event) {
@@ -253,26 +310,16 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         ((TextView) card.findViewById(R.id.tvEventDate)).setText(dateStr);
         ((TextView) card.findViewById(R.id.tvEventTime)).setText(timeStr);
 
-        // Map
+        // Replace MapView with static map icon
+        ImageView staticMapIcon = card.findViewById(R.id.staticMapIcon);
+        if (staticMapIcon != null) {
+            staticMapIcon.setVisibility(View.VISIBLE);
+            staticMapIcon.setImageResource(R.drawable.ic_map_placeholder); // Use your static map icon
+        }
         MapView mapView = card.findViewById(R.id.mapView);
-        mapView.onCreate(null);
-
-        // Run geocoding in background to avoid UI block
-        new AsyncTask<Void, Void, LatLng>() {
-            @Override
-            protected LatLng doInBackground(Void... voids) {
-                return getLocationFromAddress(card.getContext(), event.getLocation());
-            }
-            @Override
-            protected void onPostExecute(LatLng loc) {
-                if (loc != null) {
-                    mapView.getMapAsync(googleMap -> {
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 15));
-                        googleMap.addMarker(new MarkerOptions().position(loc).title(event.getLocation()));
-                    });
-                }
-            }
-        }.execute();
+        if (mapView != null) {
+            mapView.setVisibility(View.GONE);
+        }
 
         // Registration button
         Button btnRegister = card.findViewById(R.id.btnRegisterEvent);
@@ -499,7 +546,13 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             dbRef.child("registrations").child(registrationId).setValue(registration)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(this, "Registration request sent.", Toast.LENGTH_SHORT).show();
+                        // Immediately update the map and refresh UI
                         registrationStatusMap.put(event.getEventId(), "pending");
+                        // Force refresh of participant registrations and event list
+                        String participantIdNow = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                        registrationViewModel.loadParticipantRegistrations(participantIdNow);
+                        eventViewModel.fetchEvents();
+                        // Also refresh event cards immediately
                         setupEventObserver();
                     })
                     .addOnFailureListener(e -> Toast.makeText(this, "Failed to send registration request.", Toast.LENGTH_SHORT).show());
