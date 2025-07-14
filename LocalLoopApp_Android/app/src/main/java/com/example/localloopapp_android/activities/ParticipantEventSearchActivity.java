@@ -310,15 +310,30 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         ((TextView) card.findViewById(R.id.tvEventDate)).setText(dateStr);
         ((TextView) card.findViewById(R.id.tvEventTime)).setText(timeStr);
 
-        // Replace MapView with static map icon
+        // Map
+        MapView mapView = card.findViewById(R.id.mapView);
+        mapView.onCreate(null);
+
+        // Run geocoding in background to avoid UI block
+        new AsyncTask<Void, Void, LatLng>() {
+            @Override
+            protected LatLng doInBackground(Void... voids) {
+                return getLocationFromAddress(card.getContext(), event.getLocation());
+            }
+            @Override
+            protected void onPostExecute(LatLng loc) {
+                if (loc != null) {
+                    mapView.getMapAsync(googleMap -> {
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 15));
+                        googleMap.addMarker(new MarkerOptions().position(loc).title(event.getLocation()));
+                    });
+                }
+            }
+        }.execute();
+
+        // Hide static map icon if present
         ImageView staticMapIcon = card.findViewById(R.id.staticMapIcon);
         if (staticMapIcon != null) {
-            staticMapIcon.setVisibility(View.VISIBLE);
-            staticMapIcon.setImageResource(R.drawable.ic_map_placeholder1); // Use your static map icon
-        }
-        MapView mapView = card.findViewById(R.id.mapView);
-        if (mapView != null) {
-            mapView.setVisibility(View.GONE);
         }
 
         // Registration button
