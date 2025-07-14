@@ -120,15 +120,6 @@ public class ParticipantEventActivity extends AppCompatActivity {
             }
         });
 
-        // Hosted By: fetch organizer name and company
-        String organizerId = getIntent().getStringExtra("organizer_id");
-        TextView hostedByView = findViewById(R.id.tvHostedBy);
-        if (organizerId != null) {
-            fetchOrganizerInfo(organizerId, hostedByView);
-        } else {
-            hostedByView.setText("");
-        }
-
         // Register button
         Button registerBtn = findViewById(R.id.btnRegisterEvent);
         if (cost == 0.0) {

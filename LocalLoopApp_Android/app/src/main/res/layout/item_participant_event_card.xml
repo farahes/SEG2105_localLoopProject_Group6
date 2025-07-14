@@ -29,16 +29,6 @@
             android:textStyle="bold"
             android:layout_marginBottom="4dp" />
 
-        <!-- Hosted By Text -->
-        <TextView
-            android:id="@+id/tvHostedBy"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="14sp"
-            android:textColor="#888888"
-            android:layout_marginBottom="8dp" />
-
         <!-- Event Details/Description -->
         <TextView
             android:id="@+id/tvEventDescription"
@@ -96,7 +86,7 @@
         <ImageView
             android:id="@+id/staticMapIcon"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="168dp"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_map_placeholder1"
             android:contentDescription="Map preview"
