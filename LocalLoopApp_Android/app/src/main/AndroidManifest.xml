@@ -66,6 +66,7 @@
             android:name=".activities.dashboard_activities.ManageAccountOrganizer"
             android:exported="false" />
         <activity android:name=".activities.dashboard_activities.OrganizerInbox" />
+        <activity android:name=".activities.dashboard_activities.ManageParticipantAccountActivity" />
     </application>
 
 </manifest>

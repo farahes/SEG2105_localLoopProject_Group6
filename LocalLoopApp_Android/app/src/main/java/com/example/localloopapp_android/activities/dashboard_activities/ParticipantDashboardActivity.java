@@ -15,6 +15,9 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.localloopapp_android.R;
 import com.example.localloopapp_android.utils.Constants;
 
+import android.content.SharedPreferences;
+import android.widget.Toast;
+
 public class ParticipantDashboardActivity extends AppCompatActivity {
 
     @Override
@@ -46,6 +49,12 @@ public class ParticipantDashboardActivity extends AppCompatActivity {
         ImageButton btnTickets = findViewById(R.id.btnTickets);
         btnTickets.setOnClickListener(v -> {
             Intent intent = new Intent(this, MyTicketsActivity.class);
+            startActivity(intent);
+        });
+
+        ImageButton btnProfile = findViewById(R.id.btnProfile);
+        btnProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ManageParticipantAccountActivity.class);
             startActivity(intent);
         });
     }
