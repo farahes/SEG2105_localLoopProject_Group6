@@ -277,14 +277,37 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         // Registration button
         Button btnRegister = card.findViewById(R.id.btnRegisterEvent);
         String status = registrationStatusMap.get(event.getEventId());
-        if ("registered".equals(status)) {
-            btnRegister.setText("Registered");
-            btnRegister.setEnabled(false);
+        if (status != null) {
+            switch (status) {
+                case "pending":
+                    btnRegister.setText(event.getFee() == 0.0
+                            ? "Pending (Free)"
+                            : String.format(Locale.getDefault(), "Pending ($%.2f)", event.getFee()));
+                    btnRegister.setEnabled(false);
+                    btnRegister.setBackgroundColor(getResources().getColor(R.color.yellow, null));
+                    break;
+                case "accepted":
+                    btnRegister.setText("Accepted");
+                    btnRegister.setEnabled(false);
+                    btnRegister.setBackgroundColor(getResources().getColor(R.color.green, null));
+                    break;
+                case "rejected":
+                    btnRegister.setText("Rejected");
+                    btnRegister.setEnabled(false);
+                    btnRegister.setBackgroundColor(getResources().getColor(R.color.red, null));
+                    break;
+                default:
+                    btnRegister.setText("Unknown Status");
+                    btnRegister.setEnabled(false);
+                    btnRegister.setBackgroundColor(getResources().getColor(android.R.color.darker_gray, null));
+                    break;
+            }
         } else {
             btnRegister.setText(event.getFee() == 0.0
                     ? "Register (Free)"
                     : String.format(Locale.getDefault(), "Register ($%.2f)", event.getFee()));
             btnRegister.setEnabled(true);
+            btnRegister.setBackgroundColor(getResources().getColor(R.color.purple_500, null));
             btnRegister.setOnClickListener(v -> registerForEvent(event));
         }
 
@@ -557,46 +580,53 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         fetchOrganizerInfo(event.getOrganizerId(), hostedByView);
 
         Button btnRegister = popup.findViewById(R.id.btnRegisterEvent);
-        // 1) set initial label based on fee
-        if (event.getFee() == 0.0) {
-            btnRegister.setText("Register (Free)");
+        String status = registrationStatusMap.get(event.getEventId());
+        if (status != null) {
+            switch (status) {
+                case "pending":
+                    btnRegister.setText("Pending");
+                    btnRegister.setEnabled(false);
+                    btnRegister.setBackgroundColor(getResources().getColor(R.color.yellow, null));
+                    break;
+                case "accepted":
+                    btnRegister.setText("Accepted");
+                    btnRegister.setEnabled(false);
+                    btnRegister.setBackgroundColor(getResources().getColor(R.color.green, null));
+                    break;
+                case "rejected":
+                    btnRegister.setText("Rejected");
+                    btnRegister.setEnabled(false);
+                    btnRegister.setBackgroundColor(getResources().getColor(R.color.red, null));
+                    break;
+                default:
+                    btnRegister.setText("Unknown Status");
+                    btnRegister.setEnabled(false);
+                    btnRegister.setBackgroundColor(getResources().getColor(android.R.color.darker_gray, null));
+                    break;
+            }
         } else {
-            btnRegister.setText(String.format(Locale.getDefault(), "Register ($%.2f)", event.getFee()));
+            btnRegister.setText(event.getFee() == 0.0
+                    ? "Register (Free)"
+                    : String.format(Locale.getDefault(), "Register ($%.2f)", event.getFee()));
+            btnRegister.setEnabled(true);
+            btnRegister.setBackgroundColor(getResources().getColor(R.color.purple_500, null));
+            btnRegister.setOnClickListener(v -> {
+                String evtId = event.getEventId();
+                if (registrationStatusMap.containsKey(evtId)) {
+                    Toast.makeText(
+                            ParticipantEventSearchActivity.this,
+                            "You have already registered for this event.",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                    return;
+                }
+                registerForEvent(event);
+                btnRegister.setText("Pending");
+                btnRegister.setEnabled(false);
+                btnRegister.setBackgroundColor(getResources().getColor(R.color.yellow, null));
+                dialog.dismiss();
+            });
         }
-        btnRegister.setEnabled(true);
-
-        // 2) single, well-scoped click-listener
-        btnRegister.setOnClickListener(v -> {
-            String evtId = event.getEventId();
-
-            // a) if already registered → only that toast
-            if (registrationStatusMap.containsKey(evtId)) {
-                Toast.makeText(
-                        ParticipantEventSearchActivity.this,
-                        "You have already registered for this event.",
-                        Toast.LENGTH_SHORT
-                ).show();
-                return;
-            }
-
-            // b) otherwise kick off registration
-            registerForEvent(event);
-
-            // c) flip the button into a “pending” state
-            if (event.getFee() == 0.0) {
-                btnRegister.setText("Pending (Free)");
-            } else {
-                btnRegister.setText(String.format(
-                        Locale.getDefault(),
-                        "Pending ($%.2f)",
-                        event.getFee()
-                ));
-            }
-            btnRegister.setEnabled(false);
-
-            // d) close the sheet
-            dialog.dismiss();
-        });
 
         Button btnOverlay = popup.findViewById(R.id.btnCardOverlay);
         btnOverlay.setVisibility(View.GONE);
