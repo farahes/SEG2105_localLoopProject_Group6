@@ -123,6 +123,9 @@ public class ManageRegistrationsActivity extends AppCompatActivity {
                         }
 
                         tvCapacityScore.setText(acceptedCount + " / " + max);
+
+                        // Update accepted attendees list every time registrations change
+                        loadAcceptedAttendeesFromRegistrations(eventId, acceptedAttendeesContainer);
                     }
 
                     @Override
@@ -132,43 +135,44 @@ public class ManageRegistrationsActivity extends AppCompatActivity {
                     }
                 });
 
-        // Load accepted attendees' names
-        loadAcceptedAttendees(eventId, acceptedAttendeesContainer);
-
         eventContainer.addView(eventCard);
     }
 
-    private void loadAcceptedAttendees(String eventId, LinearLayout container) {
-        DatabaseReference acceptedRef = FirebaseDatabase.getInstance().getReference("acceptedAttendees").child(eventId);
-        acceptedRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                container.removeAllViews();
-                for (DataSnapshot attendeeSnap : snapshot.getChildren()) {
-                    String participantId = attendeeSnap.getKey();
+    // Show all accepted participants for an event by querying registrations
+    private void loadAcceptedAttendeesFromRegistrations(String eventId, LinearLayout container) {
+        DatabaseReference regRef = FirebaseDatabase.getInstance().getReference("registrations");
+        regRef.orderByChild("eventId").equalTo(eventId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        container.removeAllViews();
+                        for (DataSnapshot regSnap : snapshot.getChildren()) {
+                            String status = regSnap.child("status").getValue(String.class);
+                            if (!"accepted".equals(status)) continue;
+                            String participantId = regSnap.child("participantId").getValue(String.class);
 
-                    FirebaseDatabase.getInstance().getReference("users").child(participantId)
-                            .addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot userSnap) {
-                                    String name = userSnap.child("name").getValue(String.class);
-                                    String username = userSnap.child("username").getValue(String.class);
+                            FirebaseDatabase.getInstance().getReference("users").child(participantId)
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot userSnap) {
+                                            String username = userSnap.child("username").getValue(String.class);
+                                            String name = userSnap.child("name").getValue(String.class);
 
-                                    TextView tv = new TextView(ManageRegistrationsActivity.this);
-                                    tv.setText((name != null ? name : "(not set)") + (username != null ? " (" + username + ")" : ""));
-                                    tv.setTextColor(getResources().getColor(R.color.green, null));
-                                    container.addView(tv);
-                                }
+                                            TextView tv = new TextView(ManageRegistrationsActivity.this);
+                                            tv.setText((username != null ? username : (name != null ? name : "(not set)")));
+                                            tv.setTextColor(getResources().getColor(R.color.green, null));
+                                            container.addView(tv);
+                                        }
 
-                                @Override
-                                public void onCancelled(DatabaseError error) {}
-                            });
-                }
-            }
+                                        @Override
+                                        public void onCancelled(DatabaseError error) {}
+                                    });
+                        }
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError error) {}
-        });
+                    @Override
+                    public void onCancelled(DatabaseError error) {}
+                });
     }
 
     private void updateStatus(String registrationId, String eventId, String participantId, String status, LinearLayout acceptedContainer) {
@@ -185,11 +189,11 @@ public class ManageRegistrationsActivity extends AppCompatActivity {
                         .child(eventId).child(participantId).setValue(true);
 
                 // Refresh accepted list
-                loadAcceptedAttendees(eventId, acceptedContainer);
+                loadAcceptedAttendeesFromRegistrations(eventId, acceptedContainer);
             } else {
                 FirebaseDatabase.getInstance().getReference("acceptedAttendees")
                         .child(eventId).child(participantId).removeValue();
-                loadAcceptedAttendees(eventId, acceptedContainer);
+                loadAcceptedAttendeesFromRegistrations(eventId, acceptedContainer);
             }
         }).addOnFailureListener(e ->
                 Toast.makeText(this, "Failed to update: " + e.getMessage(), Toast.LENGTH_SHORT).show()
