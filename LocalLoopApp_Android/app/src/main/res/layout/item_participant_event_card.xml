@@ -96,9 +96,9 @@
         <ImageView
             android:id="@+id/staticMapIcon"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="160dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_map_placeholder"
+            android:src="@drawable/ic_map_placeholder1"
             android:contentDescription="Map preview"
             android:visibility="gone" />
 

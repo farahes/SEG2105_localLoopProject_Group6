@@ -314,7 +314,7 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
         ImageView staticMapIcon = card.findViewById(R.id.staticMapIcon);
         if (staticMapIcon != null) {
             staticMapIcon.setVisibility(View.VISIBLE);
-            staticMapIcon.setImageResource(R.drawable.ic_map_placeholder); // Use your static map icon
+            staticMapIcon.setImageResource(R.drawable.ic_map_placeholder1); // Use your static map icon
         }
         MapView mapView = card.findViewById(R.id.mapView);
         if (mapView != null) {
