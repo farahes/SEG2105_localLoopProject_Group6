@@ -129,6 +129,11 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(OrganizerViewModel.class);
         viewModel.setOrganizerId(organizerId);
+
+        TextView welcomeText = findViewById(R.id.tvWelcomeMessage);
+        welcomeText.setText(firstName != null
+                ? "Welcome " + firstName + "! You are logged in as Organizer."
+                : "Welcome, Organizer!");
     }
 
     /**
