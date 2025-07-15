@@ -72,7 +72,6 @@ public class CreateAccountActivity extends AppCompatActivity {
         setupCreateAccountButtonListener();
     }
 
-    // region: UI setup
     /**
      * Initializes all UI components.
      */
@@ -105,10 +104,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     private void setupCreateAccountButtonListener() {
         buttonCreateAccount.setOnClickListener(view -> performInputValidationsAndCreateAccount());
     }
-    // endregion
 
-
-    // region: Account Creation
     /**
      * Gathers form input, validates each field, and initiates account creation.
      * Trims values, applies validation rules, checks password match, and ensures
@@ -300,11 +296,11 @@ public class CreateAccountActivity extends AppCompatActivity {
             return participant;
         }
     }
-
-    // endregion
-
-
-    // region: Firebase Utilities
+    /**
+     * Checks if the provided username is unique in the database.
+     * Uses a Firebase query to find any existing users with the same username.
+     * Calls the callback with true if unique, false otherwise.
+     */
     private void checkUsernameUniqueness(final String usernameToCheck, final UniquenessCallback callback) {
         Query usernameQuery = mDatabaseUsersRef.orderByChild("username").equalTo(usernameToCheck);
 
@@ -320,10 +316,7 @@ public class CreateAccountActivity extends AppCompatActivity {
             }
         });
     }
-    // endregion
 
-
-    // region: Helpers
     /**
      * Extracts and trims form input into a RegistrationForm object.
      * createRegistrationFormFromInputFields() is better ?
@@ -363,21 +356,4 @@ public class CreateAccountActivity extends AppCompatActivity {
         void onResult(boolean isUnique);
         void onError(DatabaseError error);
     }
-    // endregion
 }
-
-/**
- * You can find the Clean Code Rule Book in notion, I made it for fun. It explains the structure of this code.
- *
- * I realise it may be a bit overkill to have this much structure for a simple Create Account screen,
- * but I wanted to ensure that the code is modular, testable, and easy to maintain.
- * This way, if we need to add more features or validations in the future,
- * we can do it more easily.
- *
- * And also I was kinda interested how far the stucturization can go since I've never really done it before.
- *
- * This note was almost fully written by Copilot, as I started typing it completed the rest,
- * exactly how I wanted to say it. Like it reads my mind. That's crazy.
- *
- * -- Mariia
- */

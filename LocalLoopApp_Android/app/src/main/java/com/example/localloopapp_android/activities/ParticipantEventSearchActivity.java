@@ -644,9 +644,6 @@ public class ParticipantEventSearchActivity extends AppCompatActivity {
             }
         });
 
-        //TextView hostedByView = popup.findViewById(R.id.tvHostedBy);
-       // fetchOrganizerInfo(event.getOrganizerId(), hostedByView);
-
         Button btnRegister = popup.findViewById(R.id.btnRegisterEvent);
         String status = registrationStatusMap.get(event.getEventId());
         if (status != null) {

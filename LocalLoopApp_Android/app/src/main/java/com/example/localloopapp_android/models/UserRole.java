@@ -22,6 +22,6 @@ public enum UserRole {
                 return r;
             }
         }
-        return null; // or throw exception if invalid?
+        return null;
     }
 }

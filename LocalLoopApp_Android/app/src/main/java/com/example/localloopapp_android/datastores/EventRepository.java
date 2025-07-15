@@ -126,7 +126,6 @@ public class EventRepository {
                      */
                     @Override
                     public void onCancelled(DatabaseError error) {
-                        //Log.e("EventRepository", "Failed to load events", error.toException());
                         callback.onFailure(error.toException()); // return error to callback
                     }
                 });

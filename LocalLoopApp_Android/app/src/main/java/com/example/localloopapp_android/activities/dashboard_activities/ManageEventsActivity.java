@@ -161,32 +161,6 @@ public class ManageEventsActivity extends AppCompatActivity implements Registrat
         displayFilteredEvents(false);
     }
 
-    /*
-    private void showRegistrations() {
-        eventListContainer.setVisibility(View.GONE);
-        registrationsRecyclerView.setVisibility(View.VISIBLE);
-
-        registrationViewModel.getPendingRegistrations().observe(this, registrations -> {
-            if (registrations == null || registrations.isEmpty()) {
-                noEventsPlaceholder.setVisibility(View.VISIBLE);
-                registrationsRecyclerView.setVisibility(View.GONE);
-                TextView noEventsText = noEventsPlaceholder.findViewById(R.id.no_events_text);
-                if (noEventsText != null) {
-                    noEventsText.setText("No pending registrations.");
-                }
-            } else {
-                noEventsPlaceholder.setVisibility(View.GONE);
-                registrationsRecyclerView.setVisibility(View.VISIBLE);
-                if (registrationAdapter == null) {
-                    registrationAdapter = new RegistrationAdapter(registrations, this);
-                    registrationsRecyclerView.setAdapter(registrationAdapter);
-                } else {
-                    registrationAdapter.updateRegistrations(registrations);
-                }
-            }
-        });
-    }
-*/
     private void displayFilteredEvents(boolean upcoming) {
         if (allEvents == null) return; // Prevents NullPointerException
         eventListContainer.removeAllViews();

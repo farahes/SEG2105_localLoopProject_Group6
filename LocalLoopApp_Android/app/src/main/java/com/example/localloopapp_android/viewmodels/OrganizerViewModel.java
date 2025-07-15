@@ -105,11 +105,4 @@ public class OrganizerViewModel extends ViewModel {
         ); // send updated object to repo
         fetchEventsByOrganizer();
     }
-
-    /**
-     * Returns all events created by this organizer.
-     */
-    public List<Event> getMyEvents() {
-        return eventRepo.getMyEvents();
-    }
 }

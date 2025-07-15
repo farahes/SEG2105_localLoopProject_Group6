@@ -181,8 +181,6 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                         .toLocalDate());
             }
             setupCalendar();
-            //displayEvents(events, /* showUpcoming= */ true);
-            // TODO by uncommenting the line above, it displays an event on the main screen with bool of image working
         });
 
         viewModel.fetchEventsByOrganizer();
