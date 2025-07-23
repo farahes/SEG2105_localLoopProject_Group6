@@ -70,27 +70,6 @@ Tertiary Black: #373D3F (Used for text)
 
 ---
 
-### Admin Account User Flow
-
-#### Admin Dashboard and Managing User Accounts:
-*Note: Home button and inbox button are placeholders for now.*
-
-<img width="250" height="1377" alt="image13" src="https://github.com/user-attachments/assets/bc47b104-0dbf-4d4e-b351-18d4d9e4a34b" />
-<img width="250" height="899" alt="image37" src="https://github.com/user-attachments/assets/6a4f9554-775e-4450-8a3b-57aaedb96491" />
-
-
-#### Manage Categories:
-
-<img width="250" height="1404" alt="image12" src="https://github.com/user-attachments/assets/529d7532-8e01-4a5b-8157-6d8068b71489" />
-<img width="250" height="1409" alt="image28" src="https://github.com/user-attachments/assets/0f9a16f7-c836-4e6c-a3a8-f0362ae8cee6" />
-<img width="250" height="1411" alt="image9" src="https://github.com/user-attachments/assets/968f5ac2-80e8-4b98-b960-1e239cc013c0" />
-
-#### Account Page – View Account Information and Log Out:
-
-<img width="250" height="1999" alt="image36" src="https://github.com/user-attachments/assets/454b5e54-e81e-4477-b9f0-85ab152dc621" />
-
----
-
 ### Organizer Account User Flow
 
 #### Organizer Dashboard:
@@ -143,9 +122,6 @@ Tertiary Black: #373D3F (Used for text)
 <img width="250" height="1057" alt="image22" src="https://github.com/user-attachments/assets/6b561c46-fb54-4a46-ad92-4ffcd6bb3be9" />
 <img width="250" height="780" alt="image8" src="https://github.com/user-attachments/assets/934b172b-a835-4945-8217-cb0471a9a771" />
 
-<img width="250" height="406" alt="image23" src="https://github.com/user-attachments/assets/f6efd42c-ab35-478f-bd12-669c92bd5bc1" />
-<img width="250" height="778" alt="image3" src="https://github.com/user-attachments/assets/49a9fb30-dc4c-42c9-b6e3-75e8d5d0ad6e" />
-
 <img width="250" height="1403" alt="image4" src="https://github.com/user-attachments/assets/90986bd1-8110-4dce-ba50-500931755ad7" />
 <img width="250" height="1401" alt="image17" src="https://github.com/user-attachments/assets/cc50e977-8f66-4e8c-a3f5-11123e2ba401" />
 <img width="250" height="1999" alt="image39" src="https://github.com/user-attachments/assets/1be6bf52-b270-4bf5-8d7c-26f4e3aecbdf" />
@@ -164,6 +140,27 @@ Tertiary Black: #373D3F (Used for text)
 #### Account Page – View Account Information and Log Out:
 
 <img width="250" height="1999" alt="image14" src="https://github.com/user-attachments/assets/6d217428-a34a-48e4-a1d3-359abc5a4b92" />
+
+---
+
+### Admin Account User Flow
+
+#### Admin Dashboard and Managing User Accounts:
+*Note: Home button and inbox button are placeholders for now.*
+
+<img width="250" height="1377" alt="image13" src="https://github.com/user-attachments/assets/bc47b104-0dbf-4d4e-b351-18d4d9e4a34b" />
+<img width="250" height="899" alt="image37" src="https://github.com/user-attachments/assets/6a4f9554-775e-4450-8a3b-57aaedb96491" />
+
+
+#### Manage Categories:
+
+<img width="250" height="1404" alt="image12" src="https://github.com/user-attachments/assets/529d7532-8e01-4a5b-8157-6d8068b71489" />
+<img width="250" height="1409" alt="image28" src="https://github.com/user-attachments/assets/0f9a16f7-c836-4e6c-a3a8-f0362ae8cee6" />
+<img width="250" height="1411" alt="image9" src="https://github.com/user-attachments/assets/968f5ac2-80e8-4b98-b960-1e239cc013c0" />
+
+#### Account Page – View Account Information and Log Out:
+
+<img width="250" height="1999" alt="image36" src="https://github.com/user-attachments/assets/454b5e54-e81e-4477-b9f0-85ab152dc621" />
 
 ---
 
